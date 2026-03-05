@@ -61,8 +61,9 @@ const Unauthorized = () => {
                     {/* Title */}
                     <motion.h1
                         style={{
+                            fontFamily: "'Fraunces', serif",
                             fontSize: '3rem',
-                            fontWeight: '800',
+                            fontWeight: '900',
                             background: 'linear-gradient(135deg, #EF4444, #DC2626)',
                             WebkitBackgroundClip: 'text',
                             WebkitTextFillColor: 'transparent',
@@ -77,9 +78,10 @@ const Unauthorized = () => {
 
                     <motion.h2
                         style={{
+                            fontFamily: "'Fraunces', serif",
                             fontSize: '1.5rem',
-                            fontWeight: '600',
-                            color: '#1A1A2E',
+                            fontWeight: '700',
+                            color: '#1F2937',
                             marginBottom: '15px'
                         }}
                         initial={{ opacity: 0 }}

@@ -25,7 +25,7 @@ public class User {
     private String password;
     private String phone;
     @Enumerated(EnumType.STRING)
-    private USER_ROLE role;
+    private UserRole role;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "user")

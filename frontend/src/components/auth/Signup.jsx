@@ -118,7 +118,7 @@ const Signup = () => {
 
             setTimeout(() => {
                 login(data);
-                navigate('/dashboard');
+                navigate('/');
             }, 2000);
         } catch (err) {
             setMsg({ type: 'error', text: err.response?.data?.message || "Registration failed" });
@@ -247,7 +247,7 @@ const Signup = () => {
                                     className="input-icon"
                                     animate={{
                                         scale: focusedField === 'firstName' ? 1.2 : 1,
-                                        color: focusedField === 'firstName' ? '#FF6B35' : '#6B7280'
+                                        color: focusedField === 'firstName' ? '#22C55E' : '#6B7280'
                                     }}
                                 >
                                     👤
@@ -268,7 +268,7 @@ const Signup = () => {
                                     className="input-icon"
                                     animate={{
                                         scale: focusedField === 'lastName' ? 1.2 : 1,
-                                        color: focusedField === 'lastName' ? '#FF6B35' : '#6B7280'
+                                        color: focusedField === 'lastName' ? '#22C55E' : '#6B7280'
                                     }}
                                 >
                                     👤
@@ -293,7 +293,7 @@ const Signup = () => {
                                 className="input-icon"
                                 animate={{
                                     scale: focusedField === 'email' ? 1.2 : 1,
-                                    color: focusedField === 'email' ? '#FF6B35' : '#6B7280'
+                                    color: focusedField === 'email' ? '#22C55E' : '#6B7280'
                                 }}
                             >
                                 📧
@@ -317,7 +317,7 @@ const Signup = () => {
                                 className="input-icon"
                                 animate={{
                                     scale: focusedField === 'password' ? 1.2 : 1,
-                                    color: focusedField === 'password' ? '#FF6B35' : '#6B7280'
+                                    color: focusedField === 'password' ? '#22C55E' : '#6B7280'
                                 }}
                             >
                                 🔒
@@ -381,7 +381,7 @@ const Signup = () => {
                                 className="input-icon"
                                 animate={{
                                     scale: focusedField === 'confirmPassword' ? 1.2 : 1,
-                                    color: focusedField === 'confirmPassword' ? '#FF6B35' : '#6B7280'
+                                    color: focusedField === 'confirmPassword' ? '#22C55E' : '#6B7280'
                                 }}
                             >
                                 🔐
@@ -474,7 +474,7 @@ const Signup = () => {
                             variants={itemVariants}
                             whileHover={{
                                 scale: 1.02,
-                                boxShadow: "0 15px 35px rgba(255, 107, 53, 0.4)"
+                                boxShadow: "0 15px 35px rgba(34, 197, 94, 0.4)"
                             }}
                             whileTap={{ scale: 0.98 }}
                             disabled={loading}
@@ -554,7 +554,7 @@ const Signup = () => {
                             Already have an account?{' '}
                             <Link to="/login" className="auth-footer-link">
                                 <motion.span
-                                    whileHover={{ color: '#E55A2B' }}
+                                    whileHover={{ color: '#16A34A' }}
                                 >
                                     Sign In
                                 </motion.span>

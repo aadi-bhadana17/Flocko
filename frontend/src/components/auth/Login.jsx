@@ -78,8 +78,8 @@ const Login = () => {
             login(data);
 
             if (data.role === 'ADMIN') navigate('/admin');
-            else if (data.role === 'RESTAURANT_OWNER') navigate('/restaurant');
-            else navigate('/dashboard');
+            else if (data.role === 'RESTAURANT_OWNER') navigate('/restaurant-panel');
+            else navigate('/');
         } catch (err) {
             setError(err.response?.data?.message || "Invalid email or password");
         } finally {
@@ -209,7 +209,7 @@ const Login = () => {
                                 className="input-icon"
                                 animate={{
                                     scale: focusedField === 'email' ? 1.2 : 1,
-                                    color: focusedField === 'email' ? '#FF6B35' : '#6B7280'
+                                    color: focusedField === 'email' ? '#22C55E' : '#6B7280'
                                 }}
                             >
                                 📧
@@ -236,7 +236,7 @@ const Login = () => {
                                 className="input-icon"
                                 animate={{
                                     scale: focusedField === 'password' ? 1.2 : 1,
-                                    color: focusedField === 'password' ? '#FF6B35' : '#6B7280'
+                                    color: focusedField === 'password' ? '#22C55E' : '#6B7280'
                                 }}
                             >
                                 🔒
@@ -275,7 +275,7 @@ const Login = () => {
                             variants={itemVariants}
                             whileHover={{
                                 scale: 1.02,
-                                boxShadow: "0 15px 35px rgba(255, 107, 53, 0.4)"
+                                boxShadow: "0 15px 35px rgba(34, 197, 94, 0.4)"
                             }}
                             whileTap={{ scale: 0.98 }}
                             disabled={loading}
@@ -355,7 +355,7 @@ const Login = () => {
                             Don't have an account?{' '}
                             <Link to="/signup" className="auth-footer-link">
                                 <motion.span
-                                    whileHover={{ color: '#E55A2B' }}
+                                    whileHover={{ color: '#16A34A' }}
                                 >
                                     Create Account
                                 </motion.span>

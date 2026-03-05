@@ -1,17 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:wght@700;900&family=DM+Sans:wght@400;500;600;700&display=swap');
 
 :root {
-  --primary: #FF6B35;
-  --primary-dark: #E55A2B;
-  --secondary: #2EC4B6;
-  --accent: #FFBE0B;
-  --dark: #1A1A2E;
-  --darker: #16213E;
-  --light: #F7F7F7;
+  --primary: #22C55E;
+  --primary-dark: #16A34A;
+  --secondary: #16A34A;
+  --accent: #22C55E;
+  --dark: #1F2937;
+  --darker: #111827;
+  --light: #F8FAFC;
   --white: #FFFFFF;
   --gray: #6B7280;
+  --border: #E5E7EB;
   --error: #EF4444;
   --success: #10B981;
+  --warning: #F59E0B;
 }
 
 * {
@@ -21,8 +23,9 @@
 }
 
 body {
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
   background-color: var(--light);
+  color: var(--dark);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;

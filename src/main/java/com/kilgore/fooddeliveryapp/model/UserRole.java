@@ -1,6 +1,6 @@
 package com.kilgore.fooddeliveryapp.model;
 
-public enum USER_ROLE {
+public enum UserRole {
     CUSTOMER,
     ADMIN,
     RESTAURANT_OWNER,

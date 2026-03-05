@@ -56,7 +56,7 @@ public class UserService {
     @Transactional
     public UserProfileResponse updateUserProfile(UpdateProfileRequest request) {
         User user = userAuthorization.authorizeUser();
-        User existingUser = userRepository.findByEmail(user.getEmail());
+        User existingUser = userRepository.findByEmail(request.getEmail());
 
         if(existingUser != null && !user.equals(existingUser))
             throw new UserAlreadyExistsException();

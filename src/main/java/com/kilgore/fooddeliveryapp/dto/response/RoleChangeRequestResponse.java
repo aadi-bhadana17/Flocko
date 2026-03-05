@@ -1,7 +1,7 @@
 package com.kilgore.fooddeliveryapp.dto.response;
 
-import com.kilgore.fooddeliveryapp.model.REQUEST_STATUS;
-import com.kilgore.fooddeliveryapp.model.USER_ROLE;
+import com.kilgore.fooddeliveryapp.model.RequestStatus;
+import com.kilgore.fooddeliveryapp.model.UserRole;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,8 +16,8 @@ public class RoleChangeRequestResponse {
     private Long requestId;
     private String userName;
     private String userEmail;
-    private USER_ROLE requestedRole;
-    private REQUEST_STATUS requestStatus;
+    private UserRole requestedRole;
+    private RequestStatus requestStatus;
 
     private String requestReason;
 
