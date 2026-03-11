@@ -16,7 +16,7 @@ Built with Spring Boot, PostgreSQL JWT authentication, Razorpay payment integrat
 - PostgreSQL + JPA/Hibernate
 - Lombok for boilerplate reduction
 - Maven for dependency management
-- Razorpay Payment Integration
+- PayPal Payment Integration
 
 **Frontend**
 - React + Vite
