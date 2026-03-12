@@ -18,6 +18,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -281,8 +282,15 @@ public class OrderService {
 
         if(canUserCancelOrder(order)) {
             order.setOrderStatus(OrderStatus.CANCELLED);
+            String message = "Order has  been cancelled";
+
+            if(order.isPreOrder()) {
+                BigDecimal refund = order.getTotalPrice().multiply(BigDecimal.valueOf(0.75));
+                order.setRefundAmount(refund);
+                message = message + " and " + refund + " amount has been refunded to your wallet";
+            }
             orderRepository.save(order);
-            return "Order has been cancelled";
+            return message;
         }
 
         throw new EntityUnavailableException("The order is " + order.getOrderStatus() + " now, So it can't be cancelled");

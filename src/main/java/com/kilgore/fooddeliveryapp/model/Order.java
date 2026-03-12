@@ -43,5 +43,9 @@ public class Order {
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
     private int totalQuantity;
+
+    private boolean isPreOrder = false;
+    private LocalDateTime scheduledAt;
+    private BigDecimal refundAmount;
 }
 
