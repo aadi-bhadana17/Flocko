@@ -44,6 +44,7 @@ public class Order {
     private PaymentStatus paymentStatus;
     private int totalQuantity;
 
+    @Column(nullable = false)
     private boolean isPreOrder = false;
     private LocalDateTime scheduledAt;
     private BigDecimal refundAmount;

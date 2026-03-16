@@ -1,7 +1,9 @@
 package com.kilgore.fooddeliveryapp.controller;
 
+import com.kilgore.fooddeliveryapp.dto.request.AddMessPlanRequest;
 import com.kilgore.fooddeliveryapp.dto.request.RestaurantRequest;
 import com.kilgore.fooddeliveryapp.dto.request.RestaurantStatusRequest;
+import com.kilgore.fooddeliveryapp.dto.response.MessPlanResponse;
 import com.kilgore.fooddeliveryapp.dto.response.RestaurantResponse;
 import com.kilgore.fooddeliveryapp.service.RestaurantService;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -54,4 +56,10 @@ public class RestaurantController {
         return restaurantService.updateRestaurantStatus(id, request);
     }
 
+    @PostMapping("{id}/mess-plans")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'RESTAURANT_OWNER')")
+    public MessPlanResponse addMessPlanToRestaurant(@PathVariable Long id,
+                                                    @RequestBody AddMessPlanRequest request) {
+        return restaurantService.addMessPlanToRestaurant(id, request);
+    }
 }

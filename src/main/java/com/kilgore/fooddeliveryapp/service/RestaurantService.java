@@ -1,21 +1,19 @@
 package com.kilgore.fooddeliveryapp.service;
 
-import com.kilgore.fooddeliveryapp.dto.request.ContactInformationDto;
-import com.kilgore.fooddeliveryapp.dto.request.RestaurantAddressDto;
-import com.kilgore.fooddeliveryapp.dto.request.RestaurantRequest;
-import com.kilgore.fooddeliveryapp.dto.request.RestaurantStatusRequest;
+import com.kilgore.fooddeliveryapp.authorization.UserAuthorization;
+import com.kilgore.fooddeliveryapp.dto.request.*;
+import com.kilgore.fooddeliveryapp.dto.response.MessPlanResponse;
+import com.kilgore.fooddeliveryapp.dto.response.MessPlanSlotResponse;
 import com.kilgore.fooddeliveryapp.dto.response.OwnerResponse;
 import com.kilgore.fooddeliveryapp.dto.response.RestaurantResponse;
+import com.kilgore.fooddeliveryapp.dto.summary.FoodSummary;
+import com.kilgore.fooddeliveryapp.dto.summary.RestaurantSummary;
+import com.kilgore.fooddeliveryapp.exceptions.EntityNotFoundException;
 import com.kilgore.fooddeliveryapp.exceptions.RestaurantAlreadyExistsException;
 import com.kilgore.fooddeliveryapp.exceptions.RestaurantNotFoundException;
-import com.kilgore.fooddeliveryapp.model.ContactInformation;
-import com.kilgore.fooddeliveryapp.model.Restaurant;
-import com.kilgore.fooddeliveryapp.model.RestaurantAddress;
-import com.kilgore.fooddeliveryapp.model.RestaurantStatus;
-import com.kilgore.fooddeliveryapp.model.User;
-import com.kilgore.fooddeliveryapp.repository.RestaurantRepository;
-import com.kilgore.fooddeliveryapp.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.kilgore.fooddeliveryapp.model.*;
+import com.kilgore.fooddeliveryapp.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -29,10 +27,21 @@ import java.util.List;
 @Service
 public class RestaurantService {
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
-    @Autowired
-    private UserRepository userRepository;
+    private final RestaurantRepository restaurantRepository;
+    private final UserRepository userRepository;
+    private final UserAuthorization userAuthorization;
+    private final MessPlanRepository messPlanRepository;
+    private final FoodRepository foodRepository;
+    private final MessPlanSlotRepository messPlanSlotRepository;
+
+    public RestaurantService(RestaurantRepository restaurantRepository, UserRepository userRepository, UserAuthorization userAuthorization, MessPlanRepository messPlanRepository, FoodRepository foodRepository, MessPlanSlotRepository messPlanSlotRepository) {
+        this.restaurantRepository = restaurantRepository;
+        this.userRepository = userRepository;
+        this.userAuthorization = userAuthorization;
+        this.messPlanRepository = messPlanRepository;
+        this.foodRepository = foodRepository;
+        this.messPlanSlotRepository = messPlanSlotRepository;
+    }
 
     public RestaurantResponse createRestaurant(RestaurantRequest request) {
         Restaurant restaurant = restaurantRepository
@@ -210,4 +219,116 @@ public class RestaurantService {
                 .map(this::toDto)
                 .toList();
     }
+
+    @Transactional
+    public MessPlanResponse addMessPlanToRestaurant(Long id, AddMessPlanRequest request) {
+        User user = userAuthorization.authorizeUser();
+        Restaurant restaurant = restaurantRepository.findById(id)
+                .orElseThrow(() -> new RestaurantNotFoundException(id));
+
+        if(!restaurant.getOwner().getEmail().equals(user.getEmail())) {
+            throw new AccessDeniedException("You are not authorized to modify this restaurant.");
+        }
+
+        MessPlan messPlan = new MessPlan();
+        messPlan.setMessPlanName(request.getMessPlanName());
+        messPlan.setMessPlanDescription(request.getMessPlanDescription());
+        messPlan.setPrice(request.getPrice());
+        messPlan.setRestaurant(restaurant);
+
+        checkDistinctSlots(request.getSlots());
+        /*
+         will throw an error if something duplicate found,
+         code will run normally otherwise as return type is - void
+         and, it is called before saving because if anything wrong - why touch DB then?
+        */
+
+        messPlanRepository.save(messPlan);
+
+        /*
+         bul adding slots required a messPlan, so we have no choice but to save this object - messPlan
+         even tough there might be a case, where we get corrupt foodIds in request
+         so we add @Transactional here
+        */
+
+        for(AddMessPlanSlotRequest slot : request.getSlots()) {
+            MessPlanSlot messPlanSlot = new MessPlanSlot();
+            messPlanSlot.setMessPlan(messPlan);
+            messPlanSlot.setDayOfWeek(slot.getDayOfWeek());
+            messPlanSlot.setMealType(slot.getMealType());
+
+            List<Food> foods = foodRepository.findAllById(slot.getFoodIds());
+
+            if(foods.size() != slot.getFoodIds().size()) {
+                throw new EntityNotFoundException("One or more food items not found");
+            }
+            // checking if there is any corrupt foodId - which doesn't exist in DB
+
+            messPlanSlot.setFoodItems(foods);
+
+            messPlanSlotRepository.save(messPlanSlot);
+            messPlan.getSlots().add(messPlanSlot);
+        }
+
+        return createMessPlanResponse(messPlan);
+    }
+
+    private MessPlanResponse createMessPlanResponse(MessPlan messPlan) {
+
+        RestaurantSummary restaurantSummary = new RestaurantSummary(
+                messPlan.getRestaurant().getRestaurantId(),
+                messPlan.getRestaurant().getRestaurantName(),
+                messPlan.getRestaurant().getCuisineType(),
+                messPlan.getRestaurant().getAvgRating()
+        );
+
+        List<MessPlanSlotResponse> slots = messPlan.getSlots().stream()
+                .map(this::createMessPlanSlotResponse)
+                .toList();
+
+        return new MessPlanResponse(
+                messPlan.getMessPlanId(),
+                messPlan.getMessPlanName(),
+                messPlan.getMessPlanDescription(),
+                messPlan.getPrice(),
+                restaurantSummary,
+                slots,
+                messPlan.isActive()
+        );
+    }
+
+    private FoodSummary createFoodSummary(Food food) {
+        return new FoodSummary(
+                food.getFoodId(),
+                food.getFoodName(),
+                food.getFoodDescription(),
+                food.getFoodPrice(),
+                food.isVegetarian()
+        );
+    }
+
+    private MessPlanSlotResponse createMessPlanSlotResponse(MessPlanSlot slot) {
+        List<FoodSummary> foods = slot.getFoodItems().stream()
+                .map(this::createFoodSummary)
+                .toList();
+
+        return new MessPlanSlotResponse(
+                slot.getSlotId(),
+                slot.getDayOfWeek(),
+                slot.getMealType(),
+                foods
+        );
+    }
+
+    private void checkDistinctSlots(List<AddMessPlanSlotRequest> slots) {
+        long distinctCount = slots.stream()
+                .map(s -> s.getDayOfWeek() + "-" + s.getMealType())
+                .distinct()
+                .count();
+
+        if(distinctCount != slots.size()) {
+            throw new IllegalArgumentException("Duplicate day+meal combinations found");
+        }
+    }
+
 }

@@ -89,6 +89,11 @@ public class OrderService {
         cart.setRestaurant(null);
         cartRepository.save(cart);
 
+        if(request.getScheduledAt() != null) {
+            order.setPreOrder(true);
+            order.setScheduledAt(request.getScheduledAt());
+        }
+
         setRestaurantKitchenStatus(order.getRestaurant());
 
         return createOrderResponse(order, message);
@@ -190,6 +195,7 @@ public class OrderService {
                 order.getPaymentStatus(),
                 order.getTotalPrice(),
                 order.getTotalQuantity(),
+                order.getScheduledAt(),
                 message
         );
 

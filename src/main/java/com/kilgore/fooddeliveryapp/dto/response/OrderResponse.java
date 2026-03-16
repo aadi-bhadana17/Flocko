@@ -31,6 +31,8 @@ public class OrderResponse {
     private BigDecimal totalPrice;
     private int totalQuantity;
 
+    private LocalDateTime scheduledAt;
+
     private String message;
 
 }
