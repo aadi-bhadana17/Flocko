@@ -48,5 +48,10 @@ public class Order {
     private OrderType orderType = OrderType.REGULAR;
     private LocalDateTime scheduledAt;
     private BigDecimal refundAmount;
+
+    @Column(nullable = false)
+    private boolean isSpecial = false;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<ChatMessage>  chatMessages = new ArrayList<>();
 }
 

@@ -104,4 +104,18 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.FORBIDDEN)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(ChatNotAllowedException.class)
+    public ResponseEntity<String> handleChatNotAllowedException(ChatNotAllowedException ex) {
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(ex.getMessage());
+    }
+
+    @ExceptionHandler(CredentialsNotMatchException.class)
+    public ResponseEntity<String> handleCredentialsNotMatchException(CredentialsNotMatchException ex) {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(ex.getMessage());
+    }
 }
