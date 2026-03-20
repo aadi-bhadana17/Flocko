@@ -5,10 +5,7 @@ import com.kilgore.fooddeliveryapp.dto.request.PlaceOrderRequest;
 import com.kilgore.fooddeliveryapp.dto.request.UpdateOrderStatusRequest;
 import com.kilgore.fooddeliveryapp.dto.response.OrderResponse;
 import com.kilgore.fooddeliveryapp.dto.summary.*;
-import com.kilgore.fooddeliveryapp.exceptions.EntityNotFoundException;
-import com.kilgore.fooddeliveryapp.exceptions.EntityUnavailableException;
-import com.kilgore.fooddeliveryapp.exceptions.InvalidOrderStateException;
-import com.kilgore.fooddeliveryapp.exceptions.UserStatusException;
+import com.kilgore.fooddeliveryapp.exceptions.*;
 import com.kilgore.fooddeliveryapp.model.*;
 import com.kilgore.fooddeliveryapp.repository.*;
 import jakarta.transaction.Transactional;
@@ -90,7 +87,7 @@ public class OrderService {
         cartRepository.save(cart);
 
         if(request.getScheduledAt() != null) {
-            order.setPreOrder(true);
+            order.setOrderType(OrderType.PRE_ORDER);
             order.setScheduledAt(request.getScheduledAt());
         }
 
@@ -245,10 +242,19 @@ public class OrderService {
     }
 
     public List<OrderResponse> getRestaurantOrders() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        User user = userRepository.findByEmail(authentication.getName());
+        User user = userAuthorization.authorizeUser();
 
-        return user.getOwnedRestaurants().stream()
+        List<Restaurant> restaurants;
+
+        if (user.getRole() == UserRole.RESTAURANT_STAFF) {
+            Restaurant restaurant = restaurantRepository.findById(user.getEmployedAt())
+                    .orElseThrow(() -> new RestaurantNotFoundException(user.getEmployedAt()));
+            restaurants = List.of(restaurant);
+        } else {
+            restaurants = user.getOwnedRestaurants();
+        }
+
+        return restaurants.stream()
                 .flatMap(restaurant -> restaurant.getOrders().stream())
                 .map(order -> createOrderResponse(order, "Your Restaurant Order"))
                 .toList();
@@ -290,7 +296,7 @@ public class OrderService {
             order.setOrderStatus(OrderStatus.CANCELLED);
             String message = "Order has  been cancelled";
 
-            if(order.isPreOrder()) {
+            if(order.getOrderType() == OrderType.PRE_ORDER) {
                 BigDecimal refund = order.getTotalPrice().multiply(BigDecimal.valueOf(0.75));
                 order.setRefundAmount(refund);
                 message = message + " and " + refund + " amount has been refunded to your wallet";

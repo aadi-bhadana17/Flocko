@@ -104,6 +104,32 @@
     color: var(--dark, #1F2937);
 }
 
+.cd-mess-filter-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+.cd-chip-btn {
+    border: 1px solid var(--border, #E5E7EB);
+    background: var(--surface, #FFFFFF);
+    color: var(--gray, #6B7280);
+    border-radius: 999px;
+    padding: 0.3rem 0.8rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.cd-chip-btn.active,
+.cd-chip-btn:hover {
+    border-color: var(--primary, #22C55E);
+    color: var(--primary-dark, #16A34A);
+    background: var(--green-tint, #DCFCE7);
+}
+
 /* Empty */
 .cd-empty {
     text-align: center;
@@ -276,6 +302,67 @@
 .cd-fav-remove:hover {
     background: var(--error-bg, #FEF2F2);
     color: var(--error, #EF4444);
+}
+
+/* Mess Plans */
+.cd-mess-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 0.9rem;
+}
+
+.cd-mess-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.cd-mess-head {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.cd-mess-name {
+    font-size: 0.98rem;
+    font-weight: 700;
+    color: var(--dark, #1F2937);
+}
+
+.cd-mess-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+}
+
+.cd-mess-badge.active {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.cd-mess-badge.inactive {
+    background: #F3F4F6;
+    color: #4B5563;
+}
+
+.cd-mess-desc {
+    font-size: 0.83rem;
+    color: var(--gray, #6B7280);
+    line-height: 1.4;
+}
+
+.cd-mess-meta-row {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    color: var(--gray, #6B7280);
+    font-size: 0.8rem;
 }
 
 /* Addresses */

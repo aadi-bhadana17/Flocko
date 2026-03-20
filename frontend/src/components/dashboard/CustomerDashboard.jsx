@@ -5,7 +5,7 @@ import { AuthContext } from '../../context/AuthContext';
 import {
     getUserProfile,
     getAddresses, addAddress, updateAddress, setDefaultAddress, deleteAddress,
-    getFavourites, removeFavourite,
+    getFavourites, removeFavourite, getMyMessSubscriptions,
 } from '../../api/userService';
 import { getMyOrders } from '../../api/orderService';
 import { motion } from 'framer-motion';
@@ -25,8 +25,21 @@ const STATUS_STYLES = {
     CANCELLED:        { bg: '#FEE2E2', color: '#DC2626', label: 'Cancelled' },
 };
 
-const TABS = ['overview', 'favourites', 'addresses'];
-const TAB_LABELS = { overview: '📊 Overview', favourites: '❤️ Favourites', addresses: '📍 Addresses' };
+const TABS = ['overview', 'favourites', 'addresses', 'messPlans'];
+const TAB_LABELS = {
+    overview: '📊 Overview',
+    favourites: '❤️ Favourites',
+    addresses: '📍 Addresses',
+    messPlans: '🍱 My Mess Plans',
+};
+
+const normalizeSubscriptionsPayload = (payload) => {
+    if (Array.isArray(payload)) return payload;
+    if (Array.isArray(payload?.content)) return payload.content;
+    if (Array.isArray(payload?.data)) return payload.data;
+    if (Array.isArray(payload?.subscriptions)) return payload.subscriptions;
+    return [];
+};
 
 const CustomerDashboard = () => {
     const { user } = useContext(AuthContext);
@@ -40,13 +53,21 @@ const CustomerDashboard = () => {
     const [orders, setOrders] = useState([]);
     const [favourites, setFavourites] = useState([]);
     const [addresses, setAddresses] = useState([]);
+    const [messSubscriptions, setMessSubscriptions] = useState([]);
+    const [messFilter, setMessFilter] = useState('all');
+    const [loadingMess, setLoadingMess] = useState(false);
 
     useEffect(() => { fetchInitial(); }, []);
 
     useEffect(() => {
         if (activeTab === 'favourites') fetchFavourites();
         if (activeTab === 'addresses') fetchAddresses();
+        if (activeTab === 'messPlans') fetchMessSubscriptions();
     }, [activeTab]);
+
+    useEffect(() => {
+        if (activeTab === 'messPlans') fetchMessSubscriptions();
+    }, [messFilter]);
 
     const flash = (msg) => { setSuccess(msg); setTimeout(() => setSuccess(''), 2500); };
     const flashError = (msg) => { setError(msg); setTimeout(() => setError(''), 4000); };
@@ -71,6 +92,19 @@ const CustomerDashboard = () => {
 
     const fetchAddresses = async () => {
         try { setAddresses(await getAddresses()); } catch {}
+    };
+
+    const fetchMessSubscriptions = async () => {
+        setLoadingMess(true);
+        try {
+            const active = messFilter === 'all' ? undefined : messFilter === 'active';
+            const payload = await getMyMessSubscriptions(active);
+            setMessSubscriptions(normalizeSubscriptionsPayload(payload));
+        } catch {
+            flashError('Failed to load mess subscriptions.');
+        } finally {
+            setLoadingMess(false);
+        }
     };
 
     const handleRemoveFavourite = async (restaurantId) => {
@@ -113,6 +147,10 @@ const CustomerDashboard = () => {
                         <div className="cd-summary-num">{addresses.length}</div>
                         <div className="cd-summary-label">Addresses</div>
                     </div>
+                    <div className="cd-summary-card">
+                        <div className="cd-summary-num">{messSubscriptions.length}</div>
+                        <div className="cd-summary-label">Mess Plans</div>
+                    </div>
                 </div>
 
                 {/* Recent Orders */}
@@ -141,6 +179,79 @@ const CustomerDashboard = () => {
                             </Link>
                         );
                     })
+                )}
+            </div>
+        );
+    };
+
+    // ═══════════════════════════════════════
+    //  MESS PLANS TAB
+    // ═══════════════════════════════════════
+    const MessPlansTab = () => {
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '-';
+            const dt = new Date(dateStr);
+            if (Number.isNaN(dt.getTime())) return dateStr;
+            return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+        };
+
+        return (
+            <div>
+                <div className="cd-section-header">
+                    <h3>My Subscriptions ({messSubscriptions.length})</h3>
+                    <div className="cd-mess-filter-wrap">
+                        <button
+                            className={`cd-chip-btn ${messFilter === 'all' ? 'active' : ''}`}
+                            onClick={() => setMessFilter('all')}
+                        >
+                            All
+                        </button>
+                        <button
+                            className={`cd-chip-btn ${messFilter === 'active' ? 'active' : ''}`}
+                            onClick={() => setMessFilter('active')}
+                        >
+                            Active
+                        </button>
+                        <button
+                            className={`cd-chip-btn ${messFilter === 'inactive' ? 'active' : ''}`}
+                            onClick={() => setMessFilter('inactive')}
+                        >
+                            Inactive
+                        </button>
+                        <button className="cd-btn cd-btn-outline cd-btn-sm" onClick={fetchMessSubscriptions}>↻ Refresh</button>
+                    </div>
+                </div>
+
+                {loadingMess ? (
+                    <div className="cd-empty"><p>Loading subscriptions...</p></div>
+                ) : messSubscriptions.length === 0 ? (
+                    <div className="cd-empty">
+                        <span className="cd-empty-icon">🍱</span>
+                        <h3>No subscriptions found</h3>
+                        <p>Subscribe to a restaurant mess plan to see it here.</p>
+                        <Link to="/" className="cd-btn cd-btn-primary" style={{ marginTop: '0.75rem' }}>Explore Restaurants</Link>
+                    </div>
+                ) : (
+                    <div className="cd-mess-grid">
+                        {messSubscriptions.map((sub) => (
+                            <div key={sub.subscriptionId} className="cd-mess-card">
+                                <div className="cd-mess-head">
+                                    <h4 className="cd-mess-name">{sub.messPlan?.name || 'Mess Plan'}</h4>
+                                    <span className={`cd-mess-badge ${sub.active ? 'active' : 'inactive'}`}>
+                                        {sub.active ? 'Active' : 'Inactive'}
+                                    </span>
+                                </div>
+                                {sub.messPlan?.description && <p className="cd-mess-desc">{sub.messPlan.description}</p>}
+                                <div className="cd-mess-meta-row">
+                                    <span>Price: ₹{Number(sub.messPlan?.price || 0).toFixed(0)}</span>
+                                </div>
+                                <div className="cd-mess-meta-row">
+                                    <span>Start: {formatDate(sub.startDate)}</span>
+                                    <span>End: {formatDate(sub.endDate)}</span>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 )}
             </div>
         );
@@ -357,6 +468,7 @@ const CustomerDashboard = () => {
                     {activeTab === 'overview' && <OverviewTab />}
                     {activeTab === 'favourites' && <FavouritesTab />}
                     {activeTab === 'addresses' && <AddressesTab />}
+                    {activeTab === 'messPlans' && <MessPlansTab />}
                 </div>
             </div>
         </div>

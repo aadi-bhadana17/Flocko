@@ -19,7 +19,7 @@ public interface MessSubscriptionRepository extends JpaRepository<MessSubscripti
             "WHERE ms.user = :currentUser " +
             "AND ms.messPlan = :messPlan " +
             "AND ms.active = true")
-    boolean findActiveSubscriptionByUserAndMessPlan(User currentUser, MessPlan messPlan);
+    MessSubscription findActiveSubscriptionByUserAndMessPlan(User currentUser, MessPlan messPlan);
 
     @Query("SELECT ms FROM MessSubscription ms " +
             "JOIN ms.messPlan mp " +
