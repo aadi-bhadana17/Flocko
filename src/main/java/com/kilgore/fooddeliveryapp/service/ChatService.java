@@ -65,7 +65,7 @@ public class ChatService {
         else if(order.getOrderStatus() == OrderStatus.DELIVERED)
             throw new ChatNotAllowedException("Cannot send messages for delivered orders");
 
-        if(!user.getUserId().equals(order.getUser().getUserId()))
+        if(user.getRole() == UserRole.CUSTOMER && !user.getUserId().equals(order.getUser().getUserId()))
             throw new AccessDeniedException("Only the customer who placed the order can send messages");
         else if(user.getRole() == UserRole.RESTAURANT_STAFF && !Objects.equals(order.getRestaurant().getRestaurantId(), user.getEmployedAt()))
             throw new AccessDeniedException("Restaurant staff can only send messages for their own restaurant's orders");

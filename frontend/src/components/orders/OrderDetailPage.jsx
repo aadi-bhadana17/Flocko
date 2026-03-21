@@ -1,6 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getOrder, cancelOrder } from '../../api/orderService';
+import { AuthContext } from '../../context/AuthContext';
+import OrderChatPanel from './OrderChatPanel';
 import { motion } from 'framer-motion';
 import './OrderDetailPage.css';
 
@@ -17,6 +19,7 @@ const STATUS_STEPS = ['CREATED', 'CONFIRMED', 'PREPARING', 'OUT_FOR_DELIVERY', '
 
 const OrderDetailPage = () => {
     const { orderId } = useParams();
+    const { user } = useContext(AuthContext);
     const [order, setOrder] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
@@ -65,6 +68,12 @@ const OrderDetailPage = () => {
     };
 
     const canCancel = order && (order.orderStatus === 'CREATED' || order.orderStatus === 'CONFIRMED');
+    const isSpecialOrder = Boolean(order?.isSpecial);
+    const isChatSendAllowedStatus = order && !['CANCELLED', 'DELIVERED'].includes(order.orderStatus);
+    const canSendChat = isSpecialOrder && isChatSendAllowedStatus && ['CUSTOMER', 'RESTAURANT_STAFF'].includes(user?.role);
+    const sendDisabledReason = !isChatSendAllowedStatus
+        ? 'Chat is read-only once the order is cancelled or delivered.'
+        : 'Only customers and restaurant staff can send chat messages.';
 
     const currentStepIndex = order ? STATUS_STEPS.indexOf(order.orderStatus) : -1;
     const isCancelled = order?.orderStatus === 'CANCELLED';
@@ -250,6 +259,21 @@ const OrderDetailPage = () => {
                             </button>
                         )}
                     </motion.div>
+
+                    {isSpecialOrder && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.25 }}
+                        >
+                            <OrderChatPanel
+                                orderId={order.orderId}
+                                canSend={canSendChat}
+                                sendDisabledReason={sendDisabledReason}
+                                pollMs={4000}
+                            />
+                        </motion.div>
+                    )}
                 </div>
             </div>
         </div>

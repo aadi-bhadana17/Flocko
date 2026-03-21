@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { getRestaurantOrders, updateOrderStatus } from '../../api/orderService';
 import { updateKitchenStatus } from '../../api/kitchenService';
+import OrderChatPanel from '../orders/OrderChatPanel';
 import { motion } from 'framer-motion';
 import './RestaurantStaffDashboard.css';
 
@@ -39,6 +40,7 @@ const RestaurantStaffDashboard = () => {
     const [orderFilter, setOrderFilter] = useState('ALL');
     const [loading, setLoading] = useState(true);
     const [updatingId, setUpdatingId] = useState(null);
+    const [expandedChatOrderId, setExpandedChatOrderId] = useState(null);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -186,6 +188,9 @@ const RestaurantStaffDashboard = () => {
                                 {filteredOrders.map((order) => {
                                     const style = STATUS_STYLES[order.orderStatus] || STATUS_STYLES.CREATED;
                                     const nextStatuses = VALID_TRANSITIONS[order.orderStatus] || [];
+                                    const isSpecialOrder = Boolean(order.isSpecial);
+                                    const isChatOpen = expandedChatOrderId === order.orderId;
+                                    const canSendChat = !['CANCELLED', 'DELIVERED'].includes(order.orderStatus);
                                     return (
                                         <div key={order.orderId} className="sd-order-card">
                                             <div className="sd-order-top">
@@ -213,8 +218,17 @@ const RestaurantStaffDashboard = () => {
 
                                             <div className="sd-order-bottom">
                                                 <span className="sd-order-total">₹{Number(order.totalPrice).toFixed(0)}</span>
-                                                {nextStatuses.length > 0 && (
-                                                    <div className="sd-order-status-actions">
+                                                <div className="sd-order-status-actions">
+                                                    {isSpecialOrder && (
+                                                        <button
+                                                            className="sd-btn sd-btn-sm sd-btn-outline"
+                                                            onClick={() => setExpandedChatOrderId((prev) => prev === order.orderId ? null : order.orderId)}
+                                                        >
+                                                            {isChatOpen ? 'Hide Chat' : 'Open Chat'}
+                                                        </button>
+                                                    )}
+                                                    {nextStatuses.length > 0 && (
+                                                        <>
                                                         {nextStatuses.map((status) => (
                                                             <button
                                                                 key={status}
@@ -225,9 +239,22 @@ const RestaurantStaffDashboard = () => {
                                                                 {updatingId === order.orderId ? '...' : STATUS_LABELS[status]}
                                                             </button>
                                                         ))}
-                                                    </div>
-                                                )}
+                                                        </>
+                                                    )}
+                                                </div>
                                             </div>
+
+                                            {isSpecialOrder && isChatOpen && (
+                                                <div className="sd-chat-wrap">
+                                                    <OrderChatPanel
+                                                        orderId={order.orderId}
+                                                        canSend={canSendChat}
+                                                        sendDisabledReason="Chat is read-only once the order is cancelled or delivered."
+                                                        pollMs={4000}
+                                                        title={`Order #${order.orderId} Chat`}
+                                                    />
+                                                </div>
+                                            )}
                                         </div>
                                     );
                                 })}

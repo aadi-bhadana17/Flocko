@@ -20,6 +20,8 @@ const CartPage = () => {
     const [loadingAddresses, setLoadingAddresses] = useState(false);
     const [placingOrder, setPlacingOrder] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(null);
+    const [scheduledAt, setScheduledAt] = useState('');
+    const [isSpecial, setIsSpecial] = useState(false);
 
     // New address form
     const [showAddressForm, setShowAddressForm] = useState(false);
@@ -123,7 +125,13 @@ const CartPage = () => {
         setPlacingOrder(true);
         setError('');
         try {
-            const orderData = await placeOrder(selectedAddress);
+            const orderPayload = {
+                addressId: selectedAddress,
+                ...(scheduledAt ? { scheduledAt } : {}),
+                ...(isSpecial ? { isSpecial: true } : {})
+            };
+
+            const orderData = await placeOrder(orderPayload);
             setOrderSuccess(orderData);
             setCart(null);
         } catch (err) {
@@ -455,6 +463,29 @@ const CartPage = () => {
                                             </motion.form>
                                         )}
                                     </AnimatePresence>
+
+                                    <div className="cart-order-options">
+                                        <label className="cart-option-label" htmlFor="scheduledAt">
+                                            Schedule delivery (optional)
+                                        </label>
+                                        <input
+                                            id="scheduledAt"
+                                            type="datetime-local"
+                                            className="cart-option-input"
+                                            value={scheduledAt}
+                                            onChange={(e) => setScheduledAt(e.target.value)}
+                                        />
+
+                                        <label className="cart-special-toggle" htmlFor="isSpecial">
+                                            <input
+                                                id="isSpecial"
+                                                type="checkbox"
+                                                checked={isSpecial}
+                                                onChange={(e) => setIsSpecial(e.target.checked)}
+                                            />
+                                            <span>Mark as special order (optional)</span>
+                                        </label>
+                                    </div>
 
                                     <button
                                         className="cart-btn cart-btn-primary cart-btn-full cart-place-order-btn"

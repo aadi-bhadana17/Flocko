@@ -188,6 +188,10 @@
     border-top: 1px solid var(--border, #E5E7EB);
 }
 
+.sd-chat-wrap {
+    margin-top: 0.9rem;
+}
+
 .sd-order-total {
     font-family: 'Fraunces', serif;
     font-weight: 700;

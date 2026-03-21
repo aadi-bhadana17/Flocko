@@ -3,7 +3,16 @@ import api from './axiosConfig';
 const ORDER_BASE = '/api/order';
 
 export const placeOrder = async (addressId) => {
-    const response = await api.post(ORDER_BASE, { addressId });
+    const payload = {
+        addressId: typeof addressId === 'object' ? addressId.addressId : addressId,
+    };
+
+    if (typeof addressId === 'object') {
+        if (addressId.scheduledAt) payload.scheduledAt = addressId.scheduledAt;
+        if (typeof addressId.isSpecial === 'boolean') payload.isSpecial = addressId.isSpecial;
+    }
+
+    const response = await api.post(ORDER_BASE, payload);
     return response.data;
 };
 
