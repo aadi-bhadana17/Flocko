@@ -118,4 +118,11 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.UNAUTHORIZED)
                 .body(ex.getMessage());
     }
+
+    @ExceptionHandler(DefaultAddressNotFoundException.class)
+    public ResponseEntity<String> handleDefaultAddressNotFoundException(DefaultAddressNotFoundException ex) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(ex.getMessage());
+    }
 }

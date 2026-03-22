@@ -2,13 +2,15 @@ package com.kilgore.fooddeliveryapp.controller;
 
 import com.kilgore.fooddeliveryapp.dto.publicResponse.RestaurantMenuResponse;
 import com.kilgore.fooddeliveryapp.dto.publicResponse.RestaurantPublicResponse;
+import com.kilgore.fooddeliveryapp.dto.response.GroupDealResponse;
+import com.kilgore.fooddeliveryapp.service.GroupDealService;
 import com.kilgore.fooddeliveryapp.service.PublicService;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/public")
+@RequestMapping("/public/restaurants")
 public class PublicController {
     /*
         This controller can be used for endpoints that do not require authentication, such as viewing the menu
@@ -17,12 +19,14 @@ public class PublicController {
     */
 
     private final PublicService publicService;
+    private final GroupDealService groupDealService;
 
-    public PublicController(PublicService publicService) {
+    public PublicController(PublicService publicService, GroupDealService groupDealService) {
         this.publicService = publicService;
+        this.groupDealService = groupDealService;
     }
 
-    @GetMapping("/restaurants")
+    @GetMapping
     public List<RestaurantPublicResponse> getRestaurants(
                                     @RequestParam(required = false) String city,
                                     @RequestParam(required = false) String cuisineType) {
@@ -30,18 +34,23 @@ public class PublicController {
         return publicService.getRestaurants(city, cuisineType);
     }
 
-    @GetMapping("/restaurants/search")
+    @GetMapping("/search")
     public List<RestaurantPublicResponse> getRestaurantByName(@RequestParam("q") String name) {
         return publicService.getRestaurantByName(name);
     }
 
-    @GetMapping("/restaurants/{id}")
-    public RestaurantPublicResponse getRestaurantById(@PathVariable Long id) {
-        return publicService.getRestaurantById(id);
+    @GetMapping("/{restaurantId}")
+    public RestaurantPublicResponse getRestaurantById(@PathVariable Long restaurantId) {
+        return publicService.getRestaurantById(restaurantId);
     }
 
-    @GetMapping("/restaurants/{id}/menu")
-    public RestaurantMenuResponse getRestaurantMenu(@PathVariable Long id) {
-        return publicService.getRestaurantMenu(id);
+    @GetMapping("/{restaurantId}/menu")
+    public RestaurantMenuResponse getRestaurantMenu(@PathVariable Long restaurantId) {
+        return publicService.getRestaurantMenu(restaurantId);
+    }
+
+    @GetMapping("/{restaurantId}/group-deals")
+    public List<GroupDealResponse> getDealsForRestaurant(@PathVariable Long restaurantId) {
+        return groupDealService.getActiveDealsForRestaurant(restaurantId);
     }
 }

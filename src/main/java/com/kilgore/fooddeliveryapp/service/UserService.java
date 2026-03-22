@@ -249,7 +249,8 @@ public class UserService {
                 user.getLastName(),
                 user.getEmail(),
                 user.getPhone(),
-                user.getRole()
+                user.getRole(),
+                user.getWalletBalance()
         );
     }
 
@@ -299,11 +300,18 @@ public class UserService {
     public String subscribeToMessPlan(Long messPlanId) {
         User user = userAuthorization.authorizeUser();
 
+        Address defAddress = user.getAddresses().stream()
+                .filter(Address::isDefault)
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("Default address not found for user: " + user.getUserId()));
+
         MessPlan messPlan = messPlanRepository.findById(messPlanId)
                 .orElseThrow(() -> new EntityNotFoundException("Mess Plan with this id not found"));
 
-        if(messSubscriptionRepository.findActiveSubscriptionByUserAndMessPlan(user, messPlan) != null)
+        if(messSubscriptionRepository.findActiveSubscriptionByUserAndMessPlan(user, messPlan) != null) {
             throw new AccessDeniedException("You already have an active subscription for this mess plan");
+        }
+
 
         LocalDate now = LocalDate.now();
 

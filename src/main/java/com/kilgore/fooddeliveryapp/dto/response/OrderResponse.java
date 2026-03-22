@@ -1,5 +1,6 @@
 package com.kilgore.fooddeliveryapp.dto.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.kilgore.fooddeliveryapp.dto.summary.AddressSummary;
 import com.kilgore.fooddeliveryapp.dto.summary.OrderItemSummary;
 import com.kilgore.fooddeliveryapp.dto.summary.RestaurantSummary;
@@ -32,6 +33,9 @@ public class OrderResponse {
     private int totalQuantity;
 
     private LocalDateTime scheduledAt;
+
+    @JsonProperty("isSpecial")
+    private boolean isSpecial;
 
     private String message;
 

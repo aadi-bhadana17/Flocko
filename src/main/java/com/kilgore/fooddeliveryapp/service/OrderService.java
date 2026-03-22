@@ -77,6 +77,8 @@ public class OrderService {
         order.setPaymentStatus(PaymentStatus.PENDING);
         order.setTotalQuantity(cart.getTotalQuantity());
 
+        if(request.isSpecial()) order.setSpecial(true);
+
         orderRepository.save(order);
         List<OrderItem> orderItems = createOrderItems(cart, order);
 
@@ -193,6 +195,7 @@ public class OrderService {
                 order.getTotalPrice(),
                 order.getTotalQuantity(),
                 order.getScheduledAt(),
+                order.isSpecial(),
                 message
         );
 

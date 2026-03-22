@@ -1,5 +1,7 @@
 package com.kilgore.fooddeliveryapp.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,4 +17,8 @@ public class PlaceOrderRequest {
     private Long addressId;
 
     private LocalDateTime scheduledAt; // Optional , null for normal orders
+
+    @JsonProperty("isSpecial")
+    @JsonAlias("special")
+    private boolean isSpecial; // Optional
 }

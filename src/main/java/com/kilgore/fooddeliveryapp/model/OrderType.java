@@ -3,5 +3,6 @@ package com.kilgore.fooddeliveryapp.model;
 public enum OrderType {
     REGULAR,
     PRE_ORDER,
-    MESS
+    MESS,
+    GROUP_DEAL
 }
