@@ -4,7 +4,8 @@ import { motion } from 'framer-motion';
 import { getAddresses } from '../../api/userService';
 import {
     getGroupDealDetail,
-    getGroupDealParticipations,
+    getGroupDealParticipationsByDeal,
+    getGroupDealParticipationsByUser,
     participateInGroupDeal,
     withdrawFromGroupDeal,
 } from '../../api/groupDealService';
@@ -27,6 +28,12 @@ const statusClass = (status) => {
 };
 
 const formatMoney = (value) => `Rs ${Number(value || 0).toFixed(2)}`;
+
+const extractErrorMessage = (err, fallback) => {
+    const payload = err?.response?.data;
+    if (typeof payload === 'string') return payload;
+    return payload?.message || fallback;
+};
 
 const extractAddressId = (address) => {
     return address?.addressId ?? address?.id ?? address?.userAddressId ?? null;
@@ -87,6 +94,13 @@ const GroupDealDetailPage = () => {
     const isCustomer = user?.role === ROLES.CUSTOMER;
     const isOwner = user?.role === ROLES.RESTAURANT_OWNER;
 
+    const activeParticipation = useMemo(() => {
+        if (!participations.length) return null;
+        const confirmed = participations.filter((item) => (item?.isConfirmed ?? item?.confirmed) !== false);
+        if (!confirmed.length) return null;
+        return [...confirmed].sort((a, b) => Number(b?.participantId || 0) - Number(a?.participantId || 0))[0];
+    }, [participations]);
+
     const fetchDeal = useCallback(async () => {
         setLoading(true);
         setError('');
@@ -96,7 +110,7 @@ const GroupDealDetailPage = () => {
             setDeal(data);
             setHasParticipated(didUserParticipate(data));
         } catch (err) {
-            setError(err.response?.data?.message || err.response?.data || 'Unable to load this deal.');
+            setError(extractErrorMessage(err, 'Unable to load this deal.'));
         } finally {
             setLoading(false);
         }
@@ -135,7 +149,7 @@ const GroupDealDetailPage = () => {
     }, [isCustomer]);
 
     useEffect(() => {
-        if (!isOwner) {
+        if (!isOwner && !isCustomer) {
             setParticipations([]);
             setParticipationsError('');
             setParticipationsLoading(false);
@@ -146,18 +160,30 @@ const GroupDealDetailPage = () => {
             setParticipationsLoading(true);
             setParticipationsError('');
             try {
-                const payload = await getGroupDealParticipations(restaurantId, dealId);
+                const payload = isOwner
+                    ? await getGroupDealParticipationsByDeal(restaurantId, dealId)
+                    : await getGroupDealParticipationsByUser(restaurantId, dealId);
                 setParticipations(Array.isArray(payload) ? payload : []);
             } catch (err) {
                 setParticipations([]);
-                setParticipationsError(err.response?.data?.message || err.response?.data || 'Unable to load participants.');
+                const msg = extractErrorMessage(err, 'Unable to load participants.');
+                if (isCustomer && /didn't participate/i.test(msg)) {
+                    setParticipationsError('');
+                    return;
+                }
+                setParticipationsError(msg);
             } finally {
                 setParticipationsLoading(false);
             }
         };
 
         fetchParticipations();
-    }, [isOwner, restaurantId, dealId]);
+    }, [isOwner, isCustomer, restaurantId, dealId]);
+
+    useEffect(() => {
+        if (!isCustomer) return;
+        setHasParticipated(Boolean(activeParticipation));
+    }, [activeParticipation, isCustomer]);
 
     const progressPercent = useMemo(() => {
         if (!deal?.targetParticipation) return 0;
@@ -196,25 +222,58 @@ const GroupDealDetailPage = () => {
             });
             setHasParticipated(true);
             setToast('Payment mocked and participation confirmed.');
-            await fetchDeal();
+            await Promise.all([
+                fetchDeal(),
+                getGroupDealParticipationsByUser(restaurantId, dealId).then((payload) => {
+                    setParticipations(Array.isArray(payload) ? payload : []);
+                    setParticipationsError('');
+                }).catch((err) => {
+                    const msg = extractErrorMessage(err, 'Unable to load participants.');
+                    if (/didn't participate/i.test(msg)) {
+                        setParticipations([]);
+                        setParticipationsError('');
+                        return;
+                    }
+                    setParticipationsError(msg);
+                }),
+            ]);
         } catch (err) {
-            setToast(err.response?.data?.message || err.response?.data || 'Unable to participate right now.');
+            setToast(extractErrorMessage(err, 'Unable to participate right now.'));
         } finally {
             setActionBusy(false);
         }
     };
 
     const handleWithdraw = async () => {
+        if (!activeParticipation?.participantId) {
+            setToast('No active participation found to withdraw.');
+            return;
+        }
+
         setActionBusy(true);
         setToast('');
 
         try {
-            await withdrawFromGroupDeal(restaurantId, dealId);
+            await withdrawFromGroupDeal(restaurantId, dealId, activeParticipation.participantId);
             setHasParticipated(false);
             setToast('You have withdrawn from this group deal.');
-            await fetchDeal();
+            await Promise.all([
+                fetchDeal(),
+                getGroupDealParticipationsByUser(restaurantId, dealId).then((payload) => {
+                    setParticipations(Array.isArray(payload) ? payload : []);
+                    setParticipationsError('');
+                }).catch((err) => {
+                    const msg = extractErrorMessage(err, 'Unable to load participants.');
+                    if (/didn't participate/i.test(msg)) {
+                        setParticipations([]);
+                        setParticipationsError('');
+                        return;
+                    }
+                    setParticipationsError(msg);
+                }),
+            ]);
         } catch (err) {
-            setToast(err.response?.data?.message || err.response?.data || 'Unable to withdraw right now.');
+            setToast(extractErrorMessage(err, 'Unable to withdraw right now.'));
         } finally {
             setActionBusy(false);
         }
@@ -397,9 +456,9 @@ const GroupDealDetailPage = () => {
                     )}
                 </section>
 
-                {isOwner && (
+                {(isOwner || isCustomer) && (
                     <section className="gdd-card gdd-actions-card">
-                        <h2>Participants</h2>
+                        <h2>{isOwner ? 'Participants' : 'Your Participation'}</h2>
 
                         {participationsError && <p className="gdd-muted">{participationsError}</p>}
 

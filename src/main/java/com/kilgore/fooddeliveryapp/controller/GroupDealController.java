@@ -39,7 +39,14 @@ public class GroupDealController {
     public String deleteGroupDeal(@PathVariable Long dealId, @PathVariable Long restaurantId) {
         return groupDealService.deleteGroupDeal(restaurantId, dealId);
     }
-    
+
+
+    @GetMapping("/{dealId}/participations")
+    @PreAuthorize("hasAnyAuthority('RESTAURANT_OWNER')")
+    public List<GroupDealParticipationResponse> getParticipationsByDeal(@PathVariable Long restaurantId,
+                                                                        @PathVariable Long dealId) {
+        return groupDealService.getParticipationsByDeal(restaurantId, dealId);
+    }
 
     //----------------------------------------------------CUSTOMERS-----------------------------------------------------
 
@@ -49,12 +56,11 @@ public class GroupDealController {
                                                 @PathVariable Long dealId) {
         return groupDealService.getDeal(restaurantId, dealId);
     }
-    
+
     @GetMapping("/{dealId}/participate")
-    @PreAuthorize("hasAnyAuthority('RESTAURANT_OWNER')")
-    public List<GroupDealParticipationResponse> getParticipationsByDeal(@PathVariable Long restaurantId,
+    public List<GroupDealParticipationResponse> getParticipationsByUser(@PathVariable Long restaurantId,
                                                                   @PathVariable Long dealId) {
-        return groupDealService.getParticipationsByDeal(restaurantId, dealId);
+        return groupDealService.getParticipationsByUser(restaurantId,dealId);
     }
 
     @PostMapping("{dealId}/participate")
@@ -64,8 +70,10 @@ public class GroupDealController {
         return groupDealService.participateInGroupDeal(restaurantId, dealId, request);
     }
 
-    @PutMapping("{dealId}/participate")
-    public String withdrawFromGroupDeal(@PathVariable Long restaurantId, @PathVariable Long dealId) {
-        return groupDealService.withdrawFromGroupDeal(restaurantId, dealId);
+    @PutMapping("{dealId}/participate/{participationId}")
+    public String withdrawFromGroupDeal(@PathVariable Long restaurantId,
+                                        @PathVariable Long dealId,
+                                        @PathVariable  Long participationId) {
+        return groupDealService.withdrawFromGroupDeal(restaurantId, dealId, participationId);
     }
 }

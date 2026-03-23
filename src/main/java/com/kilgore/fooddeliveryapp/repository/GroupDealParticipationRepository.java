@@ -13,10 +13,10 @@ import java.util.List;
 @Repository
 public interface GroupDealParticipationRepository extends JpaRepository<GroupDealParticipation, Long> {
 
-    @Query("SELECT SUM(gdp.quantity) FROM GroupDealParticipation gdp WHERE gdp.groupDeal.dealId = :dealId")
+    @Query("SELECT SUM(gdp.quantity) FROM GroupDealParticipation gdp WHERE gdp.groupDeal.dealId = :dealId AND gdp.isConfirmed = true ")
     Integer getTotalParticipantsByDeal(@Param("dealId") Long dealId);
 
-    GroupDealParticipation findByUserAndGroupDeal(User user, GroupDeal groupDeal);
+    List<GroupDealParticipation> findByUserAndGroupDeal(User user, GroupDeal groupDeal);
 
     List<GroupDealParticipation> findByGroupDeal(GroupDeal deal);
 

@@ -10,7 +10,9 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Component
 public class GroupDealScheduler {
@@ -57,19 +59,33 @@ public class GroupDealScheduler {
 
         List<GroupDeal> deals = groupDealRepository.findDealsByStatusAndConfirmationWindowEndTimeBefore(GroupDealStatus.CONFIRMATION_WINDOW, now);
 
+        Map<Long, Integer> participationMap = new HashMap<>();
+
         deals.forEach(deal -> {
             Integer currPar = groupDealParticipationRepository.getTotalParticipantsByDeal(deal.getDealId());
+            participationMap.put(deal.getDealId(), currPar);
+
             if(currPar == null || currPar < deal.getTargetParticipation() * 0.5) {
                 deal.setStatus(GroupDealStatus.EXPIRED); // 50% not reach - deal expired
+                   } else {
+                deal.setStatus(GroupDealStatus.FULFILLED); // 50% or above reached - deal fulfilled
+            }
+        });
+        groupDealRepository.saveAll(deals);
+
+        deals.forEach(deal -> {
+            Integer currPar = participationMap.get(deal.getDealId());
+
+            if(deal.getStatus() == GroupDealStatus.EXPIRED) {
                 List<GroupDealParticipation> participantList = groupDealParticipationRepository.findActiveParticipantsByDeal(deal.getDealId());
 
                 if(participantList != null && !participantList.isEmpty())
                     groupDealOrderService.refundToUser(deal, participantList, currPar); // refund the users who participated in the deal
-            } else {
-                deal.setStatus(GroupDealStatus.FULFILLED); // 50% or above reached - deal fulfilled
+            }
+            else {
                 groupDealOrderService.processGroupDeal(deal.getDealId(), currPar); // process the deal - place order and refund
+
             }
         });
-        groupDealRepository.saveAll(deals);
     }
 }

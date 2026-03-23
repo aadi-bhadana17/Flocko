@@ -145,8 +145,14 @@ public class GroupDealService {
     public GroupDealResponse getDeal(Long restaurantId, Long dealId) {
         User user = userAuthorization.authorizeUser();
 
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
+
         GroupDeal deal = groupDealRepository.findById(dealId)
                 .orElseThrow(() -> new EntityNotFoundException("Group deal with id " + dealId + " not found"));
+
+        if(!deal.getRestaurant().equals(restaurant))
+            throw new AccessDeniedException("This deal does not belong to this restaurant");
 
         return mapToGroupDealResponse(deal);
     }
@@ -185,7 +191,7 @@ public class GroupDealService {
     }
 
     @Transactional
-    public String withdrawFromGroupDeal(Long restaurantId, Long dealId) {
+    public String withdrawFromGroupDeal(Long restaurantId, Long dealId, Long  participationId) {
         User user = userAuthorization.authorizeUser();
 
         GroupDeal deal = groupDealRepository.findById(dealId)
@@ -194,7 +200,8 @@ public class GroupDealService {
         if(deal.getStatus() == GroupDealStatus.FULFILLED || deal.getStatus() == GroupDealStatus.EXPIRED || deal.getStatus() == GroupDealStatus.DELETED)
             throw new IllegalStateException("Cannot withdraw from this deal as it is already " + deal.getStatus());
 
-        GroupDealParticipation participation = groupDealParticipationRepository.findByUserAndGroupDeal(user, deal);
+        GroupDealParticipation participation = groupDealParticipationRepository.findById(participationId)
+                .orElseThrow(() -> new EntityNotFoundException("Participation with id " + participationId + " not found"));
 
         participation.setConfirmed(false);
         groupDealParticipationRepository.save(participation);
@@ -329,8 +336,30 @@ public class GroupDealService {
         if(!deal.getRestaurant().equals(restaurant)) {
             throw new AccessDeniedException("This deal does not belong to your restaurant");
         }
-        
+
         return groupDealParticipationRepository.findGroupDealParticipationsByGroupDeal(deal).stream()
+                .map(this::mapToGroupDealParticipationResponse)
+                .toList();
+    }
+
+    public List<GroupDealParticipationResponse> getParticipationsByUser(Long restaurantId, Long dealId) {
+        User user = userAuthorization.authorizeUser();
+
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
+
+        GroupDeal deal = groupDealRepository.findById(dealId)
+                .orElseThrow(() -> new EntityNotFoundException("Group deal with id " + dealId + " not found"));
+
+        if(!restaurant.equals(deal.getRestaurant())) {
+            throw new EntityMisMatchAssociationException("This deal does not belong to this restaurant");
+        }
+
+        List<GroupDealParticipation> participationList = groupDealParticipationRepository.findByUserAndGroupDeal(user, deal);
+        if(participationList == null || participationList.isEmpty()) {
+            throw new EntityNotFoundException("You didn't participate in this deal");
+        }
+        return participationList.stream()
                 .map(this::mapToGroupDealParticipationResponse)
                 .toList();
     }

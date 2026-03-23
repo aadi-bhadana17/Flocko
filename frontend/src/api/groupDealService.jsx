@@ -27,13 +27,18 @@ export const participateInGroupDeal = async (restaurantId, dealId, data) => {
     return response.data;
 };
 
-export const withdrawFromGroupDeal = async (restaurantId, dealId) => {
-    const response = await api.put(`${BASE}/${restaurantId}/group-deals/${dealId}/participate`);
+export const withdrawFromGroupDeal = async (restaurantId, dealId, participationId) => {
+    const response = await api.put(`${BASE}/${restaurantId}/group-deals/${dealId}/participate/${participationId}`);
     return response.data;
 };
 
-export const getGroupDealParticipations = async (restaurantId, dealId) => {
+export const getGroupDealParticipationsByUser = async (restaurantId, dealId) => {
     const response = await api.get(`${BASE}/${restaurantId}/group-deals/${dealId}/participate`);
+    return response.data;
+};
+
+export const getGroupDealParticipationsByDeal = async (restaurantId, dealId) => {
+    const response = await api.get(`${BASE}/${restaurantId}/group-deals/${dealId}/participations`);
     return response.data;
 };
 
