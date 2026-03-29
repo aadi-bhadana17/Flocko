@@ -8,6 +8,7 @@ import Navbar from './components/layout/Navbar';
 import HomePage from './components/public/HomePage';
 import RestaurantPage from './components/public/RestaurantPage';
 import CartPage from './components/cart/CartPage';
+import SharedCartPage from './components/cart/SharedCartPage';
 import OrdersPage from './components/orders/OrdersPage';
 import OrderDetailPage from './components/orders/OrderDetailPage';
 import GroupDealDetailPage from './components/deals/GroupDealDetailPage';
@@ -83,6 +84,14 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={[ROLES.CUSTOMER, ROLES.ADMIN, ROLES.RESTAURANT_OWNER, ROLES.RESTAURANT_STAFF]}>
                 <WithNavbar><CartPage /></WithNavbar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/shared-cart"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.CUSTOMER, ROLES.ADMIN, ROLES.RESTAURANT_OWNER, ROLES.RESTAURANT_STAFF]}>
+                <WithNavbar><SharedCartPage /></WithNavbar>
               </ProtectedRoute>
             }
           />

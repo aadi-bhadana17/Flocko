@@ -31,4 +31,8 @@ public class Cart {
     @ManyToOne
     private Restaurant restaurant;
 
+    @ManyToOne
+    private SharedCart  sharedCart; // if this cart is part of a shared cart, otherwise null,
+    // and it will keep change as user might switch between shared carts
+
 }

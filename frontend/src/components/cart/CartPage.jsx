@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getCart, updateCartItemQuantity, removeCartItem, clearCart } from '../../api/cartService';
+import { getCurrentSharedCart } from '../../api/sharedCartService';
 import { getAddresses, addAddress } from '../../api/userService';
 import { placeOrder } from '../../api/orderService';
 import { motion, AnimatePresence } from 'framer-motion';
 import './CartPage.css';
 
 const CartPage = () => {
+    const navigate = useNavigate();
 
     const [cart, setCart] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [updatingItem, setUpdatingItem] = useState(null);
+    const [hasActiveSharedCart, setHasActiveSharedCart] = useState(false);
 
     // Checkout state
     const [showCheckout, setShowCheckout] = useState(false);
@@ -32,7 +35,21 @@ const CartPage = () => {
 
     useEffect(() => {
         fetchCart();
+        checkCurrentSharedCart();
     }, []);
+
+    const checkCurrentSharedCart = async () => {
+        try {
+            await getCurrentSharedCart();
+            setHasActiveSharedCart(true);
+        } catch (err) {
+            if (err?.response?.status === 404) {
+                setHasActiveSharedCart(false);
+                return;
+            }
+            setHasActiveSharedCart(false);
+        }
+    };
 
     const fetchCart = async () => {
         setLoading(true);
@@ -141,6 +158,18 @@ const CartPage = () => {
         }
     };
 
+    const handleOpenSharedCart = () => {
+        if (cart?.restaurant) {
+            navigate('/shared-cart', { state: { restaurant: cart.restaurant } });
+            return;
+        }
+        navigate('/shared-cart');
+    };
+
+    const handleViewCurrentSharedCart = () => {
+        navigate('/shared-cart');
+    };
+
     // Order success view
     if (orderSuccess) {
         return (
@@ -204,6 +233,14 @@ const CartPage = () => {
                         <h2>Your cart is empty</h2>
                         <p>Looks like you haven't added any items yet.</p>
                         <Link to="/" className="cart-btn cart-btn-primary">Browse Restaurants</Link>
+                        {hasActiveSharedCart && (
+                            <button className="cart-btn cart-btn-outline" onClick={handleViewCurrentSharedCart}>
+                                View your shared cart
+                            </button>
+                        )}
+                        <button className="cart-shared-cta" onClick={handleOpenSharedCart}>
+                            Want to share cart with others?
+                        </button>
                     </motion.div>
                 </div>
             </div>
@@ -305,6 +342,15 @@ const CartPage = () => {
                                 Clear Cart
                             </button>
                         </div>
+
+                        <button className="cart-shared-cta" onClick={handleOpenSharedCart}>
+                            Want to share cart with others?
+                        </button>
+                        {hasActiveSharedCart && (
+                            <button className="cart-shared-view-btn" onClick={handleViewCurrentSharedCart}>
+                                View your shared cart
+                            </button>
+                        )}
                     </motion.div>
 
                     {/* Order Summary / Checkout */}
