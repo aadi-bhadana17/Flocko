@@ -8,6 +8,7 @@ import {
     getFavourites, removeFavourite, getMyMessSubscriptions,
 } from '../../api/userService';
 import { getMyOrders } from '../../api/orderService';
+import { getMyReviews } from '../../api/reviewService';
 import { motion } from 'framer-motion';
 import './CustomerDashboard.css';
 
@@ -25,13 +26,18 @@ const STATUS_STYLES = {
     CANCELLED:        { bg: '#FEE2E2', color: '#DC2626', label: 'Cancelled' },
 };
 
-const TABS = ['overview', 'favourites', 'addresses', 'messPlans'];
+const TABS = ['overview', 'favourites', 'addresses', 'messPlans', 'reviews'];
 const TAB_LABELS = {
     overview: '📊 Overview',
     favourites: '❤️ Favourites',
     addresses: '📍 Addresses',
     messPlans: '🍱 My Mess Plans',
+    reviews: '📝 Reviews',
 };
+
+const sortReviewsByRecent = (reviews) => [...reviews].sort(
+    (a, b) => new Date(b?.postedAt || 0).getTime() - new Date(a?.postedAt || 0).getTime()
+);
 
 const normalizeSubscriptionsPayload = (payload) => {
     if (Array.isArray(payload)) return payload;
@@ -56,6 +62,8 @@ const CustomerDashboard = () => {
     const [messSubscriptions, setMessSubscriptions] = useState([]);
     const [messFilter, setMessFilter] = useState('all');
     const [loadingMess, setLoadingMess] = useState(false);
+    const [reviews, setReviews] = useState([]);
+    const [loadingReviews, setLoadingReviews] = useState(false);
 
     useEffect(() => { fetchInitial(); }, []);
 
@@ -63,6 +71,7 @@ const CustomerDashboard = () => {
         if (activeTab === 'favourites') fetchFavourites();
         if (activeTab === 'addresses') fetchAddresses();
         if (activeTab === 'messPlans') fetchMessSubscriptions();
+        if (activeTab === 'reviews') fetchReviews();
     }, [activeTab]);
 
     useEffect(() => {
@@ -104,6 +113,18 @@ const CustomerDashboard = () => {
             flashError('Failed to load mess subscriptions.');
         } finally {
             setLoadingMess(false);
+        }
+    };
+
+    const fetchReviews = async () => {
+        setLoadingReviews(true);
+        try {
+            const payload = await getMyReviews();
+            setReviews(sortReviewsByRecent(payload));
+        } catch {
+            flashError('Failed to load your reviews.');
+        } finally {
+            setLoadingReviews(false);
         }
     };
 
@@ -150,6 +171,10 @@ const CustomerDashboard = () => {
                     <div className="cd-summary-card">
                         <div className="cd-summary-num">{messSubscriptions.length}</div>
                         <div className="cd-summary-label">Mess Plans</div>
+                    </div>
+                    <div className="cd-summary-card">
+                        <div className="cd-summary-num">{reviews.length}</div>
+                        <div className="cd-summary-label">Reviews</div>
                     </div>
                 </div>
 
@@ -249,6 +274,53 @@ const CustomerDashboard = () => {
                                     <span>Start: {formatDate(sub.startDate)}</span>
                                     <span>End: {formatDate(sub.endDate)}</span>
                                 </div>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    const ReviewsTab = () => {
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '-';
+            const dt = new Date(dateStr);
+            if (Number.isNaN(dt.getTime())) return dateStr;
+            return dt.toLocaleDateString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+            });
+        };
+
+        return (
+            <div>
+                <div className="cd-section-header">
+                    <h3>My Reviews ({reviews.length})</h3>
+                    <button className="cd-btn cd-btn-outline cd-btn-sm" onClick={fetchReviews}>↻ Refresh</button>
+                </div>
+
+                {loadingReviews ? (
+                    <div className="cd-empty"><p>Loading reviews...</p></div>
+                ) : reviews.length === 0 ? (
+                    <div className="cd-empty">
+                        <span className="cd-empty-icon">📝</span>
+                        <h3>No reviews posted yet</h3>
+                        <p>Rate restaurants after your orders to see them here.</p>
+                    </div>
+                ) : (
+                    <div className="cd-review-list">
+                        {reviews.map((review) => (
+                            <div key={review.reviewId} className="cd-review-card">
+                                <div className="cd-review-top">
+                                    <h4>{review.restaurant?.restaurantName || 'Restaurant'}</h4>
+                                    <span>{formatDate(review.postedAt)}</span>
+                                </div>
+                                <div className="cd-review-rating">{'★'.repeat(Math.max(0, Math.min(5, review.rating || 0)))} <span>({review.rating}/5)</span></div>
+                                {review.comment && <p className="cd-review-comment">{review.comment}</p>}
                             </div>
                         ))}
                     </div>
@@ -469,6 +541,7 @@ const CustomerDashboard = () => {
                     {activeTab === 'favourites' && <FavouritesTab />}
                     {activeTab === 'addresses' && <AddressesTab />}
                     {activeTab === 'messPlans' && <MessPlansTab />}
+                    {activeTab === 'reviews' && <ReviewsTab />}
                 </div>
             </div>
         </div>

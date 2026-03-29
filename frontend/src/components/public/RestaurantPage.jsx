@@ -4,6 +4,7 @@ import { getRestaurantById, getRestaurantMenu } from '../../api/publicService';
 import { getMessPlans, getMessPlanById } from '../../api/restaurantService';
 import { addToCart } from '../../api/cartService';
 import { getFavourites, addFavourite, removeFavourite, subscribeToMessPlan } from '../../api/userService';
+import { getRestaurantReviews, createRestaurantReview } from '../../api/reviewService';
 import { AuthContext } from '../../context/AuthContext';
 import { ROLES } from '../../utils/constants';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -55,6 +56,11 @@ const groupSlotsByDay = (plan) => {
 
 const getFoodName = (food) => food?.foodName || food?.name || `Food #${food?.foodId ?? food?.id}`;
 
+const sortByHighestRating = (reviews) => [...reviews].sort((a, b) => {
+    if ((b?.rating || 0) !== (a?.rating || 0)) return (b?.rating || 0) - (a?.rating || 0);
+    return new Date(b?.postedAt || 0).getTime() - new Date(a?.postedAt || 0).getTime();
+});
+
 const RestaurantPage = () => {
     const { id } = useParams();
     const { user } = useContext(AuthContext);
@@ -78,6 +84,14 @@ const RestaurantPage = () => {
     const [selectedMessPlan, setSelectedMessPlan] = useState(null);
     const [messDetailLoading, setMessDetailLoading] = useState(false);
     const [messDetailError, setMessDetailError] = useState('');
+    const [activePanel, setActivePanel] = useState('menu');
+    const [restaurantReviews, setRestaurantReviews] = useState([]);
+    const [reviewLoading, setReviewLoading] = useState(false);
+    const [reviewError, setReviewError] = useState('');
+    const [reviewToast, setReviewToast] = useState('');
+    const [showReviewForm, setShowReviewForm] = useState(false);
+    const [submittingReview, setSubmittingReview] = useState(false);
+    const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
 
     useEffect(() => {
         fetchData();
@@ -99,6 +113,11 @@ const RestaurantPage = () => {
         setSelectedMessPlanId(null);
         setSelectedMessPlan(null);
         setMessDetailError('');
+        setActivePanel('menu');
+        setRestaurantReviews([]);
+        setReviewError('');
+        setReviewToast('');
+        setShowReviewForm(false);
         try {
             const [restaurantData, menuData] = await Promise.all([
                 getRestaurantById(id),
@@ -121,6 +140,51 @@ const RestaurantPage = () => {
         } finally {
             setLoading(false);
             setMessLoading(false);
+        }
+    };
+
+    const fetchRestaurantReviewList = async () => {
+        setReviewLoading(true);
+        setReviewError('');
+        try {
+            const reviews = await getRestaurantReviews(id);
+            setRestaurantReviews(sortByHighestRating(reviews));
+        } catch (err) {
+            setRestaurantReviews([]);
+            setReviewError(err.response?.data?.message || err.response?.data || 'Unable to load reviews for this restaurant.');
+        } finally {
+            setReviewLoading(false);
+        }
+    };
+
+    const handleOpenReviews = () => {
+        setActivePanel('reviews');
+        fetchRestaurantReviewList();
+    };
+
+    const handleReviewSubmit = async (e) => {
+        e.preventDefault();
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        setSubmittingReview(true);
+        setReviewError('');
+        try {
+            const created = await createRestaurantReview(id, {
+                rating: Number(reviewForm.rating),
+                comment: reviewForm.comment,
+            });
+            setRestaurantReviews((prev) => sortByHighestRating([created, ...prev]));
+            setReviewToast('Review posted successfully.');
+            setReviewForm({ rating: 5, comment: '' });
+            setShowReviewForm(false);
+            setTimeout(() => setReviewToast(''), 2500);
+        } catch (err) {
+            setReviewError(err.response?.data?.message || err.response?.data || 'Failed to post review.');
+        } finally {
+            setSubmittingReview(false);
         }
     };
 
@@ -246,6 +310,12 @@ const RestaurantPage = () => {
 
     const activeCategoryData = menu?.categories?.find(c => c.categoryId === activeCategory);
     const availableMessPlans = messPlans.filter(plan => (typeof plan?.active === 'boolean' ? plan.active : plan?.isActive !== false));
+    const formatReviewDate = (dateStr) => {
+        if (!dateStr) return '-';
+        const dt = new Date(dateStr);
+        if (Number.isNaN(dt.getTime())) return dateStr;
+        return dt.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    };
 
     return (
         <div className="rp-page">
@@ -395,14 +465,16 @@ const RestaurantPage = () => {
             )}
             <div className="rp-container rp-menu-layout">
                 {/* Category Sidebar */}
-                {menu?.categories?.length > 0 && (
-                    <aside className="rp-sidebar">
-                        <h3 className="rp-sidebar-title">Menu</h3>
-                        {menu.categories.map((cat) => (
+                <aside className="rp-sidebar">
+                    <h3 className="rp-sidebar-title">Menu</h3>
+                    {menu?.categories?.map((cat) => (
                             <motion.button
                                 key={cat.categoryId}
-                                className={`rp-cat-btn ${activeCategory === cat.categoryId ? 'active' : ''}`}
-                                onClick={() => setActiveCategory(cat.categoryId)}
+                                className={`rp-cat-btn ${activePanel === 'menu' && activeCategory === cat.categoryId ? 'active' : ''}`}
+                                onClick={() => {
+                                    setActivePanel('menu');
+                                    setActiveCategory(cat.categoryId);
+                                }}
                                 whileHover={{ x: 3 }}
                                 whileTap={{ scale: 0.97 }}
                             >
@@ -410,13 +482,105 @@ const RestaurantPage = () => {
                                 <span className="rp-cat-count">{cat.foods?.length || 0}</span>
                             </motion.button>
                         ))}
-                    </aside>
-                )}
+
+                    {(!menu?.categories || menu.categories.length === 0) && (
+                        <div className="rp-sidebar-empty">No menu categories yet.</div>
+                    )}
+
+                    <div className="rp-sidebar-divider" />
+                    <motion.button
+                        className={`rp-cat-btn rp-review-nav-btn ${activePanel === 'reviews' ? 'active' : ''}`}
+                        onClick={handleOpenReviews}
+                        whileHover={{ x: 3 }}
+                        whileTap={{ scale: 0.97 }}
+                    >
+                        <span className="rp-cat-name">Reviews</span>
+                        <span className="rp-cat-count">{restaurantReviews.length}</span>
+                    </motion.button>
+                </aside>
 
                 {/* Food Items */}
                 <main className="rp-menu-main">
                     <AnimatePresence mode="wait">
-                        {activeCategoryData ? (
+                        {activePanel === 'reviews' ? (
+                            <motion.div
+                                key="reviews-panel"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.2 }}
+                            >
+                                <div className="rp-category-header rp-review-header-row">
+                                    <button
+                                        className="rp-add-to-cart-btn rp-review-post-btn"
+                                        onClick={() => {
+                                            if (!user) {
+                                                navigate('/login');
+                                                return;
+                                            }
+                                            setShowReviewForm((prev) => !prev);
+                                        }}
+                                    >
+                                        {showReviewForm ? 'Cancel' : 'Post New Review'}
+                                    </button>
+                                    <h2 className="rp-category-title">Customer Reviews</h2>
+                                    <span className="rp-category-desc">Sorted by highest rating</span>
+                                </div>
+
+                                {reviewToast && <div className="rp-review-toast">{reviewToast}</div>}
+                                {reviewError && <div className="rp-mess-error">{reviewError}</div>}
+
+                                {showReviewForm && (
+                                    <form className="rp-review-form" onSubmit={handleReviewSubmit}>
+                                        <div className="rp-review-form-row">
+                                            <label htmlFor="reviewRating">Rating</label>
+                                            <select
+                                                id="reviewRating"
+                                                value={reviewForm.rating}
+                                                onChange={(e) => setReviewForm((prev) => ({ ...prev, rating: Number(e.target.value) }))}
+                                            >
+                                                {[5, 4, 3, 2, 1].map((rating) => (
+                                                    <option key={rating} value={rating}>{rating} Star{rating > 1 ? 's' : ''}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="rp-review-form-row">
+                                            <label htmlFor="reviewComment">Comment</label>
+                                            <textarea
+                                                id="reviewComment"
+                                                value={reviewForm.comment}
+                                                onChange={(e) => setReviewForm((prev) => ({ ...prev, comment: e.target.value }))}
+                                                placeholder="Share your experience..."
+                                                rows={3}
+                                                required
+                                            />
+                                        </div>
+                                        <button type="submit" className="rp-add-to-cart-btn rp-review-submit-btn" disabled={submittingReview}>
+                                            {submittingReview ? 'Posting...' : 'Submit Review'}
+                                        </button>
+                                    </form>
+                                )}
+
+                                {reviewLoading ? (
+                                    <div className="rp-empty-cat"><p>Loading reviews...</p></div>
+                                ) : restaurantReviews.length === 0 ? (
+                                    <div className="rp-empty-cat"><p>No reviews yet for this restaurant.</p></div>
+                                ) : (
+                                    <div className="rp-review-list">
+                                        {restaurantReviews.map((review) => (
+                                            <div key={review.reviewId} className="rp-review-card">
+                                                <div className="rp-review-top-row">
+                                                    <strong>{review.reviewer?.fullName || review.reviewer?.firstName || 'Customer'}</strong>
+                                                    <span className="rp-review-date">{formatReviewDate(review.postedAt)}</span>
+                                                </div>
+                                                <div className="rp-review-rating">{'★'.repeat(Math.max(0, Math.min(5, review.rating || 0)))} <span>({review.rating}/5)</span></div>
+                                                {review.comment && <p className="rp-review-comment">{review.comment}</p>}
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+                            </motion.div>
+                        ) : activeCategoryData ? (
                             <motion.div
                                 key={activeCategory}
                                 initial={{ opacity: 0, y: 10 }}

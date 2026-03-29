@@ -444,6 +444,21 @@
     color: var(--primary-dark);
 }
 
+.rp-sidebar-empty {
+    font-size: 0.84rem;
+    color: var(--gray);
+    margin: 0.35rem 0;
+}
+
+.rp-sidebar-divider {
+    margin: 0.7rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.rp-review-nav-btn {
+    margin-top: 0.15rem;
+}
+
 /* Category Header */
 .rp-category-header {
     margin-bottom: 1.5rem;
@@ -461,6 +476,119 @@
     color: var(--gray);
     font-size: 0.95rem;
     margin-top: 0.3rem;
+}
+
+.rp-review-header-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.65rem 1rem;
+    align-items: center;
+}
+
+.rp-review-post-btn {
+    width: auto;
+    margin-top: 0;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.85rem;
+    grid-row: 1 / span 2;
+    align-self: start;
+}
+
+.rp-review-toast {
+    border-radius: 10px;
+    font-size: 0.9rem;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.8rem;
+    background: var(--green-tint);
+    border: 1px solid var(--green-tint-hover);
+    color: var(--primary-dark);
+}
+
+.rp-review-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.rp-review-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.7rem;
+}
+
+.rp-review-form-row label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.rp-review-form-row select,
+.rp-review-form-row textarea {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.55rem 0.72rem;
+    font-size: 0.88rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--dark);
+    background: var(--surface);
+}
+
+.rp-review-form-row textarea {
+    resize: vertical;
+}
+
+.rp-review-submit-btn {
+    width: auto;
+    margin-top: 0;
+    min-width: 140px;
+}
+
+.rp-review-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.rp-review-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+}
+
+.rp-review-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+    color: var(--dark);
+}
+
+.rp-review-date {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.rp-review-rating {
+    font-size: 0.95rem;
+    color: #F59E0B;
+    font-weight: 700;
+}
+
+.rp-review-rating span {
+    color: var(--gray);
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.rp-review-comment {
+    margin-top: 0.35rem;
+    font-size: 0.9rem;
+    color: var(--gray);
+    line-height: 1.45;
 }
 
 /* Food Grid */
@@ -687,5 +815,14 @@
         flex-direction: column;
         align-items: flex-start;
         gap: 1rem;
+    }
+
+    .rp-review-header-row {
+        grid-template-columns: 1fr;
+    }
+
+    .rp-review-post-btn {
+        grid-row: auto;
+        width: fit-content;
     }
 }

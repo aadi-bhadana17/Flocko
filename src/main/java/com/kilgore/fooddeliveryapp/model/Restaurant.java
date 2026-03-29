@@ -39,6 +39,7 @@ public class Restaurant {
     private LocalTime openingTime;
     private LocalTime closingTime;
     private BigDecimal avgRating;
+    private Long totalReviews;
 
     @OneToMany(mappedBy = "restaurant")
     private List<Review> reviews;
