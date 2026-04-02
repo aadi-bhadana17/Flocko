@@ -79,7 +79,15 @@ public class OrderService {
 
         if(request.isSpecial()) order.setSpecial(true);
 
+        if (user.getWalletBalance().compareTo(cart.getTotalPrice()) < 0) {
+            throw new IllegalArgumentException("Insufficient wallet balance, please deposit money first");
+        }
+
+        user.setWalletBalance(user.getWalletBalance().subtract(cart.getTotalPrice()));
+        userRepository.save(user);
+
         orderRepository.save(order);
+
         List<OrderItem> orderItems = createOrderItems(cart, order);
 
         order.setOrderItems(orderItems);

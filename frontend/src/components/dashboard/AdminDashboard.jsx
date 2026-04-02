@@ -592,6 +592,11 @@ const AdminDashboard = () => {
     //  RESTAURANTS TAB
     // ═══════════════════════════════════════
     const RestaurantsTab = () => {
+        const parseImageLines = (value) => value
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(Boolean);
+
         const [filter, setFilter] = useState('ALL');
         const [editingId, setEditingId] = useState(null);
         const [editForm, setEditForm] = useState({});
@@ -644,6 +649,7 @@ const AdminDashboard = () => {
                 cuisineType: r.cuisineType || '',
                 openingTime: r.openingTime || '',
                 closingTime: r.closingTime || '',
+                images: r.images?.length ? r.images : [''],
                 address: {
                     street: r.address?.street || '',
                     city: r.address?.city || '',
@@ -819,6 +825,12 @@ const AdminDashboard = () => {
                                                     <input placeholder="Description" value={editForm.restaurantDescription}
                                                         onChange={e => setEditForm({ ...editForm, restaurantDescription: e.target.value })}
                                                         style={{ padding: '0.5rem 0.8rem', border: '1.5px solid var(--border)', borderRadius: '8px', fontFamily: 'DM Sans', fontSize: '0.9rem', outline: 'none' }} />
+                                                    <textarea
+                                                        placeholder="Image URLs (one per line)"
+                                                        value={(editForm.images || []).join('\n')}
+                                                        onChange={e => setEditForm({ ...editForm, images: parseImageLines(e.target.value) })}
+                                                        style={{ padding: '0.5rem 0.8rem', border: '1.5px solid var(--border)', borderRadius: '8px', fontFamily: 'DM Sans', fontSize: '0.9rem', outline: 'none', minHeight: '4.5rem' }}
+                                                    />
                                                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.6rem' }}>
                                                         <input type="time" value={editForm.openingTime} onChange={e => setEditForm({ ...editForm, openingTime: e.target.value })}
                                                             style={{ padding: '0.5rem 0.8rem', border: '1.5px solid var(--border)', borderRadius: '8px', fontFamily: 'DM Sans', fontSize: '0.9rem', outline: 'none' }} />

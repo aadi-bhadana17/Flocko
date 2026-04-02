@@ -35,6 +35,7 @@ const Navbar = () => {
             <ul className="flocko-nav-links">
                 <li><Link to="/">Restaurants</Link></li>
                 {user && <li><Link to="/orders">Orders</Link></li>}
+                {user && <li><Link to="/wallet">Wallet</Link></li>}
                 {user && <li><Link to="/cart">🛒 Cart</Link></li>}
                 {user && <li><Link to={getDashboardPath()}>Dashboard</Link></li>}
             </ul>
@@ -102,4 +103,3 @@ const Navbar = () => {
 };
 
 export default Navbar;
-

@@ -243,6 +243,7 @@
     justify-content: center;
     background: var(--green-tint);
     position: relative;
+    overflow: hidden;
 }
 
 .r-thumb.closed {
@@ -251,6 +252,20 @@
 
 .r-thumb-emoji {
     font-size: 3.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.r-thumb-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.r-thumb.closed .r-thumb-image {
+    filter: grayscale(15%) brightness(0.8);
 }
 
 .closed-badge {
@@ -263,6 +278,7 @@
     font-weight: 600;
     padding: 0.25rem 0.65rem;
     border-radius: 6px;
+    z-index: 2;
 }
 
 .r-body {

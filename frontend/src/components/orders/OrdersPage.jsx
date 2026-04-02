@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getMyOrders } from '../../api/orderService';
+import { sortOrdersByMostRecent } from '../../utils/orderUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import './OrdersPage.css';
 
@@ -28,7 +29,7 @@ const OrdersPage = () => {
         setError('');
         try {
             const data = await getMyOrders();
-            setOrders(data);
+            setOrders(sortOrdersByMostRecent(data));
         } catch (err) {
             setError('Unable to load orders. Please try again.');
         } finally {

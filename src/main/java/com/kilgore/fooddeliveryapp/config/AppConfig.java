@@ -36,6 +36,8 @@ public class AppConfig {
                 .authorizeHttpRequests(authorizeRequests -> authorizeRequests
                         .requestMatchers("/auth/**").permitAll()
                         .requestMatchers("/public/**").permitAll()
+                        .requestMatchers("/api/wallet/deposit/success").permitAll()
+                        .requestMatchers("/api/wallet/deposit/cancel").permitAll()
                         .requestMatchers("/api/admin/**").hasAnyAuthority("ADMIN")
                         .requestMatchers("/api/**").authenticated()
                         .anyRequest().permitAll()

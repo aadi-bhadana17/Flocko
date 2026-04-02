@@ -70,6 +70,19 @@ const getRestaurantLabelFromDeal = (deal, fallback) => {
     return deal?.restaurant?.restaurantName || deal?.restaurant?.name || fallback || 'Restaurant';
 };
 
+const getRestaurantImageCandidates = (restaurant) => {
+    const listImages = Array.isArray(restaurant?.images) ? restaurant.images : [];
+    return [...listImages, restaurant?.image, restaurant?.imageUrl]
+        .filter((value) => typeof value === 'string')
+        .map((value) => value.trim())
+        .filter(Boolean);
+};
+
+const pickRandomImage = (images) => {
+    if (!images.length) return '';
+    return images[Math.floor(Math.random() * images.length)];
+};
+
 const HomePage = () => {
     const { user } = useContext(AuthContext);
     const ownerGreeting = useMemo(() => OWNER_GREETINGS[Math.floor(Math.random() * OWNER_GREETINGS.length)], []);
@@ -87,6 +100,17 @@ const HomePage = () => {
     const [dealsLoading, setDealsLoading] = useState(false);
     const [dealsError, setDealsError] = useState('');
     const [nowMs, setNowMs] = useState(Date.now());
+    const [failedRestaurantImageIds, setFailedRestaurantImageIds] = useState(new Set());
+
+    const restaurantCardImages = useMemo(() => {
+        const selectedById = new Map();
+        restaurants.forEach((restaurant) => {
+            const candidates = getRestaurantImageCandidates(restaurant);
+            const selectedImage = pickRandomImage(candidates);
+            if (selectedImage) selectedById.set(restaurant.id, selectedImage);
+        });
+        return selectedById;
+    }, [restaurants]);
 
     useEffect(() => {
         if (user) {
@@ -111,6 +135,10 @@ const HomePage = () => {
         const interval = setInterval(() => setNowMs(Date.now()), 1000);
         return () => clearInterval(interval);
     }, []);
+
+    useEffect(() => {
+        setFailedRestaurantImageIds(new Set());
+    }, [restaurants]);
 
     useEffect(() => {
         if (!user || favouriteIds.size === 0) {
@@ -216,6 +244,14 @@ const HomePage = () => {
             }
         } catch { /* silent */ }
         finally { setTogglingFav(null); }
+    };
+
+    const handleRestaurantImageError = (restaurantId) => {
+        setFailedRestaurantImageIds((prev) => {
+            const next = new Set(prev);
+            next.add(restaurantId);
+            return next;
+        });
     };
 
     return (
@@ -440,7 +476,11 @@ const HomePage = () => {
                         }}
                     >
                         <AnimatePresence>
-                            {restaurants.map((r) => (
+                            {restaurants.map((r) => {
+                                const selectedImage = restaurantCardImages.get(r.id);
+                                const showCardImage = !!selectedImage && !failedRestaurantImageIds.has(r.id);
+
+                                return (
                                 <motion.div
                                     key={r.id}
                                     variants={{
@@ -453,9 +493,19 @@ const HomePage = () => {
                                     <Link to={`/restaurant/${r.id}`} className="restaurant-card-link">
                                         <div className="restaurant-card">
                                             <div className={`r-thumb ${r.open ? '' : 'closed'}`}>
-                                                <span className="r-thumb-emoji">
-                                                    {cuisineEmoji[r.cuisineType] || '🍽️'}
-                                                </span>
+                                                {showCardImage ? (
+                                                    <img
+                                                        src={selectedImage}
+                                                        alt={`${r.name || 'Restaurant'} cover`}
+                                                        className="r-thumb-image"
+                                                        loading="lazy"
+                                                        onError={() => handleRestaurantImageError(r.id)}
+                                                    />
+                                                ) : (
+                                                    <span className="r-thumb-emoji">
+                                                        {cuisineEmoji[r.cuisineType] || '🍽️'}
+                                                    </span>
+                                                )}
                                                 {!r.open && <span className="closed-badge">Closed</span>}
                                                 {user && (
                                                     <button
@@ -485,7 +535,7 @@ const HomePage = () => {
                                         </div>
                                     </Link>
                                 </motion.div>
-                            ))}
+                            );})}
                         </AnimatePresence>
                     </motion.div>
                 )}

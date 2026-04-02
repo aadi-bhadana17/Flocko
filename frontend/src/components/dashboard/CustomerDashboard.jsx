@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
@@ -9,6 +8,7 @@ import {
 } from '../../api/userService';
 import { getMyOrders } from '../../api/orderService';
 import { getMyReviews } from '../../api/reviewService';
+import { sortOrdersByMostRecent } from '../../utils/orderUtils';
 import { motion } from 'framer-motion';
 import './CustomerDashboard.css';
 
@@ -88,7 +88,7 @@ const CustomerDashboard = () => {
                 getUserProfile(), getMyOrders(), getFavourites(), getAddresses()
             ]);
             setProfile(profileData);
-            setOrders(ordersData);
+            setOrders(sortOrdersByMostRecent(ordersData));
             setFavourites(favsData);
             setAddresses(addrsData);
         } catch { flashError('Failed to load dashboard data.'); }

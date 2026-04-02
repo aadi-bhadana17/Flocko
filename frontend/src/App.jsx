@@ -16,6 +16,9 @@ import RestaurantDashboard from './components/dashboard/RestaurantDashboard';
 import RestaurantStaffDashboard from './components/dashboard/RestaurantStaffDashboard';
 import AdminDashboard from './components/dashboard/AdminDashboard';
 import CustomerDashboard from './components/dashboard/CustomerDashboard';
+import WalletPage from './components/wallet/WalletPage.jsx';
+import WalletSuccessPage from './components/wallet/WalletSuccessPage.jsx';
+import WalletCancelPage from './components/wallet/WalletCancelPage.jsx';
 import { ROLES } from './utils/constants';
 
 
@@ -116,6 +119,32 @@ function App() {
             element={
               <ProtectedRoute allowedRoles={[ROLES.CUSTOMER, ROLES.ADMIN, ROLES.RESTAURANT_OWNER, ROLES.RESTAURANT_STAFF]}>
                 <WithNavbar><GroupDealDetailPage /></WithNavbar>
+              </ProtectedRoute>
+            }
+          />
+
+          {/* Wallet Routes (any logged-in user) */}
+          <Route
+            path="/wallet"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.CUSTOMER, ROLES.ADMIN, ROLES.RESTAURANT_OWNER, ROLES.RESTAURANT_STAFF]}>
+                <WithNavbar><WalletPage /></WithNavbar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wallet/success"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.CUSTOMER, ROLES.ADMIN, ROLES.RESTAURANT_OWNER, ROLES.RESTAURANT_STAFF]}>
+                <WithNavbar><WalletSuccessPage /></WithNavbar>
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/wallet/cancel"
+            element={
+              <ProtectedRoute allowedRoles={[ROLES.CUSTOMER, ROLES.ADMIN, ROLES.RESTAURANT_OWNER, ROLES.RESTAURANT_STAFF]}>
+                <WithNavbar><WalletCancelPage /></WithNavbar>
               </ProtectedRoute>
             }
           />

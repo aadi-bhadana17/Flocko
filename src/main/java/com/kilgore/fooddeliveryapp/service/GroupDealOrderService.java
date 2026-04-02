@@ -31,23 +31,35 @@ public class GroupDealOrderService {
 
     @Transactional
     public void processGroupDeal(Long dealId, Integer currentParticipation) {
-        /*
-        This method will process the complete deal - refund, place order, fetch participants - and one deal at a time
+        GroupDeal deal = groupDealRepository.findById(dealId)
+                .orElseThrow(() -> new RuntimeException("Deal not found"));
 
-         So, at first it will fetch users who didn't withdraw at CONFIRMATION_WINDOW phase and then place order for them
-         and later refund the discounted amount in their wallet
-        */
+        // status update + processing in same transaction
+        deal.setStatus(GroupDealStatus.FULFILLED);
+        groupDealRepository.save(deal);
 
-        GroupDeal deal = groupDealRepository.findById(dealId).orElseThrow(() -> new RuntimeException("Deal not found"));
-
-        List<GroupDealParticipation> participationList = groupDealParticipationRepository.findActiveParticipantsByDeal(deal.getDealId());
+        List<GroupDealParticipation> participationList =
+                groupDealParticipationRepository.findActiveParticipantsByDeal(deal.getDealId());
         BigDecimal currentPrice = calculateCurrentPrice(deal, currentParticipation);
 
-        participationList.forEach(par -> {
-            placeOrder(deal, par, currentPrice); // place order for user at his place
-        });
+        participationList.forEach(par -> placeOrder(deal, par, currentPrice));
+        refundToUser(deal, participationList, currentParticipation);
+    }
 
-        refundToUser(deal, participationList, currentParticipation); // refund the discounted amount to user
+    @Transactional
+    public void expireDeal(Long dealId, Integer currentParticipation) {
+        GroupDeal deal = groupDealRepository.findById(dealId)
+                .orElseThrow(() -> new RuntimeException("Deal not found"));
+
+        // status update + refund in same transaction
+        deal.setStatus(GroupDealStatus.EXPIRED);
+        groupDealRepository.save(deal);
+
+        List<GroupDealParticipation> participantList =
+                groupDealParticipationRepository.findActiveParticipantsByDeal(dealId);
+
+        if (participantList != null && !participantList.isEmpty())
+            refundToUser(deal, participantList, currentParticipation);
     }
 
     public void refundToUser(GroupDeal deal, List<GroupDealParticipation> participationList, Integer currentParticipation) {
