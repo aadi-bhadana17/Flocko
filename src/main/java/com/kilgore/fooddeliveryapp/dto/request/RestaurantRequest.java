@@ -16,6 +16,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -39,6 +40,7 @@ public class RestaurantRequest {
     private LocalTime openingTime;
     @NotNull
     private LocalTime closingTime;
+    private List<String> images;
 
 
     @Target(ElementType.TYPE)

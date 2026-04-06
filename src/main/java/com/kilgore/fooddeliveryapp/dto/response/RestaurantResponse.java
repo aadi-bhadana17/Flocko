@@ -10,6 +10,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -23,6 +24,7 @@ public class RestaurantResponse {
     private ContactInformationDto contactInformation;
     private LocalTime openingTime;
     private LocalTime closingTime;
+    private List<String> images;
     private boolean open;
     private RestaurantStatus restaurantStatus;
     private LocalDate registrationDate;

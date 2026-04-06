@@ -61,6 +61,7 @@ public class RestaurantService {
         restaurant.setContactInformation(mapToContactInformation(request.getContactInformation()));
         restaurant.setOpeningTime(request.getOpeningTime());
         restaurant.setClosingTime(request.getClosingTime());
+        restaurant.setImages(request.getImages());
         restaurant.setRegistrationDate(LocalDate.now());
         restaurant.setOpen(isOpen(request));
         restaurant.setRestaurantStatus(RestaurantStatus.ACTIVE);
@@ -87,6 +88,7 @@ public class RestaurantService {
                 mapToContactInformationDto(restaurant.getContactInformation()),
                 restaurant.getOpeningTime(),
                 restaurant.getClosingTime(),
+                restaurant.getImages(),
                 restaurant.isOpen(),
                 restaurant.getRestaurantStatus(),
                 restaurant.getRegistrationDate()
@@ -187,6 +189,9 @@ public class RestaurantService {
         restaurant.setCuisineType(request.getCuisineType());
         restaurant.setOpeningTime(request.getOpeningTime());
         restaurant.setClosingTime(request.getClosingTime());
+        if (request.getImages() != null) {
+            restaurant.setImages(request.getImages());
+        }
         restaurant.setContactInformation(mapToContactInformation(request.getContactInformation()));
 
         restaurantRepository.save(restaurant);

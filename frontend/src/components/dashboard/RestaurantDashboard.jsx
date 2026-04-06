@@ -10,6 +10,7 @@ import {
 } from '../../api/restaurantService';
 import { createGroupDeal, deleteGroupDeal, getGroupDealsByRestaurant } from '../../api/groupDealService';
 import { getRestaurantOrders, updateOrderStatus } from '../../api/orderService';
+import { sortOrdersByMostRecent } from '../../utils/orderUtils';
 import { updateKitchenStatus } from '../../api/kitchenService';
 import { motion, AnimatePresence } from 'framer-motion';
 import './RestaurantDashboard.css';
@@ -135,7 +136,7 @@ const RestaurantDashboard = () => {
 
     // ── Orders ──
     const fetchOrders = async () => {
-        try { setOrders(await getRestaurantOrders()); }
+        try { setOrders(sortOrdersByMostRecent(await getRestaurantOrders())); }
         catch (e) { flashError(e); }
     };
 
@@ -171,11 +172,17 @@ const RestaurantDashboard = () => {
     //  RESTAURANT TAB
     // ═══════════════════════════════════════
     const RestaurantTab = () => {
+        const parseImageLines = (value) => value
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(Boolean);
+
         const empty = {
             restaurantName: '', restaurantDescription: '', cuisineType: 'INDIAN',
             address: { buildingNo: '', street: '', city: '', state: '', pincode: '', landmark: '' },
             contactInformation: { email: '', mobile: '', instagram: '', facebook: '', twitter: '' },
             openingTime: '09:00', closingTime: '22:00',
+            images: [''],
         };
         const [form, setForm] = useState(editing ? {
             restaurantName: editing.restaurantName || '',
@@ -185,6 +192,7 @@ const RestaurantDashboard = () => {
             contactInformation: editing.contactInformation || empty.contactInformation,
             openingTime: editing.openingTime || '09:00',
             closingTime: editing.closingTime || '22:00',
+            images: editing.images?.length ? editing.images : [''],
         } : empty);
         const [saving, setSaving] = useState(false);
 
@@ -226,6 +234,11 @@ const RestaurantDashboard = () => {
                     <select value={form.cuisineType} onChange={e => setForm({ ...form, cuisineType: e.target.value })}>
                         {CUISINE_TYPES.map(c => <option key={c} value={c}>{c}</option>)}
                     </select>
+                    <textarea
+                        placeholder="Image URLs (one per line)"
+                        value={(form.images || []).join('\n')}
+                        onChange={e => setForm({ ...form, images: parseImageLines(e.target.value) })}
+                    />
 
                     <h4 className="rd-form-section">Address</h4>
                     <div className="rd-form-row">
@@ -1660,7 +1673,7 @@ const RestaurantDashboard = () => {
                         <label>Restaurant:</label>
                         <select value={restaurant?.restaurantId || ''} onChange={e => {
                             const r = restaurants.find(r => r.restaurantId === parseInt(e.target.value));
-                            if (r) setRestaurant(r);
+                            if ( r) setRestaurant(r);
                         }}>
                             {restaurants.map(r => <option key={r.restaurantId} value={r.restaurantId}>{r.restaurantName}</option>)}
                         </select>
