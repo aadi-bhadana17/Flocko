@@ -15,4 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     @Query("SELECT u FROM User u WHERE u.employedAt = :restaurantId")
     public List<User> findByRestaurantId(@Param("restaurantId") Long restaurantId);
+
+    User findByPendingPaypalOrderId(String orderId);
 }

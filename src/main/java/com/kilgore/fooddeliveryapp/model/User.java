@@ -41,6 +41,10 @@ public class User {
     private boolean isTempPassword = false;
 
     private BigDecimal walletBalance = BigDecimal.ZERO;
+    private BigDecimal pendingDepositAmount;
+    private String pendingPaypalOrderId;
+    @Version
+    private Long version = 0L;
 
     @JsonIgnore
     @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "user")

@@ -9,6 +9,7 @@ export const ThemeProvider = ({ children }) => {
 
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.classList.toggle('dark', theme === 'dark');
         localStorage.setItem('flocko-theme', theme);
     }, [theme]);
 
@@ -22,4 +23,3 @@ export const ThemeProvider = ({ children }) => {
         </ThemeContext.Provider>
     );
 };
-
