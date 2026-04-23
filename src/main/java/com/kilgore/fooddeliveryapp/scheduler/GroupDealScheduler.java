@@ -69,5 +69,19 @@ public class GroupDealScheduler {
             }
         });
     }
+
+    @Scheduled(fixedRate = 300000) // every 5 minutes
+    public void activateCreatedDeals() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<GroupDeal> createdDeals = groupDealRepository
+                .findDealsByStatusAndStartTimeBefore(GroupDealStatus.CREATED, now);
+
+        createdDeals.forEach(deal -> deal.setStatus(GroupDealStatus.VOTING));
+
+        if (!createdDeals.isEmpty()) {
+            groupDealRepository.saveAll(createdDeals);
+        }
+    }
     
 }

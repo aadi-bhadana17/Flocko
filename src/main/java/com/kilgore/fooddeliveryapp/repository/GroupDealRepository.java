@@ -13,14 +13,24 @@ import java.util.List;
 @Repository
 public interface GroupDealRepository extends JpaRepository<GroupDeal, Long> {
 
-    @Query("SELECT gd FROM GroupDeal gd WHERE gd.restaurant.restaurantId = :restaurantId AND gd.status IN :statuses")
+    @Query("SELECT gd FROM GroupDeal gd " +
+            "WHERE gd.restaurant.restaurantId = :restaurantId " +
+            "AND gd.status IN :statuses")
     List<GroupDeal> getActiveDealsForRestaurant(@Param("restaurantId") Long restaurantId, @Param("statuses") List<GroupDealStatus> statuses);
 
-    @Query("SELECT gd FROM GroupDeal gd WHERE gd.restaurant.restaurantId = :restaurantId")
+    @Query("SELECT gd FROM GroupDeal gd" +
+            " WHERE gd.restaurant.restaurantId = :restaurantId")
     List<GroupDeal> getAllDealsForRestaurant(@Param("restaurantId") Long restaurantId);
 
-    @Query("SELECT gd FROM GroupDeal gd WHERE gd.restaurant.restaurantId = :restaurantId AND gd.dealName != :dealName AND gd.status IN :statuses")
-    GroupDeal getActiveDealForRestaurantAndByName(@Param("restaurantId") Long restaurantId, @Param("dealName") String dealName, @Param("statuses") List<GroupDealStatus> statuses);
+    @Query("SELECT gd FROM GroupDeal gd " +
+            "WHERE gd.restaurant.restaurantId = :restaurantId " +
+            "AND gd.dealName != :dealName " +
+            "AND gd.status IN :statuses " +
+            "AND gd.startTime <= :now")
+    GroupDeal getActiveDealForRestaurantAndByName(@Param("restaurantId") Long restaurantId,
+                                                  @Param("dealName") String dealName,
+                                                  @Param("statuses") List<GroupDealStatus> statuses,
+                                                  @Param("now") LocalDateTime now);
 
 
     @Query("SELECT gd FROM GroupDeal gd WHERE gd.status = :status AND (gd.endTime <= :now)")
@@ -28,5 +38,8 @@ public interface GroupDealRepository extends JpaRepository<GroupDeal, Long> {
 
     @Query("SELECT gd FROM GroupDeal gd WHERE gd.status = :status AND (gd.confirmationWindowEndTime <= :now)")
     List<GroupDeal> findDealsByStatusAndConfirmationWindowEndTimeBefore(@Param("status") GroupDealStatus status, @Param("now") LocalDateTime now);
+
+    @Query("SELECT gd FROM GroupDeal gd WHERE gd.status = :status AND gd.startTime <= :now")
+    List<GroupDeal> findDealsByStatusAndStartTimeBefore(@Param("status") GroupDealStatus status, @Param("now") LocalDateTime now);
 
 }

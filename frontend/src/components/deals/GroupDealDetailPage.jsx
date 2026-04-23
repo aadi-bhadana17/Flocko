@@ -14,6 +14,7 @@ import { ROLES } from '../../utils/constants';
 import './GroupDealDetailPage.css';
 
 const STATUS_LABELS = {
+    CREATED: 'Scheduled',
     VOTING: 'Voting',
     CONFIRMATION_WINDOW: 'Confirmation Window',
     FULFILLED: 'Fulfilled',
@@ -21,6 +22,7 @@ const STATUS_LABELS = {
 };
 
 const statusClass = (status) => {
+    if (status === 'CREATED') return 'gdd-status-created';
     if (status === 'VOTING') return 'gdd-status-voting';
     if (status === 'CONFIRMATION_WINDOW') return 'gdd-status-confirmation';
     if (status === 'FULFILLED') return 'gdd-status-fulfilled';
@@ -449,6 +451,10 @@ const GroupDealDetailPage = () => {
 
                     {deal?.status === 'FULFILLED' && (
                         <p className="gdd-success">Deal fulfilled. Orders are being auto-placed for confirmed participants.</p>
+                    )}
+
+                    {deal?.status === 'CREATED' && (
+                        <p className="gdd-muted">This deal is scheduled and hasn't started voting yet. Voting will begin at the start time.</p>
                     )}
 
                     {deal?.status === 'EXPIRED' && (

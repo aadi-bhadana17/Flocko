@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -79,10 +80,10 @@ public class GroupDealService {
             throw new AccessDeniedException("You are not the owner of this restaurant");
         }
 
-        List<GroupDealStatus> statuses = List.of(GroupDealStatus.VOTING, GroupDealStatus.CONFIRMATION_WINDOW);
+        List<GroupDealStatus> statuses = List.of(GroupDealStatus.CREATED, GroupDealStatus.VOTING, GroupDealStatus.CONFIRMATION_WINDOW);
+        LocalDateTime now = LocalDateTime.now();
 
-
-        if(groupDealRepository.getActiveDealForRestaurantAndByName(restaurantId, request.getDealName(), statuses) != null) {
+        if(groupDealRepository.getActiveDealForRestaurantAndByName(restaurantId, request.getDealName(), statuses, now) != null) {
             throw new EntityAlreadyExistsException("An active Group deal with the same name - " + request.getDealName()
                     + " already exists for this restaurant");
         }
@@ -96,7 +97,7 @@ public class GroupDealService {
         deal.setMaxDiscount(request.getMaxDiscount());
         deal.setFoodList(fetchFoodList(request.getFoodIds(), restaurantId));
         deal.setTargetParticipation(request.getTargetParticipation());
-        deal.setStatus(GroupDealStatus.VOTING);
+        deal.setStatus(GroupDealStatus.CREATED);
 
         groupDealRepository.save(deal);
 
@@ -124,17 +125,8 @@ public class GroupDealService {
         if(!deal.getRestaurant().equals(restaurant))
             throw new AccessDeniedException("This deal does not belong to your restaurant");
 
-        List<GroupDealParticipation> participants = groupDealParticipationRepository.findByGroupDeal(deal);
-
-        List<User> refundedUsers = new ArrayList<>();
-
-        participants.forEach(pr -> {
-            User usr =  pr.getUser();
-            usr.setWalletBalance(usr.getWalletBalance().add(pr.getAmountPaid()));
-
-            refundedUsers.add(usr);
-        });
-        userRepository.saveAll(refundedUsers);
+        if(deal.getStatus() != GroupDealStatus.CREATED)
+            throw new IllegalStateException("Cannot delete this deal as it is in " + deal.getStatus() + " phase. Only deals in CREATED phase can be deleted.");
 
         deal.setStatus(GroupDealStatus.DELETED);
         groupDealRepository.delete(deal);
@@ -197,8 +189,8 @@ public class GroupDealService {
         GroupDeal deal = groupDealRepository.findById(dealId)
                 .orElseThrow(() -> new EntityNotFoundException("Group deal with id " + dealId + " not found"));
 
-        if(deal.getStatus() == GroupDealStatus.FULFILLED || deal.getStatus() == GroupDealStatus.EXPIRED || deal.getStatus() == GroupDealStatus.DELETED)
-            throw new IllegalStateException("Cannot withdraw from this deal as it is already " + deal.getStatus());
+        if(deal.getStatus() == GroupDealStatus.CREATED || deal.getStatus() == GroupDealStatus.FULFILLED || deal.getStatus() == GroupDealStatus.EXPIRED || deal.getStatus() == GroupDealStatus.DELETED)
+            throw new IllegalStateException("Cannot withdraw from this deal as it is in " + deal.getStatus() + " phase");
 
         GroupDealParticipation participation = groupDealParticipationRepository.findById(participationId)
                 .orElseThrow(() -> new EntityNotFoundException("Participation with id " + participationId + " not found"));
