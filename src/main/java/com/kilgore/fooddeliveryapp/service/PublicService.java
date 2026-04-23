@@ -10,8 +10,10 @@ import com.kilgore.fooddeliveryapp.exceptions.RestaurantNotFoundException;
 import com.kilgore.fooddeliveryapp.model.*;
 import com.kilgore.fooddeliveryapp.repository.FoodRepository;
 import com.kilgore.fooddeliveryapp.repository.RestaurantRepository;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 
 @Service
@@ -69,16 +71,24 @@ public class PublicService {
         return createRestaurantPublicResponse(restaurant);
     }
 
-    public RestaurantMenuResponse getRestaurantMenu(Long id) {
-        Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant with id " + id + " not found"));
+    @Cacheable(value = "restaurantMenu", key = "#restaurantId")
+    public RestaurantMenuResponse getRestaurantMenu(Long restaurantId) {
+        Restaurant restaurant = restaurantRepository.findMenuById(restaurantId)
+                .orElseThrow(() -> new EntityNotFoundException("Restaurant with id " + restaurantId + " not found"));
 
-        if (!isRestaurantAvailable(restaurant)) throw new RestaurantNotFoundException(id);
+        if (!isRestaurantAvailable(restaurant)) throw new RestaurantNotFoundException(restaurantId);
 
 
-        List<Food> allFoods = foodRepository.findByRestaurant_RestaurantId(id);
+        List<Food> allFoods = foodRepository.findAllByRestaurant_RestaurantId(restaurantId);
 
-        List<MenuCategoryResponse> categories = restaurant.getCategories().stream()
+        List<Category> uniqueCategories = restaurant.getCategories().stream()
+                .collect(LinkedHashMap<Long, Category>::new,
+                        (map, category) -> map.putIfAbsent(category.getCategoryId(), category),
+                        LinkedHashMap::putAll)
+                .values().stream()
+                .toList();
+
+        List<MenuCategoryResponse> categories = uniqueCategories.stream()
                 .map(category -> createMenuCategoryResponse(category, allFoods))
                 .toList();
 
