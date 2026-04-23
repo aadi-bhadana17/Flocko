@@ -25,6 +25,9 @@ public class WalletService {
         this.payPalHttpClient = payPalHttpClient;
     }
 
+    /** Immutable result returned after a successful deposit capture. */
+    public record DepositResult(BigDecimal amount, BigDecimal newBalance, String message) {}
+
     public String initiateDeposit(BigDecimal amount) throws IOException {
         User user = userAuthorization.authorizeUser();
 
@@ -68,7 +71,7 @@ public class WalletService {
         return approvalUrl;
     }
 
-    public String captureDeposit(String orderId) throws IOException {
+    public DepositResult captureDeposit(String orderId) throws IOException {
         User user = userRepository.findByPendingPaypalOrderId(orderId);
 
         OrdersCaptureRequest request = new OrdersCaptureRequest(orderId);
@@ -76,11 +79,18 @@ public class WalletService {
         HttpResponse<Order> response = payPalHttpClient.execute(request);
 
         if (response.result().status().equals("COMPLETED")) {
-            user.setWalletBalance(user.getWalletBalance().add(user.getPendingDepositAmount()));
+            BigDecimal depositAmount = user.getPendingDepositAmount();
+            user.setWalletBalance(user.getWalletBalance().add(depositAmount));
             user.setPendingDepositAmount(null);
             user.setPendingPaypalOrderId(null);
             userRepository.save(user);
-            return "Deposit successful! New balance: " + user.getWalletBalance();
+
+            return new DepositResult(
+                    depositAmount,
+                    user.getWalletBalance(),
+                    "₹" + depositAmount + " deposited successfully"
+            );
         }
         throw new RuntimeException("Payment capture failed");
-    }}
+    }
+}
