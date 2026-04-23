@@ -32,6 +32,7 @@ const ADMIN_GREETINGS = [
 ];
 
 const DEAL_STATUS_LABELS = {
+    CREATED: 'Scheduled',
     VOTING: 'Voting',
     CONFIRMATION_WINDOW: 'Confirmation',
     FULFILLED: 'Fulfilled',
