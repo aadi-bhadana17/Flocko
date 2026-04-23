@@ -956,7 +956,21 @@ const AdminDashboard = () => {
                 </div>
 
                 {loadingOrders ? (
-                    <div className="ad-empty-small"><p>Loading orders...</p></div>
+                    <div className="ad-request-list">
+                        {[1, 2, 3].map((item) => (
+                            <div key={item} className="ad-order-card">
+                                <div className="ad-order-top">
+                                    <div>
+                                        <div className="skeleton skeleton-text" style={{ width: '140px' }}></div>
+                                        <div className="skeleton skeleton-text" style={{ width: '120px' }}></div>
+                                    </div>
+                                    <div className="skeleton" style={{ width: '90px', height: '26px', borderRadius: '999px' }}></div>
+                                </div>
+                                <div className="skeleton skeleton-text" style={{ width: '55%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '72%' }}></div>
+                            </div>
+                        ))}
+                    </div>
                 ) : (orderMode === 'restaurant' && !selectedRestaurantId) ? (
                     <div className="ad-empty-small"><p>Select a restaurant to view orders.</p></div>
                 ) : filteredOrders.length === 0 ? (
@@ -1016,9 +1030,32 @@ const AdminDashboard = () => {
     if (loading) {
         return (
             <div className="ad-page">
-                <div className="ad-loading">
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }} className="ad-loading-icon">🛡️</motion.div>
-                    <p>Loading admin panel...</p>
+                <div className="ad-container">
+                    <div className="ad-page-header">
+                        <div className="skeleton skeleton-title" style={{ width: '250px' }}></div>
+                        <div className="skeleton skeleton-text" style={{ width: '160px' }}></div>
+                    </div>
+
+                    <div className="ad-summary-row">
+                        {[1, 2, 3, 4].map((item) => (
+                            <div key={item} className="ad-summary-card">
+                                <div className="skeleton" style={{ width: '48px', height: '34px', margin: '0 auto 8px' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '70%', margin: '0 auto' }}></div>
+                            </div>
+                        ))}
+                    </div>
+
+                    <div className="ad-tabs">
+                        {[1, 2, 3, 4].map((item) => (
+                            <div key={item} className="skeleton" style={{ width: '145px', height: '38px', borderRadius: '10px' }}></div>
+                        ))}
+                    </div>
+
+                    <div className="ad-tab-content">
+                        {[1, 2, 3].map((item) => (
+                            <div key={item} className="skeleton" style={{ height: '90px', marginBottom: '12px', borderRadius: '12px' }}></div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );

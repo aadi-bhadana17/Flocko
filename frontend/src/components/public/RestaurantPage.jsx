@@ -277,15 +277,47 @@ const RestaurantPage = () => {
     if (loading) {
         return (
             <div className="rp-page">
-                <div className="rp-loading">
-                    <motion.div
-                        className="rp-loading-icon"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                    >
-                        🍽️
-                    </motion.div>
-                    <p>Loading restaurant...</p>
+                <div className="rp-container">
+                    <div className="skeleton skeleton-text" style={{ width: '170px', marginTop: '1.5rem' }}></div>
+                </div>
+
+                <div className="rp-header">
+                    <div className="rp-container rp-header-inner">
+                        <div className="skeleton" style={{ width: '80px', height: '80px', borderRadius: '16px' }}></div>
+                        <div style={{ flex: 1 }}>
+                            <div className="skeleton skeleton-title" style={{ width: '48%' }}></div>
+                            <div className="skeleton skeleton-text" style={{ width: '62%' }}></div>
+                        </div>
+                        <div className="skeleton" style={{ width: '110px', height: '36px', borderRadius: '999px' }}></div>
+                    </div>
+                </div>
+
+                <div className="rp-container rp-mess-wrap">
+                    <div className="skeleton skeleton-title" style={{ width: '170px' }}></div>
+                    <div className="rp-mess-grid">
+                        {[1, 2, 3].map((item) => (
+                            <div key={item} className="rp-mess-card">
+                                <div className="skeleton skeleton-text" style={{ width: '70%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '90%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '55%' }}></div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="rp-container rp-menu-layout">
+                    <aside className="rp-sidebar">
+                        <div className="skeleton skeleton-text" style={{ width: '90px' }}></div>
+                        {[1, 2, 3, 4].map((item) => (
+                            <div key={item} className="skeleton" style={{ height: '38px', marginBottom: '8px' }}></div>
+                        ))}
+                    </aside>
+                    <main className="rp-menu-main">
+                        <div className="skeleton skeleton-title" style={{ width: '240px' }}></div>
+                        {[1, 2, 3].map((item) => (
+                            <div key={item} className="skeleton" style={{ height: '160px', borderRadius: '14px', marginBottom: '12px' }}></div>
+                        ))}
+                    </main>
                 </div>
             </div>
         );
@@ -373,7 +405,15 @@ const RestaurantPage = () => {
                 {messError && <div className="rp-mess-error">{messError}</div>}
 
                 {messLoading ? (
-                    <div className="rp-mess-empty">Loading mess plans...</div>
+                    <div className="rp-mess-grid">
+                        {[1, 2, 3].map((item) => (
+                            <div key={item} className="rp-mess-card">
+                                <div className="skeleton skeleton-text" style={{ width: '65%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '90%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '50%' }}></div>
+                            </div>
+                        ))}
+                    </div>
                 ) : availableMessPlans.length === 0 ? (
                     <div className="rp-mess-empty">No active mess plans available for this restaurant.</div>
                 ) : (
@@ -402,7 +442,11 @@ const RestaurantPage = () => {
                 {selectedMessPlanId && (
                     <div className="rp-mess-detail-wrap">
                         {messDetailLoading ? (
-                            <div className="rp-mess-empty">Loading plan details...</div>
+                            <div className="rp-mess-detail-card">
+                                <div className="skeleton skeleton-title" style={{ width: '45%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '88%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '72%' }}></div>
+                            </div>
                         ) : messDetailError ? (
                             <div className="rp-mess-error">{messDetailError}</div>
                         ) : selectedMessPlan ? (
@@ -562,7 +606,15 @@ const RestaurantPage = () => {
                                 )}
 
                                 {reviewLoading ? (
-                                    <div className="rp-empty-cat"><p>Loading reviews...</p></div>
+                                    <div className="rp-review-list">
+                                        {[1, 2, 3].map((item) => (
+                                            <div key={item} className="rp-review-card">
+                                                <div className="skeleton skeleton-text" style={{ width: '35%' }}></div>
+                                                <div className="skeleton skeleton-text" style={{ width: '50%' }}></div>
+                                                <div className="skeleton skeleton-text" style={{ width: '88%' }}></div>
+                                            </div>
+                                        ))}
+                                    </div>
                                 ) : restaurantReviews.length === 0 ? (
                                     <div className="rp-empty-cat"><p>No reviews yet for this restaurant.</p></div>
                                 ) : (

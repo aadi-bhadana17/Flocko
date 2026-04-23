@@ -81,15 +81,32 @@ const OrderDetailPage = () => {
     if (loading) {
         return (
             <div className="od-page">
-                <div className="od-loading">
-                    <motion.div
-                        className="od-loading-icon"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                    >
-                        📋
-                    </motion.div>
-                    <p>Loading order details...</p>
+                <div className="od-container">
+                    <div className="skeleton skeleton-text" style={{ width: '130px' }}></div>
+                    <div className="od-header">
+                        <div className="od-header-top">
+                            <div>
+                                <div className="skeleton skeleton-title" style={{ width: '220px' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '170px' }}></div>
+                            </div>
+                            <div className="skeleton" style={{ width: '110px', height: '30px', borderRadius: '999px' }}></div>
+                        </div>
+                    </div>
+
+                    <div className="od-tracker">
+                        <div className="skeleton" style={{ height: '20px', width: '100%' }}></div>
+                    </div>
+
+                    <div className="od-layout">
+                        {[1, 2].map((item) => (
+                            <div key={item} className="od-card">
+                                <div className="skeleton skeleton-text" style={{ width: '40%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '88%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '70%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '55%' }}></div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );

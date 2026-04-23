@@ -19,6 +19,7 @@ import CustomerDashboard from './components/dashboard/CustomerDashboard';
 import WalletPage from './components/wallet/WalletPage.jsx';
 import WalletSuccessPage from './components/wallet/WalletSuccessPage.jsx';
 import WalletCancelPage from './components/wallet/WalletCancelPage.jsx';
+import { ToastContainer } from './components/ui/Toast';
 import { ROLES } from './utils/constants';
 
 
@@ -33,6 +34,7 @@ const WithNavbar = ({ children }) => (
 function App() {
   return (
     <AuthProvider>
+      <ToastContainer />
       <Router>
         <Routes>
           {/* Auth Routes (no navbar) */}

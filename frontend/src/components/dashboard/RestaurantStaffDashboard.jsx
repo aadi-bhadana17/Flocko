@@ -2,7 +2,6 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { getRestaurantOrders, updateOrderStatus } from '../../api/orderService';
 import { updateKitchenStatus } from '../../api/kitchenService';
 import OrderChatPanel from '../orders/OrderChatPanel';
-import { motion } from 'framer-motion';
 import './RestaurantStaffDashboard.css';
 
 const STATUS_LABELS = {
@@ -128,15 +127,22 @@ const RestaurantStaffDashboard = () => {
     if (loading) {
         return (
             <div className="sd-page">
-                <div className="sd-loading">
-                    <motion.div
-                        className="sd-loading-icon"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                    >
-                        👨‍🍳
-                    </motion.div>
-                    <p>Loading staff dashboard...</p>
+                <div className="sd-container">
+                    <div className="sd-page-header">
+                        <div className="skeleton skeleton-title" style={{ width: '220px' }}></div>
+                        <div className="skeleton skeleton-text" style={{ width: '260px' }}></div>
+                    </div>
+
+                    <div className="sd-tabs">
+                        <div className="skeleton" style={{ width: '140px', height: '38px', borderRadius: '10px' }}></div>
+                        <div className="skeleton" style={{ width: '180px', height: '38px', borderRadius: '10px' }}></div>
+                    </div>
+
+                    <div>
+                        {[1, 2, 3].map((item) => (
+                            <div key={item} className="skeleton" style={{ height: '84px', marginBottom: '10px', borderRadius: '12px' }}></div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );

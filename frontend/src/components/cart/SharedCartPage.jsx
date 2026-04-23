@@ -423,7 +423,23 @@ const SharedCartPage = () => {
         return (
             <div className="shared-cart-page">
                 <div className="shared-cart-container">
-                    <div className="shared-cart-loading">Loading shared cart...</div>
+                    <div className="skeleton skeleton-text" style={{ width: '140px', marginBottom: '12px' }}></div>
+                    <div className="shared-cart-header-row">
+                        <div className="skeleton skeleton-title" style={{ width: '190px' }}></div>
+                        <div className="skeleton skeleton-text" style={{ width: '360px' }}></div>
+                    </div>
+
+                    <div className="shared-cart-grid">
+                        {[1, 2].map((item) => (
+                            <div key={item} className="shared-cart-card">
+                                <div className="skeleton skeleton-text" style={{ width: '42%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '90%' }}></div>
+                                <div className="skeleton" style={{ height: '42px', marginBottom: '10px' }}></div>
+                                <div className="skeleton" style={{ height: '42px', marginBottom: '10px' }}></div>
+                                <div className="skeleton" style={{ height: '38px', width: '150px' }}></div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </div>
         );
@@ -591,7 +607,13 @@ const SharedCartPage = () => {
                             <div className="shared-cart-action-panel">
                                 <h3>Add items to shared cart</h3>
                                 {menuLoading ? (
-                                    <p className="shared-cart-hint">Loading menu...</p>
+                                    <div>
+                                        <div className="skeleton skeleton-text" style={{ width: '120px' }}></div>
+                                        <div className="skeleton" style={{ height: '40px', marginBottom: '10px' }}></div>
+                                        <div className="skeleton skeleton-text" style={{ width: '90px' }}></div>
+                                        <div className="skeleton" style={{ height: '40px', marginBottom: '10px' }}></div>
+                                        <div className="skeleton" style={{ height: '38px', width: '170px' }}></div>
+                                    </div>
                                 ) : !menu?.categories?.length ? (
                                     <p className="shared-cart-hint">Menu is not available for this restaurant right now.</p>
                                 ) : (

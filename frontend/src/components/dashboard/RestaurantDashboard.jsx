@@ -1125,7 +1125,7 @@ const RestaurantDashboard = () => {
         const parseFoodId = (food) => Number(food?.id ?? food?.foodId);
         const parseFoodLabel = (food) => food?.name || food?.foodName || `Food #${parseFoodId(food)}`;
         const isFiveMinuteStep = (dateTimeLocal) => Number(dateTimeLocal?.split(':')?.[1] || 0) % 5 === 0;
-        const isEditableStatus = (status) => status === 'VOTING' || status === 'CONFIRMATION_WINDOW';
+        const isEditableStatus = (status) => status === 'CREATED';
 
         const [showCreateForm, setShowCreateForm] = useState(false);
         const [saving, setSaving] = useState(false);
@@ -1417,7 +1417,20 @@ const RestaurantDashboard = () => {
                 </AnimatePresence>
 
                 {groupDealsLoading ? (
-                    <div className="rd-empty-small"><p>Loading deals...</p></div>
+                    <div className="rd-groupdeal-table-wrap">
+                        {[1, 2, 3].map((item) => (
+                            <div key={item} className="rd-order-card" style={{ marginBottom: '10px' }}>
+                                <div className="rd-order-top">
+                                    <div>
+                                        <div className="skeleton skeleton-text" style={{ width: '180px' }}></div>
+                                        <div className="skeleton skeleton-text" style={{ width: '130px' }}></div>
+                                    </div>
+                                    <div className="skeleton" style={{ width: '80px', height: '24px' }}></div>
+                                </div>
+                                <div className="skeleton skeleton-text" style={{ width: '70%' }}></div>
+                            </div>
+                        ))}
+                    </div>
                 ) : groupDeals.length === 0 ? (
                     <div className="rd-empty-small"><p>No active group deals yet.</p></div>
                 ) : (
@@ -1453,7 +1466,7 @@ const RestaurantDashboard = () => {
                                                     className="rd-btn rd-btn-danger rd-btn-sm"
                                                     onClick={() => handleDelete(deal)}
                                                     disabled={deletingId === deal.dealId || !isEditableStatus(deal.status)}
-                                                    title={!isEditableStatus(deal.status) ? 'Only active deals can be deleted.' : ''}
+                                                    title={!isEditableStatus(deal.status) ? 'Only deals in CREATED phase can be deleted.' : ''}
                                                 >
                                                     {deletingId === deal.dealId ? 'Deleting...' : 'Delete'}
                                                 </button>
@@ -1648,9 +1661,23 @@ const RestaurantDashboard = () => {
     if (loading) {
         return (
             <div className="rd-page">
-                <div className="rd-loading">
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }} className="rd-loading-icon">🏪</motion.div>
-                    <p>Loading dashboard...</p>
+                <div className="rd-container">
+                    <div className="rd-page-header">
+                        <div className="skeleton skeleton-title" style={{ width: '290px' }}></div>
+                        <div className="skeleton skeleton-text" style={{ width: '210px' }}></div>
+                    </div>
+
+                    <div className="rd-tabs">
+                        {[1, 2, 3, 4, 5].map((item) => (
+                            <div key={item} className="skeleton" style={{ width: '140px', height: '38px', borderRadius: '10px' }}></div>
+                        ))}
+                    </div>
+
+                    <div className="rd-tab-content">
+                        <div className="skeleton" style={{ height: '86px', borderRadius: '12px', marginBottom: '12px' }}></div>
+                        <div className="skeleton" style={{ height: '86px', borderRadius: '12px', marginBottom: '12px' }}></div>
+                        <div className="skeleton" style={{ height: '86px', borderRadius: '12px' }}></div>
+                    </div>
                 </div>
             </div>
         );

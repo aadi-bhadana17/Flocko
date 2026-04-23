@@ -9,7 +9,6 @@ import {
 import { getMyOrders } from '../../api/orderService';
 import { getMyReviews } from '../../api/reviewService';
 import { sortOrdersByMostRecent } from '../../utils/orderUtils';
-import { motion } from 'framer-motion';
 import './CustomerDashboard.css';
 
 const cuisineEmoji = {
@@ -248,7 +247,15 @@ const CustomerDashboard = () => {
                 </div>
 
                 {loadingMess ? (
-                    <div className="cd-empty"><p>Loading subscriptions...</p></div>
+                    <div className="cd-mess-grid">
+                        {[1, 2, 3].map((item) => (
+                            <div key={item} className="cd-mess-card">
+                                <div className="skeleton skeleton-text" style={{ width: '60%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '88%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '70%' }}></div>
+                            </div>
+                        ))}
+                    </div>
                 ) : messSubscriptions.length === 0 ? (
                     <div className="cd-empty">
                         <span className="cd-empty-icon">🍱</span>
@@ -304,7 +311,15 @@ const CustomerDashboard = () => {
                 </div>
 
                 {loadingReviews ? (
-                    <div className="cd-empty"><p>Loading reviews...</p></div>
+                    <div className="cd-review-list">
+                        {[1, 2, 3].map((item) => (
+                            <div key={item} className="cd-review-card">
+                                <div className="skeleton skeleton-text" style={{ width: '45%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '30%' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '92%' }}></div>
+                            </div>
+                        ))}
+                    </div>
                 ) : reviews.length === 0 ? (
                     <div className="cd-empty">
                         <span className="cd-empty-icon">📝</span>
@@ -504,9 +519,30 @@ const CustomerDashboard = () => {
     if (loading) {
         return (
             <div className="cd-page">
-                <div className="cd-loading">
-                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }} className="cd-loading-icon">🍽️</motion.div>
-                    <p>Loading your dashboard...</p>
+                <div className="cd-container">
+                    <div className="cd-page-header">
+                        <div className="skeleton skeleton-title" style={{ width: '320px' }}></div>
+                        <div className="skeleton skeleton-text" style={{ width: '150px' }}></div>
+                    </div>
+
+                    <div className="cd-tabs">
+                        {[1, 2, 3, 4, 5].map((item) => (
+                            <div key={item} className="skeleton" style={{ width: '145px', height: '38px', borderRadius: '10px' }}></div>
+                        ))}
+                    </div>
+
+                    <div className="cd-summary-row">
+                        {[1, 2, 3, 4, 5, 6].map((item) => (
+                            <div key={item} className="cd-summary-card">
+                                <div className="skeleton" style={{ width: '44px', height: '32px', margin: '0 auto 8px' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '68%', margin: '0 auto' }}></div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {[1, 2, 3].map((item) => (
+                        <div key={item} className="skeleton" style={{ height: '76px', marginBottom: '12px', borderRadius: '12px' }}></div>
+                    ))}
                 </div>
             </div>
         );

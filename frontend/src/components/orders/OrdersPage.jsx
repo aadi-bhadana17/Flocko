@@ -56,15 +56,34 @@ const OrdersPage = () => {
     if (loading) {
         return (
             <div className="orders-page">
-                <div className="orders-loading">
-                    <motion.div
-                        className="orders-loading-icon"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
-                    >
-                        📋
-                    </motion.div>
-                    <p>Loading your orders...</p>
+                <div className="orders-container">
+                    <div className="orders-header">
+                        <div className="skeleton skeleton-title" style={{ width: '180px' }}></div>
+                        <div className="skeleton skeleton-text" style={{ width: '90px' }}></div>
+                    </div>
+
+                    <div className="orders-filters">
+                        {[1, 2, 3, 4].map((item) => (
+                            <div key={item} className="skeleton" style={{ width: '90px', height: '30px', borderRadius: '999px' }}></div>
+                        ))}
+                    </div>
+
+                    {[1, 2, 3].map((item) => (
+                        <div key={item} className="order-card" style={{ marginBottom: '12px' }}>
+                            <div className="order-card-top">
+                                <div style={{ flex: 1 }}>
+                                    <div className="skeleton skeleton-text" style={{ width: '45%' }}></div>
+                                    <div className="skeleton skeleton-text" style={{ width: '30%' }}></div>
+                                </div>
+                                <div className="skeleton" style={{ width: '90px', height: '26px', borderRadius: '999px' }}></div>
+                            </div>
+                            <div className="skeleton skeleton-text" style={{ width: '70%' }}></div>
+                            <div className="order-card-bottom">
+                                <div className="skeleton skeleton-text" style={{ width: '120px' }}></div>
+                                <div className="skeleton skeleton-text" style={{ width: '60px' }}></div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         );
