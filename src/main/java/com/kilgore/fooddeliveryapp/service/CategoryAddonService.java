@@ -13,6 +13,7 @@ import com.kilgore.fooddeliveryapp.repository.CategoryRepository;
 import com.kilgore.fooddeliveryapp.repository.RestaurantRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ public class CategoryAddonService {
     private AddonRepository addonRepository;
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public AppendAddonsResponse appendAddon(Long restaurantId,
                                             Long categoryId,
                                             AppendAddonRequest request) {
@@ -56,6 +58,7 @@ public class CategoryAddonService {
     }
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public AppendAddonsResponse removeAddons(Long restaurantId,
                                              Long categoryId,
                                              AppendAddonRequest  request) {

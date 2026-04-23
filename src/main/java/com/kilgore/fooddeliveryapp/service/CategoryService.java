@@ -13,6 +13,7 @@ import com.kilgore.fooddeliveryapp.repository.CategoryRepository;
 import com.kilgore.fooddeliveryapp.repository.RestaurantRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -28,6 +29,7 @@ public class CategoryService {
     private CategoryRepository categoryRepository;
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public CreateCategoryResponse createCategory(Long restaurantId,
                                                  CreateCategoryRequest request) {
         Restaurant restaurant = verifyOwnerAccess(restaurantId);
@@ -63,6 +65,7 @@ public class CategoryService {
 
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public CreateCategoryResponse updateCategory(Long restaurantId,
                                                  Long categoryId,
                                                  CreateCategoryRequest request) {
@@ -79,6 +82,7 @@ public class CategoryService {
     }
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public void deleteCategory(Long restaurantId, Long categoryId) {
         Restaurant restaurant = verifyOwnerAccess(restaurantId);
 

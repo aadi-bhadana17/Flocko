@@ -16,6 +16,7 @@ import com.kilgore.fooddeliveryapp.repository.FoodRepository;
 import com.kilgore.fooddeliveryapp.repository.RestaurantRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,7 @@ public class FoodService {
     private final RestaurantRepository restaurantRepository;
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public FoodResponse createFood(Long restaurantId, FoodRequest request) {
 
         Restaurant restaurant = verifyOwnerAccess(restaurantId);
@@ -82,6 +84,7 @@ public class FoodService {
     }
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public FoodResponse updateFood(Long restaurantId, Long foodId, FoodRequest request) {
         Restaurant restaurant = verifyOwnerAccess(restaurantId);
         Category category = verifyCategory(restaurant, request.getCategoryId());
@@ -105,6 +108,7 @@ public class FoodService {
     }
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public FoodResponse updateFoodStatus(Long restaurantId, Long foodId, FoodStatusRequest request) {
 
         verifyOwnerAccess(restaurantId);
@@ -117,6 +121,7 @@ public class FoodService {
     }
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public String deleteFood(Long restaurantId, Long foodId) {
         verifyOwnerAccess(restaurantId);
         Food food = foodRepository.findById(foodId)

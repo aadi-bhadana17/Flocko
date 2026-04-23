@@ -10,6 +10,7 @@ import com.kilgore.fooddeliveryapp.exceptions.RestaurantAlreadyExistsException;
 import com.kilgore.fooddeliveryapp.exceptions.RestaurantNotFoundException;
 import com.kilgore.fooddeliveryapp.model.*;
 import com.kilgore.fooddeliveryapp.repository.*;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -172,6 +173,7 @@ public class RestaurantService {
         return toDto(restaurant);
     }
 
+    @CacheEvict(value = "restaurantMenu", key = "#id")
     public RestaurantResponse updateRestaurant(RestaurantRequest request, Long id) {
         Restaurant restaurant  = restaurantRepository.findById(id)
                 .orElseThrow(() -> new RestaurantNotFoundException(id));
@@ -198,6 +200,7 @@ public class RestaurantService {
         return toDto(restaurant);
     }
 
+    @CacheEvict(value = "restaurantMenu", key = "#id")
     public RestaurantResponse updateRestaurantStatus(Long id, RestaurantStatusRequest request) {
         Restaurant restaurant = restaurantRepository.findById(id)
                 .orElseThrow(() -> new RestaurantNotFoundException(id));

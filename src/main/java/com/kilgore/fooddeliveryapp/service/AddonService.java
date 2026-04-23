@@ -14,6 +14,7 @@ import com.kilgore.fooddeliveryapp.repository.AddonRepository;
 import com.kilgore.fooddeliveryapp.repository.CategoryRepository;
 import com.kilgore.fooddeliveryapp.repository.RestaurantRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -34,6 +35,7 @@ public class AddonService {
     }
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public AddonResponse createAddon(Long restaurantId,
                                                CreateAddonRequest request) {
         Restaurant restaurant = verifyOwnerAccess(restaurantId);
@@ -64,6 +66,7 @@ public class AddonService {
     }
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public AddonResponse updateAddon(Long restaurantId, Long addonId,
                                                CreateAddonRequest request) {
         Restaurant restaurant = verifyOwnerAccess(restaurantId);
@@ -85,6 +88,7 @@ public class AddonService {
     }
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public AddonResponse updateAvailability(Long restaurantId, Long addonId,
                                                  AddonAvailableStatusRequest request) {
         Restaurant restaurant = verifyOwnerAccess(restaurantId);
@@ -96,6 +100,7 @@ public class AddonService {
     }
 
     @Transactional
+    @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
     public String deleteAddon(Long restaurantId, Long addonId) {
         Restaurant restaurant = verifyOwnerAccess(restaurantId);
         Addon addon = checkAddon(restaurant, addonId);
