@@ -1,0 +1,84 @@
+package com.kilgore.fooddeliveryapp.deals.scheduler;
+
+import com.kilgore.fooddeliveryapp.deals.model.GroupDeal;
+import com.kilgore.fooddeliveryapp.deals.model.GroupDealStatus;
+import com.kilgore.fooddeliveryapp.deals.repository.GroupDealParticipationRepository;
+import com.kilgore.fooddeliveryapp.deals.repository.GroupDealRepository;
+import com.kilgore.fooddeliveryapp.deals.service.GroupDealOrderService;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Component
+public class GroupDealScheduler {
+
+    private final GroupDealRepository groupDealRepository;
+    private final GroupDealParticipationRepository groupDealParticipationRepository;
+    private final GroupDealOrderService  groupDealOrderService;
+
+    public GroupDealScheduler(GroupDealRepository groupDealRepository, GroupDealParticipationRepository groupDealParticipationRepository, GroupDealOrderService groupDealOrderService) {
+        this.groupDealRepository = groupDealRepository;
+        this.groupDealParticipationRepository = groupDealParticipationRepository;
+        this.groupDealOrderService = groupDealOrderService;
+    }
+
+    @Scheduled(fixedRate = 300000)
+    public void handleVotingExpiry() {
+        // This method will fetch the deals whose voting period is over and
+        // then update their status to EXPIRED or move them to the next phase (e.g., CONFIRMATION)
+        // based on your business logic = at least, 50% vote required
+
+        LocalDateTime now = LocalDateTime.now();
+
+        List<GroupDeal> deals = groupDealRepository.findDealsByStatusAndEndTimeBefore(GroupDealStatus.VOTING, now);
+        deals.forEach(deal -> {
+            Integer currPar = groupDealParticipationRepository.getTotalParticipantsByDeal(deal.getDealId());
+            if(currPar == null || currPar < deal.getTargetParticipation() * 0.5){
+                deal.setStatus(GroupDealStatus.EXPIRED);
+            } else {
+                deal.setStatus(GroupDealStatus.CONFIRMATION_WINDOW);
+                deal.setConfirmationWindowEndTime(now.plusMinutes(30)); // Set confirmation window to 30 minutes
+            }
+        });
+
+        groupDealRepository.saveAll(deals);
+    }
+
+    @Scheduled(fixedRate = 300000) // every 5 minutes
+    public void handleConfirmationWindowExpiry() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<GroupDeal> deals = groupDealRepository
+                .findDealsByStatusAndConfirmationWindowEndTimeBefore(
+                        GroupDealStatus.CONFIRMATION_WINDOW, now
+                );
+
+        deals.forEach(deal -> {
+            Integer currPar = groupDealParticipationRepository
+                    .getTotalParticipantsByDeal(deal.getDealId());
+
+            if (currPar == null || currPar < deal.getTargetParticipation() * 0.5) {
+                groupDealOrderService.expireDeal(deal.getDealId(), currPar);
+            } else {
+                groupDealOrderService.processGroupDeal(deal.getDealId(), currPar);
+            }
+        });
+    }
+
+    @Scheduled(fixedRate = 300000) // every 5 minutes
+    public void activateCreatedDeals() {
+        LocalDateTime now = LocalDateTime.now();
+
+        List<GroupDeal> createdDeals = groupDealRepository
+                .findDealsByStatusAndStartTimeBefore(GroupDealStatus.CREATED, now);
+
+        createdDeals.forEach(deal -> deal.setStatus(GroupDealStatus.VOTING));
+
+        if (!createdDeals.isEmpty()) {
+            groupDealRepository.saveAll(createdDeals);
+        }
+    }
+    
+}
