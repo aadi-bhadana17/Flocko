@@ -27,9 +27,9 @@ public class CartController {
     }
 
     @PutMapping("/{cartItemId}")
-    public CartResponse updateQuantity(@PathVariable Long cartItemId,
-                                       @RequestBody UpdateCartItemRequest request) {
-        return cartService.updateCart(cartItemId, request);
+    public CartResponse updateCartItemQuantity(@PathVariable Long cartItemId,
+                                               @RequestBody UpdateCartItemRequest request) {
+        return cartService.updateCartItemQuantity(cartItemId, request);
     }
 
     @DeleteMapping("/{cartItemId}")

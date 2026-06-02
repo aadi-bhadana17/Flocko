@@ -13,7 +13,6 @@ import java.util.List;
 @NoArgsConstructor
 public class CartItemSummary {
     private Long cartItemId;
-    private Long foodId;
     private String foodName;
 
     private int quantity;

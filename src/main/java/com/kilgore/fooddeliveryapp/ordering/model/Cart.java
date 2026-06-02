@@ -1,7 +1,5 @@
 package com.kilgore.fooddeliveryapp.ordering.model;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
-import com.kilgore.fooddeliveryapp.identity.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,8 +19,8 @@ public class Cart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long cartId;
 
-    @ManyToOne
-    private User user;
+    @Column(name = "user_user_id", nullable = false)
+    private Long userId;
 
     @OneToMany(mappedBy = "cart",  cascade = CascadeType.ALL,  fetch = FetchType.EAGER, orphanRemoval = true)
     private List<CartItem> items = new ArrayList<>();
@@ -30,8 +28,8 @@ public class Cart {
     private int totalQuantity;
     private BigDecimal totalPrice;
 
-    @ManyToOne
-    private Restaurant restaurant;
+    @Column(name = "restaurant_restaurant_id")
+    private Long restaurantId;
 
     @ManyToOne
     private SharedCart sharedCart; // if this cart is part of a shared cart, otherwise null,
