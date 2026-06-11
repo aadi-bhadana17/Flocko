@@ -1,9 +1,11 @@
 package com.kilgore.fooddeliveryapp.catalog.service;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Food;
-import com.kilgore.fooddeliveryapp.catalog.model.MessPlan;
-import com.kilgore.fooddeliveryapp.catalog.model.MessPlanSlot;
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
+import com.kilgore.fooddeliveryapp.catalog.dto.response.MessSubscriptionResponse;
+import com.kilgore.fooddeliveryapp.catalog.dto.summary.MessPlanSummary;
+import com.kilgore.fooddeliveryapp.catalog.model.*;
+import com.kilgore.fooddeliveryapp.catalog.repository.MessSubscriptionRepository;
+import com.kilgore.fooddeliveryapp.catalog.util.CatalogMapper;
+import com.kilgore.fooddeliveryapp.common.enums.PaymentStatus;
 import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.AddMessPlanRequest;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.AddMessPlanSlotRequest;
@@ -15,10 +17,10 @@ import com.kilgore.fooddeliveryapp.common.exceptions.EntityMisMatchAssociationEx
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityNotFoundException;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityUnavailableException;
 import com.kilgore.fooddeliveryapp.common.exceptions.RestaurantNotFoundException;
-import com.kilgore.fooddeliveryapp.identity.model.User;
 import com.kilgore.fooddeliveryapp.catalog.repository.FoodRepository;
 import com.kilgore.fooddeliveryapp.catalog.repository.MessPlanRepository;
 import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
+import com.kilgore.fooddeliveryapp.identity.api.UserFacade;
 import jakarta.transaction.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -36,12 +38,20 @@ public class MessPlanService {
     private final RestaurantRepository restaurantRepository;
     private final MessPlanRepository messPlanRepository;
     private final FoodRepository foodRepository;
+    private final CatalogMapper catalogMapper;
+    private final MessSubscriptionRepository messSubscriptionRepository;
+    private final UserFacade userFacade;
 
-    public MessPlanService(UserAuthorization userAuthorization, RestaurantRepository restaurantRepository, MessPlanRepository messPlanRepository, FoodRepository foodRepository) {
+    public MessPlanService(UserAuthorization userAuthorization, RestaurantRepository restaurantRepository,
+                           MessPlanRepository messPlanRepository, FoodRepository foodRepository,
+                           CatalogMapper catalogMapper, MessSubscriptionRepository messSubscriptionRepository, UserFacade userFacade) {
         this.userAuthorization = userAuthorization;
         this.restaurantRepository = restaurantRepository;
         this.messPlanRepository = messPlanRepository;
         this.foodRepository = foodRepository;
+        this.catalogMapper = catalogMapper;
+        this.messSubscriptionRepository = messSubscriptionRepository;
+        this.userFacade = userFacade;
     }
 
 
@@ -67,11 +77,11 @@ public class MessPlanService {
 
     @Transactional
     public MessPlanResponse addMessPlanToRestaurant(Long id, AddMessPlanRequest request) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
         Restaurant restaurant = restaurantRepository.findById(id)
                 .orElseThrow(() -> new RestaurantNotFoundException(id));
 
-        if(!restaurant.getOwner().getEmail().equals(user.getEmail())) {
+        if(!restaurant.getOwnerUserId().equals(userId)) {
             throw new AccessDeniedException("You are not authorized to modify this restaurant.");
         }
 
@@ -109,12 +119,12 @@ public class MessPlanService {
     @Transactional
     public MessPlanResponse updateMessPlan(Long restaurantId, Long messPlanId,
                                            AddMessPlanRequest request) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
 
         MessPlan messPlan = messPlanRepository.findById(messPlanId)
                 .orElseThrow(() -> new EntityNotFoundException("MessPlan not found"));
 
-        if(!messPlan.getRestaurant().getOwner().getEmail().equals(user.getEmail())) {
+        if(!messPlan.getRestaurant().getOwnerUserId().equals(userId)) {
             throw new AccessDeniedException("You are not authorized to modify the MessPlan of this restaurant.");
         }
 
@@ -184,19 +194,9 @@ public class MessPlanService {
         );
     }
 
-    private FoodSummary createFoodSummary(Food food) {
-        return new FoodSummary(
-                food.getFoodId(),
-                food.getFoodName(),
-                food.getFoodDescription(),
-                food.getFoodPrice(),
-                food.isVegetarian()
-        );
-    }
-
     private MessPlanSlotResponse createMessPlanSlotResponse(MessPlanSlot slot) {
         List<FoodSummary> foods = slot.getFoodItems().stream()
-                .map(this::createFoodSummary)
+                .map(catalogMapper::toFoodSummary)
                 .toList();
 
         return new MessPlanSlotResponse(
@@ -219,12 +219,12 @@ public class MessPlanService {
     }
 
     public String deleteMessPlan(Long restaurantId, Long messPlanId) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
 
         MessPlan messPlan = messPlanRepository.findById(messPlanId)
                 .orElseThrow(() -> new EntityNotFoundException("MessPlan not found"));
 
-        if(!messPlan.getRestaurant().getOwner().getEmail().equals(user.getEmail())) {
+        if(!messPlan.getRestaurant().getOwnerUserId().equals(userId)) {
             throw new AccessDeniedException("You are not authorized to delete the MessPlan of this restaurant.");
         }
 
@@ -245,4 +245,69 @@ public class MessPlanService {
                 "till then it will be active for the already subscribed customers " +
                 "but won't be visible for new subscriptions";
     }
+
+    public List<MessSubscriptionResponse> getMyMessSubscriptions(Boolean active) {
+        Long userId = userAuthorization.authorizeUserId();
+
+        return messSubscriptionRepository.findActiveSubscriptionsByUserId(userId)
+                .stream()
+                .map(this::createMessSubscriptionResponse)
+                .toList();
+    }
+
+    @Transactional
+    public String subscribeToMessPlan(Long messPlanId)  {
+        Long userId = userAuthorization.authorizeUserId();
+
+        userFacade.checkDefaultAddress(userId);
+
+        MessPlan messPlan = messPlanRepository.findById(messPlanId)
+                .orElseThrow(() -> new EntityNotFoundException("Mess Plan with this id not found"));
+
+        if(messSubscriptionRepository.findActiveSubscriptionByUserIdAndMessPlan(userId, messPlan) != null) {
+            throw new AccessDeniedException("You already have an active subscription for this mess plan");
+        }
+
+
+        createMessSubscription(userId,  messPlan);
+
+        return "You have been subscribed to mess plan : " + messPlan.getMessPlanName() + " for upcoming 7 days";
+    }
+
+    private MessSubscriptionResponse createMessSubscriptionResponse(MessSubscription subscription) {
+
+        MessPlanSummary plan = new  MessPlanSummary(
+                subscription.getMessPlan().getMessPlanId(),
+                subscription.getMessPlan().getMessPlanName(),
+                subscription.getMessPlan().getDescription(),
+                subscription.getMessPlan().getPrice()
+        );
+
+
+        return new MessSubscriptionResponse(
+                subscription.getSubscriptionId(),
+                plan,
+                subscription.getStartDate(),
+                subscription.getEndDate(),
+                subscription.isActive()
+        );
+    }
+
+    private void createMessSubscription(Long userId, MessPlan messPlan) {
+        LocalDate now = LocalDate.now();
+
+        MessSubscription messSubscription = new MessSubscription();
+        messSubscription.setUserId(userId);
+        messSubscription.setMessPlan(messPlan);
+        messSubscription.setStartDate(now);
+        messSubscription.setEndDate(now.plusDays(7));
+
+        userFacade.deductWalletBalance(userId, messPlan.getPrice());
+
+        messSubscription.setActive(true);
+        messSubscription.setPaymentStatus(PaymentStatus.SUCCESS);
+
+        messSubscriptionRepository.save(messSubscription);
+    }
+
 }

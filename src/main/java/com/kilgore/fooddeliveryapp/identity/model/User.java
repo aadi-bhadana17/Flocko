@@ -11,7 +11,9 @@ import lombok.NoArgsConstructor;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Data
@@ -48,21 +50,17 @@ public class User {
     @Version
     private Long version = 0L;
 
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.PERSIST, mappedBy = "user")
-    private List<Order> orders = new ArrayList<>();
-
-    @ManyToMany
-    @JoinTable(
-            name = "user_favourites",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "restaurant_id")
+    @ElementCollection
+    @CollectionTable(
+            name = "user_favourite_restaurants",
+            joinColumns = @JoinColumn(name = "user_id")
     )
-    private List<Restaurant> favourites = new ArrayList<>();
+    @Column(name = "restaurant_id")
+    private List<Long> favouriteRestaurantIds = new ArrayList<>();
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses =  new ArrayList<>();
 
-    @OneToMany(mappedBy = "owner")
-    private List<Restaurant> ownedRestaurants = new ArrayList<>();
+    @ElementCollection
+    private Set<Long> ownedRestaurantIds = new HashSet<>();
 }

@@ -1,6 +1,5 @@
 package com.kilgore.fooddeliveryapp.ordering.model;
 
-import com.kilgore.fooddeliveryapp.identity.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -19,9 +18,12 @@ public class SharedCartMember {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long memberId;
-    @ManyToOne(fetch = FetchType.LAZY)
-    private User user;
-    @OneToOne(fetch = FetchType.LAZY)
+
+    @Column(name = "user_user_id", nullable = false)
+    private Long userId;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(nullable = false)
     private Cart cart;
     @ManyToOne(fetch = FetchType.LAZY)
     private SharedCart sharedCart;

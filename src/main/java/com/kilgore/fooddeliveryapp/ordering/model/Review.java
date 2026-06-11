@@ -1,7 +1,5 @@
 package com.kilgore.fooddeliveryapp.ordering.model;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
-import com.kilgore.fooddeliveryapp.identity.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,10 +19,12 @@ public class Review {
 
     private int rating;
     private String comment;
-    @ManyToOne
-    private User user;
-    @ManyToOne
-    private Restaurant restaurant;
+
+    @Column(name = "user_user_id", nullable = false)
+    private Long userId;
+
+    @Column(name = "restaurant_restaurant_id", nullable = false)
+    private Long restaurantId;
 
     private LocalDateTime postedAt;
 }

@@ -1,9 +1,8 @@
 package com.kilgore.fooddeliveryapp.deals.service;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Food;
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
-import com.kilgore.fooddeliveryapp.catalog.repository.FoodRepository;
-import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
+import com.kilgore.fooddeliveryapp.catalog.api.CatalogFacade;
+import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantExtendedSummary;
+import com.kilgore.fooddeliveryapp.common.enums.PaymentStatus;
 import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityAlreadyExistsException;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityMisMatchAssociationException;
@@ -16,9 +15,6 @@ import com.kilgore.fooddeliveryapp.deals.model.GroupDealTier;
 import com.kilgore.fooddeliveryapp.deals.repository.GroupDealParticipationRepository;
 import com.kilgore.fooddeliveryapp.deals.repository.GroupDealRepository;
 import com.kilgore.fooddeliveryapp.deals.repository.GroupDealTierRepository;
-import com.kilgore.fooddeliveryapp.identity.model.Address;
-import com.kilgore.fooddeliveryapp.ordering.model.PaymentStatus;
-import com.kilgore.fooddeliveryapp.identity.repository.AddressRepository;
 import com.kilgore.fooddeliveryapp.deals.dto.request.GroupDealParticipationRequest;
 import com.kilgore.fooddeliveryapp.deals.dto.request.GroupDealRequest;
 import com.kilgore.fooddeliveryapp.deals.dto.request.GroupDealTierRequest;
@@ -27,8 +23,10 @@ import com.kilgore.fooddeliveryapp.deals.dto.response.GroupDealResponse;
 import com.kilgore.fooddeliveryapp.deals.dto.response.GroupDealTierResponse;
 import com.kilgore.fooddeliveryapp.catalog.dto.summary.FoodSummary;
 import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantSummary;
-import com.kilgore.fooddeliveryapp.identity.model.User;
-import com.kilgore.fooddeliveryapp.identity.repository.UserRepository;
+import com.kilgore.fooddeliveryapp.identity.api.UserFacade;
+import com.kilgore.fooddeliveryapp.identity.dto.summary.AddressSummary;
+import com.kilgore.fooddeliveryapp.identity.dto.summary.UserExtendedSummary;
+import com.kilgore.fooddeliveryapp.identity.dto.summary.UserSummary;
 import jakarta.transaction.Transactional;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
@@ -46,30 +44,26 @@ public class GroupDealService {
     private final GroupDealRepository groupDealRepository;
     private final GroupDealParticipationRepository groupDealParticipationRepository;
     private final UserAuthorization userAuthorization;
-    private final RestaurantRepository restaurantRepository;
-    private final FoodRepository foodRepository;
     private final GroupDealTierRepository groupDealTierRepository;
-    private final UserRepository userRepository;
-    private final AddressRepository addressRepository;
+    private final CatalogFacade catalogFacade;
+    private final UserFacade userFacade;
 
-    public GroupDealService(GroupDealRepository groupDealRepository, GroupDealParticipationRepository groupDealParticipationRepository, UserAuthorization userAuthorization, RestaurantRepository restaurantRepository, FoodRepository foodRepository, GroupDealTierRepository groupDealTierRepository, UserRepository userRepository, AddressRepository addressRepository) {
+    public GroupDealService(GroupDealRepository groupDealRepository, GroupDealParticipationRepository groupDealParticipationRepository,
+                            UserAuthorization userAuthorization, GroupDealTierRepository groupDealTierRepository, CatalogFacade catalogFacade, UserFacade userFacade) {
         this.groupDealRepository = groupDealRepository;
         this.groupDealParticipationRepository = groupDealParticipationRepository;
         this.userAuthorization = userAuthorization;
-        this.restaurantRepository = restaurantRepository;
-        this.foodRepository = foodRepository;
         this.groupDealTierRepository = groupDealTierRepository;
-        this.userRepository = userRepository;
-        this.addressRepository = addressRepository;
+        this.catalogFacade = catalogFacade;
+        this.userFacade = userFacade;
     }
 
     public List<GroupDealResponse> getDealsForRestaurant(Long restaurantId) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
 
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
+        RestaurantExtendedSummary restaurant = catalogFacade.getRestaurantExtendedById(restaurantId);
 
-        if(!restaurant.getOwner().equals(user)) {
+        if(!restaurant.getOwnerUserId().equals(userId)) {
             throw new AccessDeniedException("You are not the owner of this restaurant");
         }
 
@@ -79,6 +73,7 @@ public class GroupDealService {
     }
 
     public List<GroupDealResponse> getActiveDealsForRestaurant(Long restaurantId) {
+        userAuthorization.authorizeUser();
         List<GroupDealStatus> statuses = List.of(GroupDealStatus.VOTING, GroupDealStatus.CONFIRMATION_WINDOW);
 
         return groupDealRepository.getActiveDealsForRestaurant(restaurantId, statuses).stream()
@@ -88,12 +83,9 @@ public class GroupDealService {
 
     @Transactional
     public GroupDealResponse createGroupDeal(Long restaurantId, GroupDealRequest request) {
-        User user = userAuthorization.authorizeUser();
+        Long userId= userAuthorization.authorizeUserId();
 
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
-
-        if(!restaurant.getOwner().equals(user)) {
+        if(!userFacade.isOwnerOfRestaurant(userId, restaurantId)) {
             throw new AccessDeniedException("You are not the owner of this restaurant");
         }
 
@@ -105,62 +97,41 @@ public class GroupDealService {
                     + " already exists for this restaurant");
         }
 
-        GroupDeal deal = new GroupDeal();
-        deal.setDealName(request.getDealName());
-        deal.setRestaurant(restaurant);
-        deal.setStartTime(request.getStartTime());
-        deal.setEndTime(request.getEndTime());
-        deal.setOriginalPrice(request.getOriginalPrice());
-        deal.setMaxDiscount(request.getMaxDiscount());
-        deal.setFoodList(fetchFoodList(request.getFoodIds(), restaurantId));
-        deal.setTargetParticipation(request.getTargetParticipation());
-        deal.setStatus(GroupDealStatus.CREATED);
-
-        groupDealRepository.save(deal);
-
-        List<GroupDealTier> discountList = createDicountList(request.getDiscountList(), deal);
-        deal.setDiscountList(discountList);
-        groupDealRepository.save(deal);
+        GroupDeal deal = buildGroupDeal(request, restaurantId);
 
         return mapToGroupDealResponse(deal);
     }
 
     @Transactional
     public String deleteGroupDeal(Long restaurantId, Long dealId) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
 
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
-
-        if(!restaurant.getOwner().equals(user)) {
+        if(!userFacade.isOwnerOfRestaurant(userId, restaurantId)) {
             throw new AccessDeniedException("You are not the owner of this restaurant");
         }
 
         GroupDeal deal = groupDealRepository.findById(dealId)
                 .orElseThrow(() -> new EntityNotFoundException("Group deal with id " + dealId + " not found"));
 
-        if(!deal.getRestaurant().equals(restaurant))
+        if(!deal.getRestaurantId().equals(restaurantId))
             throw new AccessDeniedException("This deal does not belong to your restaurant");
 
         if(deal.getStatus() != GroupDealStatus.CREATED)
             throw new IllegalStateException("Cannot delete this deal as it is in " + deal.getStatus() + " phase. Only deals in CREATED phase can be deleted.");
 
         deal.setStatus(GroupDealStatus.DELETED);
-        groupDealRepository.delete(deal);
+        groupDealRepository.save(deal);
 
         return "Group deal with id " + dealId + " has been deleted";
     }
 
     public GroupDealResponse getDeal(Long restaurantId, Long dealId) {
-        User user = userAuthorization.authorizeUser();
-
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
+        Long userId = userAuthorization.authorizeUserId();
 
         GroupDeal deal = groupDealRepository.findById(dealId)
                 .orElseThrow(() -> new EntityNotFoundException("Group deal with id " + dealId + " not found"));
 
-        if(!deal.getRestaurant().equals(restaurant))
+        if(!deal.getRestaurantId().equals(restaurantId))
             throw new AccessDeniedException("This deal does not belong to this restaurant");
 
         return mapToGroupDealResponse(deal);
@@ -169,39 +140,25 @@ public class GroupDealService {
     @Transactional
     public GroupDealParticipationResponse participateInGroupDeal(Long restaurantId, Long dealId,
                                                                  GroupDealParticipationRequest request) {
-        User user = userAuthorization.authorizeUser();
-
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
+        Long userId = userAuthorization.authorizeUserId();
 
         GroupDeal deal = groupDealRepository.findById(dealId)
                 .orElseThrow(() -> new EntityNotFoundException("Group deal with id " + dealId + " not found"));
 
-        if(!deal.getRestaurant().equals(restaurant))
+        if(!deal.getRestaurantId().equals(restaurantId))
             throw new AccessDeniedException("This deal does not belong to your restaurant");
 
         if(deal.getStatus() !=  GroupDealStatus.VOTING)
             throw new IllegalStateException("Cannot participate in this deal as it is not in voting stage");
 
-        Address address = addressRepository.findById(request.getAddressId())
-                .orElseThrow(() -> new EntityNotFoundException("Address with id " + request.getAddressId() + " not found"));
+        GroupDealParticipation participation = buildGroupDealParticipation(request, userId, deal);
 
-        GroupDealParticipation participation = new GroupDealParticipation();
-        participation.setGroupDeal(deal);
-        participation.setUser(user);
-        participation.setQuantity(request.getQuantity());
-        participation.setPaymentStatus(PaymentStatus.SUCCESS);
-        participation.setAmountPaid(deal.getOriginalPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
-        participation.setAddressToDeliver(address);
-
-        groupDealParticipationRepository.save(participation);
-
-        return mapToGroupDealParticipationResponse(participation);
+        return mapToGroupDealParticipationResponse(participation, userId);
     }
 
     @Transactional
     public String withdrawFromGroupDeal(Long restaurantId, Long dealId, Long  participationId) {
-        User user = userAuthorization.authorizeUser();
+        userAuthorization.authorizeUser();
 
         GroupDeal deal = groupDealRepository.findById(dealId)
                 .orElseThrow(() -> new EntityNotFoundException("Group deal with id " + dealId + " not found"));
@@ -215,34 +172,20 @@ public class GroupDealService {
         participation.setConfirmed(false);
         groupDealParticipationRepository.save(participation);
 
-        participation.getUser().setWalletBalance(participation.getUser().getWalletBalance().add(participation.getAmountPaid()));
-        userRepository.save(participation.getUser());
+        userFacade.addWalletBalance(participation.getUserId(), participation.getAmountPaid());
 
-        return "You have successfully withdrawn from the group deal with id " + dealId;
+        return "You have successfully withdrawn from the group deal with id " + dealId + ". and refund has been processed";
     }
 
     //------------------------------------------------HELPER METHODS------------------------------------------------
 
 
     private GroupDealResponse mapToGroupDealResponse(GroupDeal deal) {
-        // This method would convert a GroupDeal entity to a GroupDealResponse DTO.
-        // It would involve mapping all the relevant fields and possibly fetching related data like food items and discount tiers.
-
-        List<FoodSummary> foodList = deal.getFoodList().stream()
-                .map(food -> new FoodSummary(food.getFoodId(), food.getFoodName(),
-                        food.getFoodDescription(), food.getFoodPrice(), food.isVegetarian()))
-                .toList();
 
         List<GroupDealTierResponse> discountList = deal.getDiscountList().stream()
                 .map(tier -> new GroupDealTierResponse(tier.getThresholdPercent(), tier.getDiscountPercent()))
                 .toList();
 
-        RestaurantSummary restaurant = new  RestaurantSummary(
-                deal.getRestaurant().getRestaurantId(),
-                deal.getRestaurant().getRestaurantName(),
-                deal.getRestaurant().getCuisineType(),
-                deal.getRestaurant().getAvgRating()
-        );
 
         Integer currentParticipation = groupDealParticipationRepository.getTotalParticipantsByDeal(deal.getDealId());
         if(currentParticipation == null) currentParticipation = 0;
@@ -250,10 +193,10 @@ public class GroupDealService {
         return new GroupDealResponse(
                 deal.getDealId(),
                 deal.getDealName(),
-                restaurant,
+                catalogFacade.getRestaurantById(deal.getRestaurantId()),
                 deal.getStartTime(),
                 deal.getEndTime(),
-                foodList,
+                catalogFacade.getFoodListByIds(deal.getFoodIds()),
                 deal.getOriginalPrice(),
                 deal.getMaxDiscount(),
                 deal.getTargetParticipation(),
@@ -282,22 +225,6 @@ public class GroupDealService {
         return deal.getOriginalPrice().subtract(discount);
     }
 
-    private List<Food> fetchFoodList(List<Long> foodIds, Long restaurantId) {
-        List<Food> foodList = foodRepository.findAllById(foodIds);
-
-        if(foodList.size() != foodIds.size()) {
-            throw new EntityNotFoundException("Some Food didn't exist in this restaurant");
-        }
-
-        foodList.forEach(food -> {
-            if(!food.getRestaurant().getRestaurantId().equals(restaurantId))
-                throw new EntityMisMatchAssociationException("Food " + food.getFoodName() + " does not belong to this restaurant");
-        });
-
-
-        return foodList;
-    }
-
     private List<GroupDealTier> createDicountList(List<GroupDealTierRequest> requests, GroupDeal groupDeal) {
         List<GroupDealTier>  dicountList = new ArrayList<>();
 
@@ -315,12 +242,14 @@ public class GroupDealService {
         return dicountList;
     }
 
-    private GroupDealParticipationResponse mapToGroupDealParticipationResponse(GroupDealParticipation participation) {
+    private GroupDealParticipationResponse mapToGroupDealParticipationResponse(GroupDealParticipation participation, Long userId) {
+        UserExtendedSummary participantUser = userFacade.getUserExtendedById(participation.getUserId());
+
         return new GroupDealParticipationResponse(
                 participation.getParticipantId(),
-                participation.getUser().getUserId(),
-                participation.getUser().getFirstName() + " " + participation.getUser().getLastName(),
-                participation.getUser().getEmail(),
+                participation.getUserId(),
+                participantUser.getName(),
+                participantUser.getEmail(),
                 participation.getGroupDeal().getDealName(),
                 participation.getQuantity(),
                 participation.getPaymentStatus(),
@@ -330,46 +259,76 @@ public class GroupDealService {
     }
 
     public List<GroupDealParticipationResponse> getParticipationsByDeal(Long restaurantId, Long dealId) {
-        User user = userAuthorization.authorizeUser();
-        
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
+        Long userId = userAuthorization.authorizeUserId();
         
         GroupDeal deal = groupDealRepository.findById(dealId)
                 .orElseThrow(() -> new EntityNotFoundException("Group deal with id " + dealId + " not found"));
 
-        if(!restaurant.getOwner().equals(user)) {
+        if(!userFacade.isOwnerOfRestaurant(userId, restaurantId)) {
             throw new AccessDeniedException("You are not the owner of this restaurant");
         }
 
-        if(!deal.getRestaurant().equals(restaurant)) {
+        if(!deal.getRestaurantId().equals(restaurantId)) {
             throw new AccessDeniedException("This deal does not belong to your restaurant");
         }
 
         return groupDealParticipationRepository.findGroupDealParticipationsByGroupDeal(deal).stream()
-                .map(this::mapToGroupDealParticipationResponse)
+                .map(participation ->mapToGroupDealParticipationResponse(participation, userId))
                 .toList();
     }
 
     public List<GroupDealParticipationResponse> getParticipationsByUser(Long restaurantId, Long dealId) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
 
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
         GroupDeal deal = groupDealRepository.findById(dealId)
                 .orElseThrow(() -> new EntityNotFoundException("Group deal with id " + dealId + " not found"));
 
-        if(!restaurant.equals(deal.getRestaurant())) {
+        if(!deal.getRestaurantId().equals(restaurantId)) {
             throw new EntityMisMatchAssociationException("This deal does not belong to this restaurant");
         }
 
-        List<GroupDealParticipation> participationList = groupDealParticipationRepository.findByUserAndGroupDeal(user, deal);
+        List<GroupDealParticipation> participationList = groupDealParticipationRepository.findByUserIdAndGroupDeal(userId, deal);
         if(participationList == null || participationList.isEmpty()) {
             throw new EntityNotFoundException("You didn't participate in this deal");
         }
         return participationList.stream()
-                .map(this::mapToGroupDealParticipationResponse)
+                .map(par -> mapToGroupDealParticipationResponse(par, userId))
                 .toList();
+    }
+
+    private GroupDeal buildGroupDeal(GroupDealRequest request, Long restaurantId) {
+        GroupDeal deal = new GroupDeal();
+        deal.setDealName(request.getDealName());
+        deal.setRestaurantId(restaurantId);
+        deal.setStartTime(request.getStartTime());
+        deal.setEndTime(request.getEndTime());
+        deal.setOriginalPrice(request.getOriginalPrice());
+        deal.setMaxDiscount(request.getMaxDiscount());
+        deal.setFoodIds(request.getFoodIds());
+        deal.setTargetParticipation(request.getTargetParticipation());
+        deal.setStatus(GroupDealStatus.CREATED);
+
+        groupDealRepository.save(deal);
+
+        List<GroupDealTier> discountList = createDicountList(request.getDiscountList(), deal);
+        deal.setDiscountList(discountList);
+        groupDealRepository.save(deal);
+
+        return deal;
+    }
+
+    private GroupDealParticipation buildGroupDealParticipation(GroupDealParticipationRequest request, Long userId, GroupDeal deal) {
+        GroupDealParticipation participation = new GroupDealParticipation();
+        participation.setGroupDeal(deal);
+        participation.setUserId(userId);
+        participation.setQuantity(request.getQuantity());
+        participation.setPaymentStatus(PaymentStatus.SUCCESS);
+        participation.setAmountPaid(deal.getOriginalPrice().multiply(BigDecimal.valueOf(request.getQuantity())));
+        participation.setAddressIdToDeliver(request.getAddressId());
+
+        groupDealParticipationRepository.save(participation);
+
+        return participation;
     }
 }

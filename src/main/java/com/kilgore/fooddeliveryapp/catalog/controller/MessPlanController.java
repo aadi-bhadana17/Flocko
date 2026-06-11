@@ -2,6 +2,7 @@ package com.kilgore.fooddeliveryapp.catalog.controller;
 
 import com.kilgore.fooddeliveryapp.catalog.dto.request.AddMessPlanRequest;
 import com.kilgore.fooddeliveryapp.catalog.dto.response.MessPlanResponse;
+import com.kilgore.fooddeliveryapp.catalog.dto.response.MessSubscriptionResponse;
 import com.kilgore.fooddeliveryapp.catalog.service.MessPlanService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -51,6 +52,14 @@ public class MessPlanController {
             return messPlanService.deleteMessPlan(restaurantId, messPlanId);
         }
 
+    @GetMapping("/mess-plans/subscriptions")
+    public List<MessSubscriptionResponse> getMyMessSubscriptions(@RequestParam(required = false) Boolean active) {
+        return messPlanService.getMyMessSubscriptions(active);
+    }
 
+    @PostMapping("/mess-plans/{messPlanId}/subscribe")
+    public String subscribeToMessPlan(@PathVariable Long messPlanId) {
+        return messPlanService.subscribeToMessPlan(messPlanId);
+    }
 
 }

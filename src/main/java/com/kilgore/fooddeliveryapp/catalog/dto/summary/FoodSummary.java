@@ -15,4 +15,5 @@ public class FoodSummary {
     private String foodDescription;
     private BigDecimal foodPrice;
     private boolean vegetarian;
+    private Long restaurantId;
 }

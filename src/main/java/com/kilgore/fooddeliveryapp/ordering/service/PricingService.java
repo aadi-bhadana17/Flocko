@@ -1,14 +1,13 @@
 package com.kilgore.fooddeliveryapp.ordering.service;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Addon;
-import com.kilgore.fooddeliveryapp.catalog.model.Food;
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
-import com.kilgore.fooddeliveryapp.common.exceptions.EntityNotFoundException;
+import com.kilgore.fooddeliveryapp.catalog.api.CatalogFacade;
+import com.kilgore.fooddeliveryapp.catalog.dto.summary.AddonSummary;
+import com.kilgore.fooddeliveryapp.catalog.dto.summary.FoodSummary;
+import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantExtendedSummary;
 import com.kilgore.fooddeliveryapp.ordering.model.Cart;
 import com.kilgore.fooddeliveryapp.ordering.model.CartItem;
 import com.kilgore.fooddeliveryapp.ordering.repository.CartItemRepository;
 import com.kilgore.fooddeliveryapp.ordering.repository.CartRepository;
-import com.kilgore.fooddeliveryapp.catalog.repository.FoodRepository;
 import com.kilgore.fooddeliveryapp.ordering.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -23,24 +22,25 @@ public class PricingService {
     private final CartRepository cartRepository;
     private final CartItemRepository cartItemRepository;
     private final OrderRepository orderRepository;
-    private final FoodRepository foodRepository;
+    private final CatalogFacade catalogFacade;
 
-    public PricingService(CartRepository cartRepository, CartItemRepository cartItemRepository, OrderRepository orderRepository, FoodRepository foodRepository) {
+    public PricingService(CartRepository cartRepository, CartItemRepository cartItemRepository,
+                          OrderRepository orderRepository, CatalogFacade catalogFacade) {
         this.cartRepository = cartRepository;
         this.cartItemRepository = cartItemRepository;
         this.orderRepository = orderRepository;
-        this.foodRepository = foodRepository;
+        this.catalogFacade = catalogFacade;
     }
 
     public BigDecimal calculateItemTotal(CartItem item) {
-        Food food = foodRepository.findById(item.getFood().getFoodId())
-                .orElseThrow(() -> new EntityNotFoundException("Food item not found with ID: " + item.getFood().getFoodId()));
+        FoodSummary food = catalogFacade.getFoodById(item.getFoodId());
 
         BigDecimal base = food.getFoodPrice();
-        BigDecimal dynamicPrice = base.multiply(pricingMultiplier(food.getFoodId(), food.getRestaurant()));
+        RestaurantExtendedSummary restaurant = catalogFacade.getRestaurantExtendedById(food.getRestaurantId());
+        BigDecimal dynamicPrice = base.multiply(pricingMultiplier(food.getFoodId(), restaurant));
 
-        BigDecimal addonTotal = item.getAddons().stream()
-                .map(Addon::getPrice)
+        BigDecimal addonTotal = catalogFacade.getAddonsByIds(item.getAddonIds()).stream()
+                .map(AddonSummary::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return dynamicPrice.add(addonTotal)
@@ -48,10 +48,11 @@ public class PricingService {
     }
 
     public BigDecimal calculatePriceAtAddition(CartItem item) {
-        BigDecimal base = item.getFood().getFoodPrice();
+        FoodSummary food = catalogFacade.getFoodById(item.getFoodId());
+        BigDecimal base = food.getFoodPrice();
 
-        BigDecimal addonTotal = item.getAddons().stream()
-                .map(Addon::getPrice)
+        BigDecimal addonTotal = catalogFacade.getAddonsByIds(item.getAddonIds()).stream()
+                .map(AddonSummary::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return base.add(addonTotal);
@@ -63,20 +64,19 @@ public class PricingService {
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
     }
 
-    public BigDecimal calculateCurrentPrice(Food food, List<Addon> addons) {
+    public BigDecimal calculateCurrentPrice(FoodSummary food, List<AddonSummary> addons) {
         BigDecimal base = food.getFoodPrice();
 
         BigDecimal addonTotal = addons.stream()
-                .map(Addon::getPrice)
+                .map(AddonSummary::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         return base.add(addonTotal);
     }
 
-    public void updateCartTotal(Cart cart) {
+    public void recalculateCartTotals(Cart cart) {
         cart.setTotalPrice(calculateCartTotal(cart));
         cart.setTotalQuantity(calculateTotalQuantity(cart));
-        cartRepository.save(cart);
     }
 
     public boolean refreshExpiredPrices(Cart cart) {
@@ -86,9 +86,11 @@ public class PricingService {
 
         for(CartItem item : cart.getItems()){
             if(item.getAddedTime().isBefore(oneHourAgo)){
-                BigDecimal newPrice = calculateCurrentPrice(
-                        item.getFood(),
-                        item.getAddons());
+
+                FoodSummary food = catalogFacade.getFoodById(item.getFoodId());
+                List<AddonSummary> addons = catalogFacade.getAddonsByIds(item.getAddonIds());
+
+                BigDecimal newPrice = calculateCurrentPrice(food, addons);
 
                 if(!item.getPriceAtAddition().equals(newPrice)){
                     item.setPriceAtAddition(newPrice);
@@ -110,19 +112,19 @@ public class PricingService {
                 .sum();
     }
 
-    private BigDecimal pricingMultiplier(Long foodId, Restaurant restaurant) {
+    private BigDecimal pricingMultiplier(Long foodId, RestaurantExtendedSummary restaurant) {
 
-        int ordersLastHour = ordersInLastHour(foodId, restaurant);
+        int ordersLastHour = ordersInLastHour(foodId, restaurant.getRestaurantId());
         BigDecimal demandMultiplier = demandBasedMultiplier(ordersLastHour);
         BigDecimal timeMultiplier = timeBasedMultiplier(restaurant);
 
         return demandMultiplier.multiply(timeMultiplier);
     }
 
-    private int ordersInLastHour(Long foodId, Restaurant restaurant) {
+    private int ordersInLastHour(Long foodId, Long restaurantId) {
 
         return orderRepository.countFoodQuantityInLastHour(
-                restaurant,
+                restaurantId,
                 LocalDateTime.now().minusHours(1),
                 foodId
         );
@@ -135,7 +137,7 @@ public class PricingService {
         return BigDecimal.valueOf(1.18);
     }
 
-    private BigDecimal timeBasedMultiplier(Restaurant restaurant) {
+    private BigDecimal timeBasedMultiplier(RestaurantExtendedSummary restaurant) {
 
         LocalTime now = LocalTime.now();
         LocalTime opening = restaurant.getOpeningTime();

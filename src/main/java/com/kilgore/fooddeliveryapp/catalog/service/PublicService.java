@@ -79,7 +79,7 @@ public class PublicService {
         if (!isRestaurantAvailable(restaurant)) throw new RestaurantNotFoundException(restaurantId);
 
 
-        List<Food> allFoods = foodRepository.findAllByRestaurant_RestaurantId(restaurantId);
+        List<Food> allFoods = foodRepository.findAllByRestaurantId(restaurantId);
 
         List<Category> uniqueCategories = restaurant.getCategories().stream()
                 .collect(LinkedHashMap<Long, Category>::new,
@@ -109,7 +109,7 @@ public class PublicService {
 
     private MenuCategoryResponse createMenuCategoryResponse(Category category, List<Food> allFoods) {
         List<MenuItemResponse> foods = allFoods.stream()
-                .filter(food -> food.getFoodCategory().getCategoryId().equals(category.getCategoryId()))
+                .filter(food -> food.getCategoryId().equals(category.getCategoryId()))
                 .map(this::createMenuItemResponse)
                 .toList();
 

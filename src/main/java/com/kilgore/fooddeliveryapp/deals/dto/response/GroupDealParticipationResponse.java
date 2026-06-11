@@ -1,6 +1,6 @@
 package com.kilgore.fooddeliveryapp.deals.dto.response;
 
-import com.kilgore.fooddeliveryapp.ordering.model.PaymentStatus;
+import com.kilgore.fooddeliveryapp.common.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

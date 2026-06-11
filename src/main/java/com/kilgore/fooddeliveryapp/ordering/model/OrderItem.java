@@ -1,7 +1,5 @@
 package com.kilgore.fooddeliveryapp.ordering.model;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Addon;
-import com.kilgore.fooddeliveryapp.catalog.model.Food;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,19 +19,16 @@ public class OrderItem {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long orderItemId;
 
-    @ManyToOne
-    private Food food;
+    @Column(name = "food_food_id", nullable = false)
+    private Long foodId;
     private int quantity;
     private BigDecimal priceAtOrder;
     private BigDecimal itemTotal;
 
-    @ManyToMany
-    @JoinTable(
-            name = "order_item_addons",
-            joinColumns = @JoinColumn(name = "order_item_id"),
-            inverseJoinColumns = @JoinColumn(name = "addon_id")
-    )
-    private List<Addon> addons = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(name = "order_item_addons", joinColumns = @JoinColumn(name = "order_item_id"))
+    @Column(name = "addon_id")
+    private List<Long> addonIds = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "order_id")

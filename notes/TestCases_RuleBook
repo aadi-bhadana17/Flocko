@@ -1,0 +1,66 @@
+/*
+================= TEST WRITING RULES =================
+
+1. SECURITY TESTING
+- Do NOT mock UserAuthorization or authorizeUser()
+- Always use real SecurityContextHolder for authentication scenarios
+- Simulate authentication explicitly:
+    - No auth → set Authentication = null
+    - Valid auth → set UsernamePasswordAuthenticationToken
+- ALWAYS mock userRepository.findByEmail(authentication.getName())
+  to return a valid User when authentication is present
+- Tests must fail at the security layer, NOT business logic
+- Ensure security checks (authorizeUser / verifyOwnerAccess) are executed FIRST in flow
+
+-----------------------------------------------------
+
+2. MOCKING RULES
+- Only mock repositories and external dependencies
+- Never mock core business/security logic being tested
+- If a method depends on repository calls BEFORE security,
+  mock them to return valid data so execution reaches security
+- Avoid unnecessary stubbing
+
+-----------------------------------------------------
+
+3. TEST FOCUS
+- Each test must validate ONE behavior
+- Ensure failure happens at the intended layer
+- If testing security:
+    → ALL deeper dependencies (category, food, etc.) must be valid/mocked
+- Do not allow deeper logic (cart, address, category, etc.) to interfere
+
+-----------------------------------------------------
+
+4. DATA SETUP
+- Provide valid data for all layers AFTER the one being tested
+- NEVER leave repository calls returning null unless explicitly testing null behavior
+- Always ensure:
+    - restaurantRepository returns valid Restaurant
+    - categoryRepository returns valid Category (if needed)
+    - foodRepository returns valid Food (if needed)
+
+-----------------------------------------------------
+
+5. AUTHENTICATION SETUP (CRITICAL)
+- Always use helper method like authenticateAs(email)
+- authenticateAs MUST:
+    - set SecurityContextHolder Authentication
+    - mock userRepository.findByEmail(email) to return User
+- Without this, authorizeUser() will fail or behave incorrectly
+
+-----------------------------------------------------
+
+6. ASSERTIONS
+- Always assert the exact expected exception
+- Do not allow unexpected exceptions (like NPE)
+- If wrong exception occurs:
+    → it means test setup is wrong, NOT business logic
+
+-----------------------------------------------------
+
+7. CLEANUP
+- Always clear SecurityContextHolder after each test
+
+=====================================================
+*/

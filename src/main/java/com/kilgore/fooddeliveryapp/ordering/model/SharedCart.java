@@ -1,7 +1,5 @@
 package com.kilgore.fooddeliveryapp.ordering.model;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
-import com.kilgore.fooddeliveryapp.identity.model.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,10 +21,11 @@ public class SharedCart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long sharedCartId;
 
-    @ManyToOne
-    private User host;
-    @ManyToOne
-    private Restaurant restaurant;
+    @Column(name = "host_user_id", nullable = false)
+    private Long hostUserId;
+
+    @Column(name = "restaurant_restaurant_id", nullable = false)
+    private Long restaurantId;
 
     @OneToMany(mappedBy = "sharedCart")
     private List<SharedCartMember> memberList = new ArrayList<>();
@@ -43,6 +42,3 @@ public class SharedCart {
 
     private boolean isActive =  true;
 }
-
-
-

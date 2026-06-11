@@ -17,8 +17,12 @@ import java.util.List;
 @Service
 public class CustomerUserDetailService implements UserDetailsService {
 
-    @Autowired
-    private UserRepository userRepository;
+
+    private final UserRepository userRepository;
+
+    public CustomerUserDetailService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -33,6 +37,7 @@ public class CustomerUserDetailService implements UserDetailsService {
         }
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
 
+        assert role != null;
         grantedAuthorities.add(new SimpleGrantedAuthority(role.toString()));
 
 

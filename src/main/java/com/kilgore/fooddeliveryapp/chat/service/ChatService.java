@@ -4,11 +4,12 @@ import com.kilgore.fooddeliveryapp.chat.model.ChatMessage;
 import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import com.kilgore.fooddeliveryapp.chat.dto.request.SendChatMessageRequest;
 import com.kilgore.fooddeliveryapp.chat.dto.response.ChatMessageResponse;
+import com.kilgore.fooddeliveryapp.identity.api.UserFacade;
 import com.kilgore.fooddeliveryapp.identity.dto.summary.UserSummary;
 import com.kilgore.fooddeliveryapp.common.exceptions.ChatNotAllowedException;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityNotFoundException;
 import com.kilgore.fooddeliveryapp.identity.model.User;
-import com.kilgore.fooddeliveryapp.identity.model.UserRole;
+import com.kilgore.fooddeliveryapp.identity.repository.UserRepository;
 import com.kilgore.fooddeliveryapp.ordering.model.Order;
 import com.kilgore.fooddeliveryapp.ordering.model.OrderStatus;
 import com.kilgore.fooddeliveryapp.chat.repository.ChatRepository;
@@ -27,26 +28,30 @@ public class ChatService {
     private final ChatRepository chatRepository;
     private final UserAuthorization userAuthorization;
     private final OrderRepository orderRepository;
+    private final UserFacade userFacade;
+    private final UserRepository userRepository;
 
-    public ChatService(ChatRepository chatRepository, UserAuthorization userAuthorization, OrderRepository orderRepository) {
+    public ChatService(ChatRepository chatRepository, UserAuthorization userAuthorization, OrderRepository orderRepository, UserFacade userFacade, UserRepository userRepository) {
         this.chatRepository = chatRepository;
         this.userAuthorization = userAuthorization;
         this.orderRepository = orderRepository;
+        this.userFacade = userFacade;
+        this.userRepository = userRepository;
     }
 
 
     public List<ChatMessageResponse> getMessages(Long orderId) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
 
-        if(user.getRole() == UserRole.CUSTOMER && !Objects.equals(order.getUser().getUserId(), user.getUserId()))
+        if (userFacade.isUserCustomer(userId) && !Objects.equals(order.getUserId(), userId))
             throw new AccessDeniedException("Customers can only view messages for their own orders");
 
-        else if(user.getRole() == UserRole.RESTAURANT_OWNER && !Objects.equals(order.getRestaurant().getOwner().getUserId(), user.getUserId()))
+        else if (userFacade.isUserRestaurantOwner(userId) && !userFacade.isOwnerOfRestaurant(userId, order.getRestaurantId()))
             throw new AccessDeniedException("Restaurant owner can only view messages for their own restaurant's orders");
 
-        else if(user.getRole() == UserRole.RESTAURANT_STAFF && !Objects.equals(order.getRestaurant().getRestaurantId(), user.getEmployedAt()))
+        else if (userFacade.isUserRestaurantStaff(userId) && !userFacade.isEmployedAt(userId, order.getRestaurantId()))
             throw new AccessDeniedException("Restaurant staff can only view messages for their own restaurant's orders");
 
         return chatRepository.getMessages(orderId).stream()
@@ -56,7 +61,8 @@ public class ChatService {
 
     @Transactional
     public ChatMessageResponse sendMessage(Long orderId, SendChatMessageRequest request) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
+        User user = getUser(userId);
 
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new EntityNotFoundException("Order not found"));
@@ -69,9 +75,9 @@ public class ChatService {
         else if(order.getOrderStatus() == OrderStatus.DELIVERED)
             throw new ChatNotAllowedException("Cannot send messages for delivered orders");
 
-        if(user.getRole() == UserRole.CUSTOMER && !user.getUserId().equals(order.getUser().getUserId()))
+        if(userFacade.isUserCustomer(userId) && !userId.equals(order.getUserId()))
             throw new AccessDeniedException("Only the customer who placed the order can send messages");
-        else if(user.getRole() == UserRole.RESTAURANT_STAFF && !Objects.equals(order.getRestaurant().getRestaurantId(), user.getEmployedAt()))
+        else if(userFacade.isUserRestaurantStaff(userId) && !userFacade.isEmployedAt(userId, order.getRestaurantId()))
             throw new AccessDeniedException("Restaurant staff can only send messages for their own restaurant's orders");
 
         ChatMessage chatMessage = new ChatMessage();
@@ -97,5 +103,10 @@ public class ChatService {
                 senderSummary,
                 chatMessage.getTimestamp()
         );
+    }
+
+    private User getUser(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found"));
     }
 }

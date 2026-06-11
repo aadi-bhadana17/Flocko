@@ -14,7 +14,7 @@ import java.util.*;
 @Service
 public class JwtService {
 
-    private static final String SECRET = "bXktc3VwZXItc2VjcmV0LWtleS1teS1zdXBlci1zZWNyZXQta2V5LTEyMzQ1Njc4OTA=";
+    private static final String SECRET = System.getenv("SECRET_CODE");
 
     private static final long EXPIRATION_TIME = 86_400_000;
 

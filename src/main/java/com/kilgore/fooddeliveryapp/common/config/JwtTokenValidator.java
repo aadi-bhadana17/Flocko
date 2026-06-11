@@ -20,8 +20,12 @@ import java.util.Collections;
 @Component
 public class JwtTokenValidator extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtService jwtService;
+
+    private final JwtService jwtService;
+
+    public JwtTokenValidator(JwtService jwtService) {
+        this.jwtService = jwtService;
+    }
 
 
     @Override

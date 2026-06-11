@@ -5,8 +5,7 @@ import com.kilgore.fooddeliveryapp.catalog.model.MealType;
 import com.kilgore.fooddeliveryapp.catalog.model.MessPlanSlot;
 import com.kilgore.fooddeliveryapp.catalog.model.MessSubscription;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityNotFoundException;
-import com.kilgore.fooddeliveryapp.identity.model.Address;
-import com.kilgore.fooddeliveryapp.identity.model.User;
+import com.kilgore.fooddeliveryapp.identity.api.UserFacade;
 import com.kilgore.fooddeliveryapp.ordering.model.Order;
 import com.kilgore.fooddeliveryapp.ordering.model.OrderItem;
 import com.kilgore.fooddeliveryapp.ordering.model.OrderStatus;
@@ -26,10 +25,12 @@ public class MessOrderService {
 
     private final OrderRepository orderRepository;
     private final OrderItemRepository orderItemRepository;
+    private final UserFacade userFacade;
 
-    public MessOrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository) {
+    public MessOrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository, UserFacade userFacade) {
         this.orderRepository = orderRepository;
         this.orderItemRepository = orderItemRepository;
+        this.userFacade = userFacade;
     }
 
 
@@ -44,21 +45,18 @@ public class MessOrderService {
     }
 
     @Transactional
-    public void placeOrder(List<Food> foodList, User user, MessSubscription subscription) {
+    public void placeOrder(List<Food> foodList, Long userId, MessSubscription subscription) {
 
-        Address address = user.getAddresses().stream()
-                .filter(Address::isDefault)
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Default address not found for user: " + user.getUserId()));
+        Long addressId = userFacade.getDefaultAddress(userId).getAddressId();
 
 
 
         Order order = new Order();
-        order.setUser(user);
-        order.setRestaurant(subscription.getMessPlan().getRestaurant());
+        order.setUserId(userId);
+        order.setRestaurantId(subscription.getMessPlan().getRestaurant().getRestaurantId());
         order.setOrderStatus(OrderStatus.CREATED);
         order.setCreatedAt(LocalDateTime.now());
-        order.setDeliveryAddress(address);
+        order.setDeliveryAddressId(addressId);
         order.setOrderType(OrderType.MESS);
 
         orderRepository.save(order);
@@ -81,7 +79,7 @@ public class MessOrderService {
     private OrderItem extractOrderItems(Order order, Food food) {
         OrderItem orderItem = new OrderItem();
         orderItem.setOrder(order);
-        orderItem.setFood(food);
+        orderItem.setFoodId(food.getFoodId());
         orderItem.setQuantity(1); // Assuming quantity is 1 for each food item in the mess plan
         orderItem.setItemTotal(food.getFoodPrice());
         orderItem.setPriceAtOrder(food.getFoodPrice());

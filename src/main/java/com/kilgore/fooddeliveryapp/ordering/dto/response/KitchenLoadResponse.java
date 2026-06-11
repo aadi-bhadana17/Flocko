@@ -1,6 +1,6 @@
 package com.kilgore.fooddeliveryapp.ordering.dto.response;
 
-import com.kilgore.fooddeliveryapp.ordering.model.KitchenLoadIndicator;
+import com.kilgore.fooddeliveryapp.common.enums.KitchenLoadIndicator;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,6 +12,6 @@ public class KitchenLoadResponse {
     private Long restaurantId;
     private String restaurantName;
     private KitchenLoadIndicator kitchenLoadStatus;
-    private int currentOrders;
+    private long currentOrders;
     private String message;
 }

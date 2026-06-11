@@ -4,6 +4,7 @@ import com.kilgore.fooddeliveryapp.catalog.dto.request.CreateCategoryRequest;
 import com.kilgore.fooddeliveryapp.catalog.dto.response.CreateCategoryResponse;
 import com.kilgore.fooddeliveryapp.catalog.dto.summary.AddonSummary;
 import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantSummary;
+import com.kilgore.fooddeliveryapp.catalog.util.CatalogMapper;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityAlreadyExistsException;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityNotFoundException;
 import com.kilgore.fooddeliveryapp.common.exceptions.RestaurantNotFoundException;
@@ -11,6 +12,7 @@ import com.kilgore.fooddeliveryapp.catalog.model.Category;
 import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
 import com.kilgore.fooddeliveryapp.catalog.repository.CategoryRepository;
 import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
+import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -23,10 +25,17 @@ import java.util.List;
 @Service
 public class CategoryService {
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
+    private final RestaurantRepository restaurantRepository;
+    private final CategoryRepository categoryRepository;
+    private final CatalogMapper catalogMapper;
+    private final UserAuthorization userAuthorization;
+
+    public CategoryService(RestaurantRepository restaurantRepository, CategoryRepository categoryRepository, CatalogMapper catalogMapper, UserAuthorization userAuthorization) {
+        this.restaurantRepository = restaurantRepository;
+        this.categoryRepository = categoryRepository;
+        this.catalogMapper = catalogMapper;
+        this.userAuthorization = userAuthorization;
+    }
 
     @Transactional
     @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
@@ -99,10 +108,7 @@ public class CategoryService {
         restaurant.setRestaurantName(category.getRestaurant().getRestaurantName());
 
         List<AddonSummary> addons = category.getAvailableAddons().stream()
-                .map(addon -> new AddonSummary(
-                        addon.getAddonId(),
-                        addon.getAddonName()
-                ))
+                .map(catalogMapper::toAddonSummary)
                 .toList();
 
         return new CreateCategoryResponse(
@@ -116,13 +122,12 @@ public class CategoryService {
     }
 
     private Restaurant verifyOwnerAccess(Long restaurantId) {
-        String username =  SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        Long userId = userAuthorization.authorizeUserId();
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        if(!restaurant.getOwner().getEmail().equals(username)){
+        if(!restaurant.getOwnerUserId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to perform this action of accessing Category");
         }
         return restaurant;

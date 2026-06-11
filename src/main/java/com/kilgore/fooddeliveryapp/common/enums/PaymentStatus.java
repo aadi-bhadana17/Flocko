@@ -1,4 +1,4 @@
-package com.kilgore.fooddeliveryapp.ordering.model;
+package com.kilgore.fooddeliveryapp.common.enums;
 
 public enum PaymentStatus {
     PENDING,

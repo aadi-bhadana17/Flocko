@@ -12,10 +12,10 @@ import java.util.Optional;
 @Repository
 public interface FoodRepository extends JpaRepository<Food, Long> {
 
-    Optional<Food> findByFoodNameAndRestaurant_RestaurantId(String foodName, Long restaurantId);
+    Optional<Food> findByFoodNameAndRestaurantId(String foodName, Long restaurantId);
 
-    List<Food> findByRestaurant_RestaurantId(Long restaurantId);
+    List<Food> findByRestaurantId(Long restaurantId);
 
     @EntityGraph(attributePaths = {"foodCategory", "images"})
-    List<Food> findAllByRestaurant_RestaurantId(@Param("restaurantId") Long restaurantId);
+    List<Food> findAllByRestaurantId(@Param("restaurantId") Long restaurantId);
 }

@@ -1,5 +1,6 @@
 package com.kilgore.fooddeliveryapp.identity.repository;
 
+import com.kilgore.fooddeliveryapp.identity.dto.summary.StaffSummary;
 import com.kilgore.fooddeliveryapp.identity.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -17,4 +18,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     public List<User> findByRestaurantId(@Param("restaurantId") Long restaurantId);
 
     User findByPendingPaypalOrderId(String orderId);
+
+    List<User> findByEmployedAt(Long restaurantId);
 }

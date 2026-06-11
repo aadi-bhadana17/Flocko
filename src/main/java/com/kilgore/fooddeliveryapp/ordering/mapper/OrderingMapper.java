@@ -9,16 +9,18 @@ import com.kilgore.fooddeliveryapp.identity.dto.summary.AddressSummary;
 import com.kilgore.fooddeliveryapp.identity.dto.summary.UserSummary;
 import com.kilgore.fooddeliveryapp.ordering.dto.response.CartResponse;
 import com.kilgore.fooddeliveryapp.ordering.dto.response.OrderResponse;
+import com.kilgore.fooddeliveryapp.ordering.dto.response.SharedCartResponse;
 import com.kilgore.fooddeliveryapp.ordering.dto.summary.CartItemSummary;
+import com.kilgore.fooddeliveryapp.ordering.dto.summary.CartSummary;
 import com.kilgore.fooddeliveryapp.ordering.dto.summary.OrderItemSummary;
-import com.kilgore.fooddeliveryapp.ordering.model.Cart;
-import com.kilgore.fooddeliveryapp.ordering.model.CartItem;
-import com.kilgore.fooddeliveryapp.ordering.model.Order;
-import com.kilgore.fooddeliveryapp.ordering.model.OrderItem;
+import com.kilgore.fooddeliveryapp.ordering.dto.summary.SharedCartMemberSummary;
+import com.kilgore.fooddeliveryapp.ordering.model.*;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Component
 public class OrderingMapper {
@@ -34,7 +36,7 @@ public class OrderingMapper {
 
     public OrderResponse toOrderResponse(Order order, String message) {
         UserSummary user = userFacade.getUserById(order.getUserId());
-        RestaurantSummary restaurant = catalogFacade.getRestaurant(order.getRestaurantId());
+        RestaurantSummary restaurant = catalogFacade.getRestaurantById(order.getRestaurantId());
         AddressSummary address = userFacade.getAddressById(order.getDeliveryAddressId());
 
         return new OrderResponse(
@@ -66,6 +68,33 @@ public class OrderingMapper {
         );
     }
 
+    public SharedCartResponse toSharedCartResponse(SharedCart sharedCart, Long viewerUserId) {
+        boolean viewerIsHost = sharedCart.getHostUserId().equals(viewerUserId);
+
+        List<SharedCartMember> activeMembers = sharedCart.getMemberList().stream()
+                .filter(SharedCartMember::isActive)
+                .toList();
+
+        BigDecimal recalculatedTotal = activeMembers.stream()
+                .map(member -> member.getCart() != null && member.getCart().getTotalPrice() != null
+                        ? member.getCart().getTotalPrice()
+                        : BigDecimal.ZERO)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        return new SharedCartResponse(
+                sharedCart.getSharedCartId(),
+                userFacade.getUserById(sharedCart.getHostUserId()),
+                catalogFacade.getRestaurantById(sharedCart.getRestaurantId()),
+                createSharedCartMemberSummaries(activeMembers),
+                sharedCart.getJoinCode(),
+                recalculatedTotal,
+                sharedCart.getAmountPaid(),
+                sharedCart.isHostPaysAll(),
+                sharedCart.isActive(),
+                !viewerIsHost,
+                viewerIsHost
+        );
+    }
 
     private List<OrderItemSummary> createOrderItemsSummaries(Order order) {
         return order.getOrderItems().stream()
@@ -78,7 +107,7 @@ public class OrderingMapper {
         List<AddonSummary> addons = new ArrayList<>();
 
         if(orderItem.getAddonIds() != null && !orderItem.getAddonIds().isEmpty()) {
-            addons = catalogFacade.getAddons(orderItem.getAddonIds());
+            addons = catalogFacade.getAddonsByIds(orderItem.getAddonIds());
         }
 
         return new OrderItemSummary(
@@ -97,8 +126,8 @@ public class OrderingMapper {
     }
 
     private CartItemSummary toCartItemSummary(CartItem item) {
-        FoodSummary food = catalogFacade.getFood(item.getFoodId());
-        List<AddonSummary> addons = catalogFacade.getAddons(item.getAddonIds());
+        FoodSummary food = catalogFacade.getFoodById(item.getFoodId());
+        List<AddonSummary> addons = catalogFacade.getAddonsByIds(item.getAddonIds());
 
         return new CartItemSummary(
                 item.getCartItemId(),
@@ -106,6 +135,31 @@ public class OrderingMapper {
                 item.getQuantity(),
                 addons,
                 item.getItemTotal()
+        );
+    }
+
+    private List<SharedCartMemberSummary> createSharedCartMemberSummaries(List<SharedCartMember> members) {
+        return members.stream()
+                .map(this::createSharedCartMemberSummary)
+                .toList();
+    }
+
+    private SharedCartMemberSummary createSharedCartMemberSummary(SharedCartMember member) {
+        return new SharedCartMemberSummary(
+                member.getMemberId(),
+                userFacade.getUserById(member.getUserId()),
+                toCartSummary(member.getCart()),
+                member.getWalletContribution()
+        );
+    }
+
+    private CartSummary toCartSummary(Cart cart) {
+        Objects.requireNonNull(cart, "Cart cannot be null");
+
+        return new CartSummary(
+                cart.getCartId(),
+                toCartItemSummaries(cart.getItems()),
+                cart.getTotalPrice()
         );
     }
 }

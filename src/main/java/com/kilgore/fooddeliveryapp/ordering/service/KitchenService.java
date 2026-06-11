@@ -1,13 +1,12 @@
 package com.kilgore.fooddeliveryapp.ordering.service;
 
+import com.kilgore.fooddeliveryapp.catalog.api.CatalogFacade;
+import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantSummary;
 import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
+import com.kilgore.fooddeliveryapp.identity.api.UserFacade;
+import com.kilgore.fooddeliveryapp.identity.dto.summary.UserExtendedSummary;
 import com.kilgore.fooddeliveryapp.ordering.dto.request.UpdateKitchenStatusRequest;
 import com.kilgore.fooddeliveryapp.ordering.dto.response.KitchenLoadResponse;
-import com.kilgore.fooddeliveryapp.common.exceptions.RestaurantNotFoundException;
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
-import com.kilgore.fooddeliveryapp.identity.model.User;
-import com.kilgore.fooddeliveryapp.identity.model.UserRole;
-import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 
@@ -17,46 +16,33 @@ import java.util.Objects;
 public class KitchenService {
 
     private final UserAuthorization userAuthorization;
-    private final RestaurantRepository restaurantRepository;
     private final KitchenLoadService kitchenLoadService;
+    private final CatalogFacade catalogFacade;
+    private final UserFacade userFacade;
 
-    public KitchenService(UserAuthorization userAuthorization, RestaurantRepository restaurantRepository, KitchenLoadService kitchenLoadService) {
+    public KitchenService(UserAuthorization userAuthorization, KitchenLoadService kitchenLoadService, CatalogFacade catalogFacade, UserFacade userFacade) {
         this.userAuthorization = userAuthorization;
-        this.restaurantRepository = restaurantRepository;
         this.kitchenLoadService = kitchenLoadService;
+        this.catalogFacade = catalogFacade;
+        this.userFacade = userFacade;
     }
 
 
     public KitchenLoadResponse updateKitchenStatus(Long restaurantId, UpdateKitchenStatusRequest request) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
 
-        Restaurant restaurant =  restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
+        RestaurantSummary restaurant = catalogFacade.getRestaurantById(restaurantId);
 
-        if(user.getRole().equals(UserRole.RESTAURANT_STAFF) && !Objects.equals(user.getEmployedAt(), restaurantId))
-            throw new AccessDeniedException("You are not allowed to perform this action, as you are not employed at this restaurant.");
-        else if(user.getRole().equals(UserRole.RESTAURANT_OWNER) && !restaurant.getOwner().getUserId().equals(user.getUserId()))
-            throw new AccessDeniedException("You are not allowed to perform this action, as you do not own this restaurant.");
+        if(userFacade.canUserManageRestaurant(userId, restaurantId))
+            throw new AccessDeniedException("You are not allowed to perform this action. Because you don't have authority for that");
 
+        catalogFacade.setKitchenLoadIndicator(restaurantId, request.getKitchenLoadIndicator());
 
-        restaurant.setKitchenStatus(request.getKitchenLoadIndicator());
-        restaurantRepository.save(restaurant);
-
-        return createKitchenLoadResponse(restaurant);
+        return createKitchenLoadResponse(restaurant.getRestaurantId());
     }
 
-    private KitchenLoadResponse createKitchenLoadResponse(Restaurant restaurant) {
-        int currentOrders = kitchenLoadService.getCurrentOrders(restaurant);
-
-        return new KitchenLoadResponse(
-                restaurant.getRestaurantId(),
-                restaurant.getRestaurantName(),
-                restaurant.getKitchenStatus(),
-                currentOrders,
-                "The kitchen load status has been updated to " + restaurant.getKitchenStatus()
-                        + " according to the request made by the restaurant staff or owner." +
-                        " The current number of orders in the kitchen is " + currentOrders + "."
-        );
+    private KitchenLoadResponse createKitchenLoadResponse(Long restaurantId) {
+        long currentOrders = kitchenLoadService.getCurrentOrders(restaurantId);
+        return catalogFacade.getKitchenLoadResponse(restaurantId, currentOrders);
     }
-
 }

@@ -1,14 +1,9 @@
 package com.kilgore.fooddeliveryapp.identity.service;
 
-import com.kilgore.fooddeliveryapp.catalog.model.MessPlan;
-import com.kilgore.fooddeliveryapp.catalog.model.MessSubscription;
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
-import com.kilgore.fooddeliveryapp.catalog.repository.MessPlanRepository;
-import com.kilgore.fooddeliveryapp.catalog.repository.MessSubscriptionRepository;
-import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
+import com.kilgore.fooddeliveryapp.catalog.api.CatalogFacade;
 import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import com.kilgore.fooddeliveryapp.identity.model.Address;
-import com.kilgore.fooddeliveryapp.ordering.model.PaymentStatus;
+import com.kilgore.fooddeliveryapp.common.enums.PaymentStatus;
 import com.kilgore.fooddeliveryapp.identity.repository.AddressRepository;
 import com.kilgore.fooddeliveryapp.identity.dto.request.AddressRequest;
 import com.kilgore.fooddeliveryapp.identity.dto.request.ChangePasswordRequest;
@@ -46,20 +41,18 @@ public class UserService {
     private final RoleChangeRequestRepository roleChangeRequestRepository;
     private final UserAuthorization userAuthorization;
     private final AddressRepository addressRepository;
-    private final RestaurantRepository restaurantRepository;
-    private final MessPlanRepository messPlanRepository;
-    private final MessSubscriptionRepository messSubscriptionRepository;
     private final PasswordEncoder passwordEncoder;
+    private final CatalogFacade catalogFacade;
 
-    public UserService(UserRepository userRepository, RoleChangeRequestRepository roleChangeRequestRepository, UserAuthorization userAuthorization, AddressRepository addressRepository, RestaurantRepository restaurantRepository, MessPlanRepository messPlanRepository, MessSubscriptionRepository messSubscriptionRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, RoleChangeRequestRepository roleChangeRequestRepository,
+                       UserAuthorization userAuthorization, AddressRepository addressRepository,
+                       PasswordEncoder passwordEncoder, CatalogFacade catalogFacade) {
         this.userRepository = userRepository;
         this.roleChangeRequestRepository = roleChangeRequestRepository;
         this.userAuthorization = userAuthorization;
         this.addressRepository = addressRepository;
-        this.restaurantRepository = restaurantRepository;
-        this.messPlanRepository = messPlanRepository;
-        this.messSubscriptionRepository = messSubscriptionRepository;
         this.passwordEncoder = passwordEncoder;
+        this.catalogFacade = catalogFacade;
     }
 
     // -----------------------------------------------------Profile Management------------------------------------------------------
@@ -188,13 +181,8 @@ public class UserService {
     public List<RestaurantSummary> getFavouriteRestaurants() {
         User user = userAuthorization.authorizeUser();
 
-        return user.getFavourites().stream()
-                .map(restaurant -> new RestaurantSummary(
-                        restaurant.getRestaurantId(),
-                        restaurant.getRestaurantName(),
-                        restaurant.getCuisineType(),
-                        restaurant.getAvgRating()
-                ))
+        return user.getFavouriteRestaurantIds().stream()
+                .map(catalogFacade::getRestaurantById)
                 .toList();
     }
 
@@ -202,10 +190,7 @@ public class UserService {
     public String addFavouriteRestaurant(Long restaurantId) {
         User user = userAuthorization.authorizeUser();
 
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant with this id not found"));
-
-        user.getFavourites().add(restaurant);
+        user.getFavouriteRestaurantIds().add(restaurantId);
         userRepository.save(user);
 
         return "Restaurant added to favourites";
@@ -215,10 +200,7 @@ public class UserService {
     public String removeFavouriteRestaurant(Long restaurantId) {
         User user = userAuthorization.authorizeUser();
 
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant with this id not found"));
-
-        user.getFavourites().remove(restaurant);
+        user.getFavouriteRestaurantIds().remove(restaurantId);
         userRepository.save(user);
 
         return "Restaurant removed from favourites";
@@ -286,65 +268,5 @@ public class UserService {
             throw new AccessDeniedException("This Address does not belongs to you");
 
         return address;
-    }
-
-    private MessSubscriptionResponse createMessSubscriptionResponse(MessSubscription subscription) {
-
-        MessPlanSummary plan = new  MessPlanSummary(
-                subscription.getMessPlan().getMessPlanId(),
-                subscription.getMessPlan().getMessPlanName(),
-                subscription.getMessPlan().getDescription(),
-                subscription.getMessPlan().getPrice()
-        );
-
-
-        return new MessSubscriptionResponse(
-                subscription.getSubscriptionId(),
-                plan,
-                subscription.getStartDate(),
-                subscription.getEndDate(),
-                subscription.isActive()
-        );
-    }
-
-    @Transactional
-    public String subscribeToMessPlan(Long messPlanId) {
-        User user = userAuthorization.authorizeUser();
-
-        Address defAddress = user.getAddresses().stream()
-                .filter(Address::isDefault)
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("Default address not found for user: " + user.getUserId()));
-
-        MessPlan messPlan = messPlanRepository.findById(messPlanId)
-                .orElseThrow(() -> new EntityNotFoundException("Mess Plan with this id not found"));
-
-        if(messSubscriptionRepository.findActiveSubscriptionByUserAndMessPlan(user, messPlan) != null) {
-            throw new AccessDeniedException("You already have an active subscription for this mess plan");
-        }
-
-
-        LocalDate now = LocalDate.now();
-
-        MessSubscription messSubscription = new MessSubscription();
-        messSubscription.setUser(user);
-        messSubscription.setMessPlan(messPlan);
-        messSubscription.setStartDate(now);
-        messSubscription.setEndDate(now.plusDays(7));
-        messSubscription.setActive(true);
-        messSubscription.setPaymentStatus(PaymentStatus.SUCCESS);
-
-        messSubscriptionRepository.save(messSubscription);
-
-        return "You have been subscribed to mess plan : " + messPlan.getMessPlanName() + " for upcoming 7 days";
-    }
-
-    public List<MessSubscriptionResponse> getMyMessSubscriptions(Boolean active) {
-        User user = userAuthorization.authorizeUser();
-
-        return messSubscriptionRepository.findAllByUser(user).stream()
-                .filter(sub -> active == null || sub.isActive() == active)
-                .map(this::createMessSubscriptionResponse)
-                .toList();
     }
 }

@@ -14,16 +14,16 @@ import java.util.List;
 public interface GroupDealRepository extends JpaRepository<GroupDeal, Long> {
 
     @Query("SELECT gd FROM GroupDeal gd " +
-            "WHERE gd.restaurant.restaurantId = :restaurantId " +
+            "WHERE gd.restaurantId = :restaurantId " +
             "AND gd.status IN :statuses")
     List<GroupDeal> getActiveDealsForRestaurant(@Param("restaurantId") Long restaurantId, @Param("statuses") List<GroupDealStatus> statuses);
 
     @Query("SELECT gd FROM GroupDeal gd" +
-            " WHERE gd.restaurant.restaurantId = :restaurantId")
+            " WHERE gd.restaurantId = :restaurantId")
     List<GroupDeal> getAllDealsForRestaurant(@Param("restaurantId") Long restaurantId);
 
     @Query("SELECT gd FROM GroupDeal gd " +
-            "WHERE gd.restaurant.restaurantId = :restaurantId " +
+            "WHERE gd.restaurantId = :restaurantId " +
             "AND gd.dealName != :dealName " +
             "AND gd.status IN :statuses " +
             "AND gd.startTime <= :now")

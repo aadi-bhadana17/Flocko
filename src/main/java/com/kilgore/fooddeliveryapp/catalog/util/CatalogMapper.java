@@ -1,10 +1,8 @@
 package com.kilgore.fooddeliveryapp.catalog.util;
 
-import com.kilgore.fooddeliveryapp.catalog.dto.summary.AddonSummary;
-import com.kilgore.fooddeliveryapp.catalog.dto.summary.FoodSummary;
-import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantExtendedSummary;
-import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantSummary;
+import com.kilgore.fooddeliveryapp.catalog.dto.summary.*;
 import com.kilgore.fooddeliveryapp.catalog.model.Addon;
+import com.kilgore.fooddeliveryapp.catalog.model.Category;
 import com.kilgore.fooddeliveryapp.catalog.model.Food;
 import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
 
@@ -27,7 +25,8 @@ public class CatalogMapper {
                 restaurant.getRestaurantId(),
                 restaurant.getRestaurantName(),
                 restaurant.getOpeningTime(),
-                restaurant.getClosingTime()
+                restaurant.getClosingTime(),
+                restaurant.getOwnerUserId()
         );
     }
 
@@ -47,6 +46,13 @@ public class CatalogMapper {
                 addon.getAddonId(),
                 addon.getAddonName(),
                 addon.getPrice()
+        );
+    }
+
+    public CategorySummary toCategorySummary(Category category) {
+        return new CategorySummary(
+                category.getCategoryId(),
+                category.getCategoryName()
         );
     }
 

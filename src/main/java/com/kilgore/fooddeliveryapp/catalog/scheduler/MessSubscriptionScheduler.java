@@ -60,7 +60,7 @@ public class MessSubscriptionScheduler {
 
         subscriptionList.forEach(subscription -> {
             MessPlanSlot slot = messOrderService.processSubscription(subscription, dayOfWeek, mealType);
-            messOrderService.placeOrder(slot.getFoodItems(), subscription.getUser(), subscription);
+            messOrderService.placeOrder(slot.getFoodItems(), subscription.getUserId(), subscription);
         });
     }
 

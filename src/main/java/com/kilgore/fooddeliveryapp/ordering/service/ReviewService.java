@@ -1,5 +1,6 @@
 package com.kilgore.fooddeliveryapp.ordering.service;
 
+import com.kilgore.fooddeliveryapp.catalog.api.CatalogFacade;
 import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import com.kilgore.fooddeliveryapp.ordering.dto.request.CreateReviewRequest;
 import com.kilgore.fooddeliveryapp.ordering.dto.response.ReviewResponse;
@@ -7,7 +8,7 @@ import com.kilgore.fooddeliveryapp.common.exceptions.EntityNotFoundException;
 import com.kilgore.fooddeliveryapp.common.exceptions.RestaurantNotFoundException;
 import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
 import com.kilgore.fooddeliveryapp.ordering.model.Review;
-import com.kilgore.fooddeliveryapp.identity.model.User;
+import com.kilgore.fooddeliveryapp.identity.api.UserFacade;
 import com.kilgore.fooddeliveryapp.ordering.repository.OrderRepository;
 import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
 import com.kilgore.fooddeliveryapp.ordering.repository.ReviewRepository;
@@ -26,23 +27,24 @@ public class ReviewService {
     private final UserAuthorization userAuthorization;
     private final OrderRepository orderRepository;
     private final RestaurantRepository restaurantRepository;
-    private final MappingService mappingService;
+    private final UserFacade userFacade;
+    private final CatalogFacade catalogFacade;
 
-    public ReviewService(ReviewRepository reviewRepository, UserAuthorization userAuthorization, OrderRepository orderRepository, RestaurantRepository restaurantRepository, MappingService mappingService) {
+    public ReviewService(ReviewRepository reviewRepository, UserAuthorization userAuthorization, OrderRepository orderRepository, RestaurantRepository restaurantRepository, UserFacade userFacade, CatalogFacade catalogFacade) {
         this.reviewRepository = reviewRepository;
         this.userAuthorization = userAuthorization;
         this.orderRepository = orderRepository;
         this.restaurantRepository = restaurantRepository;
-        this.mappingService = mappingService;
+
+        this.userFacade = userFacade;
+        this.catalogFacade = catalogFacade;
     }
 
     public List<ReviewResponse> getReviewsForRestaurant(Long restaurantId) {
-        User user = userAuthorization.authorizeUser();
-
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        List<Review> reviews = reviewRepository.findByRestaurantRestaurantId(restaurantId);
+        List<Review> reviews = reviewRepository.findByRestaurantId(restaurantId);
         if(reviews.isEmpty()) {
             throw new EntityNotFoundException("There are no reviews posted for this restaurant.");
         }
@@ -53,8 +55,6 @@ public class ReviewService {
     }
 
     public ReviewResponse getReview(Long restaurantId, Long reviewId) {
-        User user = userAuthorization.authorizeUser();
-
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
@@ -65,9 +65,9 @@ public class ReviewService {
     }
 
     public List<ReviewResponse> getReviewsForUser() {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
 
-        List<Review> reviews = reviewRepository.findByUserUserId(user.getUserId());
+        List<Review> reviews = reviewRepository.findByUserId(userId);
 
         return reviews.stream()
                 .map(this::mapToReviewResponse)
@@ -76,19 +76,19 @@ public class ReviewService {
 
     @Transactional
     public ReviewResponse createReview(Long restaurantId, CreateReviewRequest request) {
-        User user = userAuthorization.authorizeUser();
+        Long userId = userAuthorization.authorizeUserId();
 
         LocalDateTime fifteenDaysAgo = LocalDateTime.now().minusDays(15);
 
-        if(reviewRepository.existsByUserUserIdAndRestaurantRestaurantIdAndPostedAtAfter(
-                user.getUserId(), restaurantId, fifteenDaysAgo)) {
+        if(reviewRepository.existsByUserIdAndRestaurantIdAndPostedAtAfter(
+                userId, restaurantId, fifteenDaysAgo)) {
             throw new IllegalStateException("You have already reviewed this restaurant within the last 15 days.");
         }
 
         LocalDateTime ninetyDaysAgo = LocalDateTime.now().minusDays(90);
 
-        if(!orderRepository.existsByUserUserIdAndRestaurantRestaurantIdAndCreatedAtAfter(
-                user.getUserId(), restaurantId, ninetyDaysAgo)) {
+        if(!orderRepository.existsByUserIdAndRestaurantIdAndCreatedAtAfter(
+                userId, restaurantId, ninetyDaysAgo)) {
             throw new IllegalStateException("You can only review a restaurant if you have placed an order within the last 90 days.");
         }
 
@@ -99,8 +99,8 @@ public class ReviewService {
 
         review.setRating(request.getRating());
         review.setComment(request.getComment());
-        review.setUser(user);
-        review.setRestaurant(restaurant);
+        review.setUserId(userId);
+        review.setRestaurantId(restaurant.getRestaurantId());
         review.setPostedAt(LocalDateTime.now());
 
         reviewRepository.save(review);
@@ -137,8 +137,8 @@ public class ReviewService {
                 review.getReviewId(),
                 review.getRating(),
                 review.getComment(),
-                mappingService.toUserSummary(review.getUser()),
-                mappingService.toRestaurantSummary(review.getRestaurant()),
+                userFacade.getUserById(review.getUserId()),
+                catalogFacade.getRestaurantById(review.getRestaurantId()),
                 review.getPostedAt()
         );
     }

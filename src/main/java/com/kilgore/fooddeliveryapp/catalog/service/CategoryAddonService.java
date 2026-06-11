@@ -3,6 +3,7 @@ package com.kilgore.fooddeliveryapp.catalog.service;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.AppendAddonRequest;
 import com.kilgore.fooddeliveryapp.catalog.dto.response.AppendAddonsResponse;
 import com.kilgore.fooddeliveryapp.catalog.dto.summary.AddonSummary;
+import com.kilgore.fooddeliveryapp.catalog.util.CatalogMapper;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityNotFoundException;
 import com.kilgore.fooddeliveryapp.common.exceptions.RestaurantNotFoundException;
 import com.kilgore.fooddeliveryapp.catalog.model.Addon;
@@ -11,8 +12,8 @@ import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
 import com.kilgore.fooddeliveryapp.catalog.repository.AddonRepository;
 import com.kilgore.fooddeliveryapp.catalog.repository.CategoryRepository;
 import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
+import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,12 +26,19 @@ import java.util.stream.Collectors;
 @Service
 public class CategoryAddonService {
 
-    @Autowired
-    private RestaurantRepository restaurantRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private AddonRepository addonRepository;
+    private final RestaurantRepository restaurantRepository;
+    private final CategoryRepository categoryRepository;
+    private final AddonRepository addonRepository;
+    private final CatalogMapper catalogMapper;
+    private final UserAuthorization userAuthorization;
+
+    public CategoryAddonService(RestaurantRepository restaurantRepository, CategoryRepository categoryRepository, AddonRepository addonRepository, CatalogMapper catalogMapper, UserAuthorization userAuthorization) {
+        this.restaurantRepository = restaurantRepository;
+        this.categoryRepository = categoryRepository;
+        this.addonRepository = addonRepository;
+        this.catalogMapper = catalogMapper;
+        this.userAuthorization = userAuthorization;
+    }
 
     @Transactional
     @CacheEvict(value = "restaurantMenu", key = "#restaurantId")
@@ -47,14 +55,14 @@ public class CategoryAddonService {
         addons.forEach(category::addAddon);
 
 
-        return createAppendAddonsResponse(category);
+        return toAddonsResponse(category);
     }
 
     public AppendAddonsResponse getAddons(Long restaurantId, Long categoryId) {
         Restaurant restaurant = verifyOwnerAccess(restaurantId);
         Category category = checkCategory(restaurant, categoryId);
 
-        return createAppendAddonsResponse(category);
+        return toAddonsResponse(category);
     }
 
     @Transactional
@@ -73,18 +81,17 @@ public class CategoryAddonService {
         // No need to save, because it is @Transactional method and the entity has been managed while fetching
         // so hibernate knows something will change, no need to save, it will happen automatically
 
-        return createAppendAddonsResponse(category);
+        return toAddonsResponse(category);
     }
 
 
     private Restaurant verifyOwnerAccess(Long restaurantId) {
-        String username =  SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        Long userId = userAuthorization.authorizeUserId();
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        if(!restaurant.getOwner().getEmail().equals(username)){
+        if(!restaurant.getOwnerUserId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to perform this action of accessing Addons for this restaurant.");
         }
         return restaurant;
@@ -127,15 +134,12 @@ public class CategoryAddonService {
         }
     }
 
-    private AppendAddonsResponse createAppendAddonsResponse(Category category) {
+    private AppendAddonsResponse toAddonsResponse(Category category) {
 
         Set<Addon> addons = category.getAvailableAddons();
 
         List<AddonSummary> addonSummaries = addons.stream()
-                .map(addon -> new AddonSummary(
-                        addon.getAddonId(),
-                        addon.getAddonName()
-                ))
+                .map(catalogMapper::toAddonSummary)
                 .toList();
 
         return new AppendAddonsResponse(

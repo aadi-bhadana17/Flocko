@@ -1,0 +1,27 @@
+[33m2c58a95[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{0}: rebase (finish): returning to refs/heads/master
+[33m2c58a95[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{1}: rebase (start): checkout 2c58a9588ee625400285a243a116bc9113a1910d
+[33m635ac1d[m HEAD@{2}: commit: User Management complete
+[33m2c58a95[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m, [m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m HEAD@{3}: merge origin/master: Merge made by the 'ort' strategy.
+[33m6dc3383[m HEAD@{4}: commit: Enhance frontend with dynamic pages
+[33m630fde1[m HEAD@{5}: commit: handle auth in frontend
+[33m498ec36[m HEAD@{6}: commit: Added frontend project
+[33m0b2c287[m HEAD@{7}: commit: Order Management completed
+[33md530e38[m HEAD@{8}: commit: Beautify the file, by clearing mess
+[33mc7ead72[m HEAD@{9}: commit: Completion of Cart Management
+[33mbadc8da[m HEAD@{10}: commit: Initial and Mid, phase of Cart Management
+[33m38ba776[m HEAD@{11}: commit: Food Management Done
+[33maed5aa0[m HEAD@{12}: commit: Add some exceptions and make code beautiful
+[33m3ae285e[m HEAD@{13}: commit: Enables Many-to-Many relationship b/w Addon and Category, and here this management is completed
+[33mf6fb0a7[m HEAD@{14}: commit: README updated
+[33m07bca32[m HEAD@{15}: commit: Change Ingredient Management to Addon
+[33m935a69d[m HEAD@{16}: commit: Enables auto login after signup for better user experience
+[33maca14f4[m HEAD@{17}: commit: Handles validation of openingTime of restaurant, it should not be after closing time
+[33mcae3f25[m HEAD@{18}: merge origin/master: Merge made by the 'ort' strategy.
+[33m7aa3a6f[m HEAD@{19}: commit: Add Ingredient management to progress in Food & Menu Department
+[33m58f546a[m HEAD@{20}: commit: First Step to Food and Menu Management, add Category Management
+[33m0c224c0[m HEAD@{21}: commit: Add methods to change and get Restaurant and manage Auth
+[33ma397782[m HEAD@{22}: merge origin/master: Merge made by the 'ort' strategy.
+[33m73f6bfa[m HEAD@{23}: commit: Add Files for Restaurant Management
+[33m4178735[m HEAD@{24}: commit: Add User and Admin controller, request for role change, modify AuthController.java and AppConfig.java
+[33m387c353[m HEAD@{25}: commit: Change in some files, and implement security config and Auth controller
+[33me8441cd[m HEAD@{26}: commit (initial): Initial domain model and project setup, and establish relationships between entites

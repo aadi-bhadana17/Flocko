@@ -1,7 +1,5 @@
 package com.kilgore.fooddeliveryapp.deals.model;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Food;
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,8 +21,8 @@ public class GroupDeal {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long dealId;
     private String dealName;
-    @ManyToOne
-    private Restaurant restaurant;
+    @Column(name = "restaurant_restaurant_id", nullable = false)
+    private Long restaurantId;
 
     private LocalDateTime startTime;
     private LocalDateTime endTime;
@@ -32,8 +30,14 @@ public class GroupDeal {
     private BigDecimal originalPrice;
     private int maxDiscount;
 
-    @ManyToMany
-    private List<Food> foodList = new ArrayList<>();
+    @ElementCollection
+    @CollectionTable(
+            name = "group_deal_food_ids",
+            joinColumns = @JoinColumn(name = "deal_id")
+    )
+    @Column(name = "food_id")
+    private List<Long> foodIds = new ArrayList<>();
+
     private int targetParticipation;
 
     @Enumerated(EnumType.STRING)

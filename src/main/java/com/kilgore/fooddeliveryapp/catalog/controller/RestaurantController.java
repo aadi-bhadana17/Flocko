@@ -1,11 +1,11 @@
 package com.kilgore.fooddeliveryapp.catalog.controller;
 
-import com.kilgore.fooddeliveryapp.identity.dto.request.AddStaffRequest;
+import com.kilgore.fooddeliveryapp.catalog.dto.request.AddStaffRequest;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.RestaurantRequest;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.RestaurantStatusRequest;
 import com.kilgore.fooddeliveryapp.catalog.dto.response.RestaurantResponse;
 import com.kilgore.fooddeliveryapp.identity.dto.response.StaffCreationResponse;
-import com.kilgore.fooddeliveryapp.identity.dto.summary.UserSummary;
+import com.kilgore.fooddeliveryapp.identity.dto.summary.StaffSummary;
 import com.kilgore.fooddeliveryapp.catalog.service.RestaurantService;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -66,7 +66,7 @@ public class RestaurantController {
 
     @GetMapping("{id}/staff")
     @PreAuthorize("hasAnyAuthority('RESTAURANT_OWNER', 'ADMIN')")
-    public List<UserSummary> getAllStaff(@PathVariable Long id) {
+    public List<StaffSummary> getAllStaff(@PathVariable Long id) {
         return restaurantService.getAllStaff(id);
     }
 

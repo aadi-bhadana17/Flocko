@@ -23,12 +23,11 @@ public class Food {
     private String foodDescription;
     private BigDecimal foodPrice;
 
-    @ManyToOne
-    @JsonIgnore
-    private Restaurant restaurant;
+    @Column(name = "restaurant_restaurant_id", nullable = false)
+    private Long restaurantId;
 
-    @ManyToOne
-    private Category foodCategory;
+    @Column(name = "food_category_category_id", nullable = false)
+    private Long categoryId;
 
     @Column(length = 1000)
     @ElementCollection(fetch = FetchType.EAGER)

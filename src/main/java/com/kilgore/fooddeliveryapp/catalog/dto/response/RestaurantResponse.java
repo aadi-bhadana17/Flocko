@@ -4,6 +4,7 @@ import com.kilgore.fooddeliveryapp.catalog.dto.request.ContactInformationDto;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.RestaurantAddressDto;
 import com.kilgore.fooddeliveryapp.catalog.model.CuisineType;
 import com.kilgore.fooddeliveryapp.catalog.model.RestaurantStatus;
+import com.kilgore.fooddeliveryapp.identity.dto.summary.UserSummary;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -19,7 +20,7 @@ public class RestaurantResponse {
     private Long restaurantId;
     private String restaurantName;
     private String restaurantDescription;
-    private OwnerResponse owner;
+    private UserSummary owner;
     private CuisineType cuisineType;
     private RestaurantAddressDto address;
     private ContactInformationDto contactInformation;

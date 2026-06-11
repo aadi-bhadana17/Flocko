@@ -1,20 +1,17 @@
 package com.kilgore.fooddeliveryapp.deals.service;
 
+import com.kilgore.fooddeliveryapp.common.enums.RefundReason;
+import com.kilgore.fooddeliveryapp.common.enums.RefundStatus;
+import com.kilgore.fooddeliveryapp.deals.dto.request.CreateGroupDealOrderRequest;
 import com.kilgore.fooddeliveryapp.deals.model.GroupDeal;
 import com.kilgore.fooddeliveryapp.deals.model.GroupDealParticipation;
 import com.kilgore.fooddeliveryapp.deals.model.GroupDealStatus;
 import com.kilgore.fooddeliveryapp.deals.model.GroupDealTier;
 import com.kilgore.fooddeliveryapp.deals.repository.GroupDealParticipationRepository;
 import com.kilgore.fooddeliveryapp.deals.repository.GroupDealRepository;
-import com.kilgore.fooddeliveryapp.ordering.model.PaymentStatus;
-import com.kilgore.fooddeliveryapp.identity.model.User;
-import com.kilgore.fooddeliveryapp.identity.repository.UserRepository;
-import com.kilgore.fooddeliveryapp.ordering.model.Order;
-import com.kilgore.fooddeliveryapp.ordering.model.OrderItem;
-import com.kilgore.fooddeliveryapp.ordering.model.OrderStatus;
-import com.kilgore.fooddeliveryapp.ordering.model.OrderType;
-import com.kilgore.fooddeliveryapp.ordering.repository.OrderItemRepository;
-import com.kilgore.fooddeliveryapp.ordering.repository.OrderRepository;
+import com.kilgore.fooddeliveryapp.common.enums.PaymentStatus;
+import com.kilgore.fooddeliveryapp.identity.api.UserFacade;
+import com.kilgore.fooddeliveryapp.ordering.api.OrderingFacade;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -29,17 +26,15 @@ import java.util.List;
 public class GroupDealOrderService {
 
     private final GroupDealParticipationRepository groupDealParticipationRepository;
-    private final UserRepository userRepository;
-    private final OrderRepository orderRepository;
-    private final OrderItemRepository orderItemRepository;
     private final GroupDealRepository groupDealRepository;
+    private final UserFacade userFacade;
+    private final OrderingFacade orderingFacade;
 
-    public GroupDealOrderService(GroupDealParticipationRepository groupDealParticipationRepository, UserRepository userRepository, OrderRepository orderRepository, OrderItemRepository orderItemRepository, GroupDealRepository groupDealRepository) {
+    public GroupDealOrderService(GroupDealParticipationRepository groupDealParticipationRepository, GroupDealRepository groupDealRepository, UserFacade userFacade, OrderingFacade orderingFacade) {
         this.groupDealParticipationRepository = groupDealParticipationRepository;
-        this.userRepository = userRepository;
-        this.orderRepository = orderRepository;
-        this.orderItemRepository = orderItemRepository;
         this.groupDealRepository = groupDealRepository;
+        this.userFacade = userFacade;
+        this.orderingFacade = orderingFacade;
     }
 
     @Transactional
@@ -78,55 +73,43 @@ public class GroupDealOrderService {
     public void refundToUser(GroupDeal deal, List<GroupDealParticipation> participationList, Integer currentParticipation) {
         BigDecimal currentPrice = calculateCurrentPrice(deal, currentParticipation);
 
-        List<User> users = new ArrayList<>();
         participationList.forEach(par -> {
-            User userToRefund = par.getUser();
+            Long userIdToRefund = par.getUserId();
             BigDecimal refund;
 
             if(deal.getStatus() == GroupDealStatus.EXPIRED) {
                 refund = par.getAmountPaid(); // full refund if deal expired
+                par.setRefundStatus(RefundStatus.PENDING); // mark as pending until we confirm refund is successful
             } else {
                 refund = (par.getAmountPaid().subtract(currentPrice)).multiply(BigDecimal.valueOf(par.getQuantity())); // refund only discounted amount
+                par.setRefundStatus(RefundStatus.PENDING);
             }
 
-            par.getUser().setWalletBalance(par.getUser().getWalletBalance().add(refund));
-            users.add(userToRefund);
-        });
+            userFacade.addWalletBalance(userIdToRefund, refund);
+            par.setRefundStatus(RefundStatus.COMPLETED);
+            par.setRefundReason(deal.getStatus() == GroupDealStatus.EXPIRED ?
+                    RefundReason.DEAL_EXPIRED : RefundReason.GROUP_DEAL_DISCOUNT);
+            par.setRefundAt(LocalDateTime.now());
+            par.setRefundAmount(refund);
 
-        userRepository.saveAll(users);
+            groupDealParticipationRepository.save(par);
+        });
     }
 
     private void placeOrder(GroupDeal deal, GroupDealParticipation par, BigDecimal currentPrice) {
-        Order order = new Order();
-        order.setUser(par.getUser());
-        order.setRestaurant(deal.getRestaurant());
-        order.setTotalPrice(currentPrice.multiply(BigDecimal.valueOf(par.getQuantity())));
-        order.setOrderStatus(OrderStatus.CREATED);
-        order.setCreatedAt(LocalDateTime.now());
-        order.setDeliveryAddress(par.getAddressToDeliver());
-        order.setPaymentStatus(PaymentStatus.SUCCESS);
-        order.setTotalQuantity(par.getQuantity());
-        order.setOrderType(OrderType.GROUP_DEAL);
-
-        orderRepository.save(order);
-        order.setOrderItems(createOrderItems(deal, order));
-        orderRepository.save(order);
+        Long orderId = orderingFacade.placeGroupDealOrder(mapToCreateGroupDealOrderRequest(deal, par, currentPrice));
     }
 
-    private List<OrderItem> createOrderItems(GroupDeal deal, Order order) {
-        List<OrderItem> orderItems = new ArrayList<>();
-        deal.getFoodList().forEach(food -> {
-            OrderItem item = new OrderItem();
-            item.setFood(food);
-            item.setQuantity(1);
-            item.setPriceAtOrder(food.getFoodPrice());
-            item.setItemTotal(food.getFoodPrice());
-            item.setOrder(order);
-
-            orderItems.add(item);
-        });
-        orderItemRepository.saveAll(orderItems);
-        return orderItems;
+    private CreateGroupDealOrderRequest mapToCreateGroupDealOrderRequest(GroupDeal deal, GroupDealParticipation par,
+                                                                         BigDecimal currentPrice) {
+        return new CreateGroupDealOrderRequest(
+                par.getUserId(),
+                deal.getRestaurantId(),
+                par.getAddressIdToDeliver(),
+                currentPrice.multiply(BigDecimal.valueOf(par.getQuantity())),
+                par.getQuantity(),
+                deal.getFoodIds()
+        );
     }
 
     private BigDecimal calculateCurrentPrice(GroupDeal deal, int currentParticipation) {

@@ -1,5 +1,6 @@
 package com.kilgore.fooddeliveryapp.catalog.service;
 
+import com.kilgore.fooddeliveryapp.catalog.util.CatalogMapper;
 import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.FoodRequest;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.FoodStatusRequest;
@@ -31,12 +32,16 @@ public class FoodService {
     private final CategoryRepository categoryRepository;
     private final RestaurantRepository restaurantRepository;
     private final UserAuthorization userAuthorization;
+    private final CatalogMapper catalogMapper;
 
-    public FoodService(FoodRepository foodRepository, CategoryRepository categoryRepository, RestaurantRepository restaurantRepository, UserAuthorization userAuthorization) {
+    public FoodService(FoodRepository foodRepository, CategoryRepository categoryRepository,
+                       RestaurantRepository restaurantRepository, UserAuthorization userAuthorization,
+                       CatalogMapper catalogMapper) {
         this.foodRepository = foodRepository;
         this.categoryRepository = categoryRepository;
         this.restaurantRepository = restaurantRepository;
         this.userAuthorization = userAuthorization;
+        this.catalogMapper = catalogMapper;
     }
 
     @Transactional
@@ -56,8 +61,8 @@ public class FoodService {
         food.setFoodDescription(request.getFoodDescription());
         food.setFoodPrice(request.getFoodPrice());
 
-        food.setRestaurant(restaurant);
-        food.setFoodCategory(category);
+        food.setRestaurantId(restaurant.getRestaurantId());
+        food.setCategoryId(category.getCategoryId());
         food.setImages(request.getImages());
 
         food.setVegetarian(request.isVegetarian());
@@ -73,7 +78,7 @@ public class FoodService {
     public List<FoodResponse> findAllFoods(Long restaurantId) {
         verifyOwnerAccess(restaurantId);
 
-        List<Food> foods = foodRepository.findByRestaurant_RestaurantId(restaurantId);
+        List<Food> foods = foodRepository.findByRestaurantId(restaurantId);
 
         return   foods.stream()
                 .map(this::createFoodResponse)
@@ -105,7 +110,7 @@ public class FoodService {
         food.setFoodName(request.getFoodName());
         food.setFoodDescription(request.getFoodDescription());
         food.setFoodPrice(request.getFoodPrice());
-        food.setFoodCategory(category);
+        food.setCategoryId(category.getCategoryId());
         food.setImages(request.getImages());
         food.setVegetarian(request.isVegetarian());
         food.setAvailable(request.isAvailable());
@@ -139,12 +144,12 @@ public class FoodService {
     }
 
     private Restaurant verifyOwnerAccess(Long restaurantId) {
-        String username = userAuthorization.authorizeUser().getEmail();
+        Long userId = userAuthorization.authorizeUserId();
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        if(!restaurant.getOwner().getEmail().equals(username)){
+        if(!restaurant.getOwnerUserId().equals(userId)) {
             throw new AccessDeniedException("You are not owner of this restaurant, " +
                     "so you are not allowed to perform this action of accessing Foods");
         }
@@ -164,16 +169,13 @@ public class FoodService {
 
     private FoodResponse createFoodResponse(Food food) {
 
-        RestaurantSummary restaurant = new RestaurantSummary(
-                food.getRestaurant().getRestaurantId(),
-                food.getRestaurant().getRestaurantName(),
-                food.getRestaurant().getCuisineType(),
-                food.getRestaurant().getAvgRating()
+        RestaurantSummary restaurant = catalogMapper.toRestaurantSummary(
+                restaurantRepository.findById(food.getRestaurantId())
+                        .orElseThrow(() -> new RestaurantNotFoundException(food.getRestaurantId()))
         );
-
-        CategorySummary category = new CategorySummary(
-                food.getFoodCategory().getCategoryId(),
-                food.getFoodCategory().getCategoryName()
+        CategorySummary category = catalogMapper.toCategorySummary(
+                categoryRepository.findById(food.getCategoryId())
+                        .orElseThrow(() -> new EntityNotFoundException("Category not found"))
         );
 
         return new FoodResponse(
@@ -191,14 +193,14 @@ public class FoodService {
     }
 
     private boolean isFoodExists(Long restaurantId, FoodRequest request) {
-        return foodRepository.findByFoodNameAndRestaurant_RestaurantId(
+        return foodRepository.findByFoodNameAndRestaurantId(
                 request.getFoodName(),
                 restaurantId
         ).isPresent();
     }
 
     private boolean isFoodNameDuplicated(Long restaurantId, Long foodId, String newFoodName) {
-        Optional<Food> food = foodRepository.findByFoodNameAndRestaurant_RestaurantId(newFoodName,  restaurantId);
+        Optional<Food> food = foodRepository.findByFoodNameAndRestaurantId(newFoodName,  restaurantId);
 
         return food.filter(value -> !value.getFoodId().equals(foodId)).isPresent();
         // if the food we are getting from param, and food from repo here, have same ID then we are fine not otherwise

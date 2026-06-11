@@ -6,7 +6,7 @@ import com.kilgore.fooddeliveryapp.ordering.dto.summary.OrderItemSummary;
 import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantSummary;
 import com.kilgore.fooddeliveryapp.identity.dto.summary.UserSummary;
 import com.kilgore.fooddeliveryapp.ordering.model.OrderStatus;
-import com.kilgore.fooddeliveryapp.ordering.model.PaymentStatus;
+import com.kilgore.fooddeliveryapp.common.enums.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;

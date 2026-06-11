@@ -1,7 +1,6 @@
 package com.kilgore.fooddeliveryapp.identity.service;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
-import com.kilgore.fooddeliveryapp.catalog.model.RestaurantStatus;
+import com.kilgore.fooddeliveryapp.catalog.api.CatalogFacade;
 import com.kilgore.fooddeliveryapp.identity.model.RequestStatus;
 import com.kilgore.fooddeliveryapp.identity.dto.request.RoleChangeRequestDecisionDto;
 import com.kilgore.fooddeliveryapp.identity.dto.request.UserRestrictionDto;
@@ -15,9 +14,10 @@ import com.kilgore.fooddeliveryapp.identity.model.AccountStatus;
 import com.kilgore.fooddeliveryapp.identity.model.RoleChangeRequest;
 import com.kilgore.fooddeliveryapp.identity.model.User;
 import com.kilgore.fooddeliveryapp.identity.model.UserRole;
-import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
 import com.kilgore.fooddeliveryapp.identity.repository.RoleChangeRequestRepository;
 import com.kilgore.fooddeliveryapp.identity.repository.UserRepository;
+import com.kilgore.fooddeliveryapp.identity.util.UserMapper;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -32,13 +32,14 @@ public class AdminService {
 
     private final RoleChangeRequestRepository roleChangeRequestRepository;
     private final UserRepository userRepository;
-    private final RestaurantRepository restaurantRepository;
+    private final CatalogFacade catalogFacade;
+    private final UserMapper userMapper;
 
-    public AdminService(RoleChangeRequestRepository roleChangeRequestRepository, UserRepository userRepository,
-                        RestaurantRepository restaurantRepository) {
+    public AdminService(RoleChangeRequestRepository roleChangeRequestRepository, UserRepository userRepository, CatalogFacade catalogFacade, UserMapper userMapper) {
         this.roleChangeRequestRepository = roleChangeRequestRepository;
         this.userRepository = userRepository;
-        this.restaurantRepository = restaurantRepository;
+        this.catalogFacade = catalogFacade;
+        this.userMapper = userMapper;
     }
 
     // ----------------------------------------------VIEW ALL USERS--------------------------------------------------
@@ -46,7 +47,7 @@ public class AdminService {
     public List<UserExtendedSummary> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(this::toDto)
+                .map(userMapper::toUserExtendedSummary)
                 .toList();
     }
 
@@ -54,7 +55,7 @@ public class AdminService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new EntityNotFoundException("User with id " + userId + " not found"));
 
-        return toDto(user);
+        return userMapper.toUserExtendedSummary(user);
     }
 
     // ----------------------------------------------MANAGE USER ACCOUNTS----------------------------------------------
@@ -71,11 +72,8 @@ public class AdminService {
         boolean isRestaurantClosed = false;
 
         if(user.getRole() == UserRole.RESTAURANT_OWNER) {
-            user.getOwnedRestaurants()
-                    .forEach(restaurant -> {
-                        restaurant.setOpen(false);
-                        restaurantRepository.save(restaurant);
-                    });
+            user.getOwnedRestaurantIds()
+                    .forEach(catalogFacade::suspendRestaurant);
             isRestaurantClosed = true;
         }
 
@@ -109,12 +107,8 @@ public class AdminService {
         boolean isRestaurantSuspended = false;
 
         if(user.getRole() == UserRole.RESTAURANT_OWNER) {
-            user.getOwnedRestaurants()
-                    .forEach(restaurant -> {
-                        restaurant.setOpen(false);
-                        restaurant.setRestaurantStatus(RestaurantStatus.SUSPENDED);
-                        restaurantRepository.save(restaurant);
-                    });
+            user.getOwnedRestaurantIds()
+                    .forEach(catalogFacade::suspendRestaurant);
             isRestaurantSuspended = true;
         }
 
@@ -135,12 +129,8 @@ public class AdminService {
         boolean isRestaurantReopened = false;
 
         if(user.getRole() == UserRole.RESTAURANT_OWNER) {
-            user.getOwnedRestaurants()
-                    .forEach(restaurant -> {
-                        restaurant.setOpen(true);
-                        restaurant.setRestaurantStatus(RestaurantStatus.ACTIVE);
-                        restaurantRepository.save(restaurant);
-                    });
+            user.getOwnedRestaurantIds()
+                    .forEach(catalogFacade::reactivateRestaurant);
             isRestaurantReopened = true;
         }
 
@@ -161,6 +151,18 @@ public class AdminService {
 
         return "User " + user.getFirstName() + " " + user.getLastName()
                 + " has been deleted from Flocko.";
+    }
+
+    // --------------------------------------------- MANAGE RESTAURANTS ------------------------------------------------
+
+    @Transactional
+    public String suspendRestaurant(Long restaurantId) {
+        return catalogFacade.suspendRestaurant(restaurantId);
+    }
+
+    @Transactional
+    public String activateRestaurant(Long restaurantId) {
+        return catalogFacade.reactivateRestaurant(restaurantId);
     }
 
     // ----------------------------------------------MANAGE ROLE CHANGE REQUESTS----------------------------------------
@@ -207,30 +209,6 @@ public class AdminService {
         return toDto(roleChangeRequest);
     }
 
-    // ----------------------------------------------MANAGE RESTAURANTS-------------------------------------------------
-
-    public String suspendRestaurant(Long restaurantId) {
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant with id " + restaurantId + " not found"));
-
-        restaurant.setOpen(false);
-        restaurant.setRestaurantStatus(RestaurantStatus.SUSPENDED);
-        restaurantRepository.save(restaurant);
-
-        return "Restaurant " + restaurant.getRestaurantName() + " has been suspended.";
-    }
-
-    public String activateRestaurant(Long restaurantId) {
-        Restaurant restaurant = restaurantRepository.findById(restaurantId)
-                .orElseThrow(() -> new EntityNotFoundException("Restaurant with id " + restaurantId + " not found"));
-
-        restaurant.setOpen(true);
-        restaurant.setRestaurantStatus(RestaurantStatus.ACTIVE);
-        restaurantRepository.save(restaurant);
-
-        return "Restaurant " + restaurant.getRestaurantName() + " has been activated.";
-    }
-
     // ----------------------------------------------HELPER METHODS-----------------------------------------------------
 
     private RoleChangeRequestResponse toDto(RoleChangeRequest request) {
@@ -253,25 +231,4 @@ public class AdminService {
         return dto;
     }
 
-    private UserExtendedSummary toDto(User user) {
-        return new UserExtendedSummary(
-                user.getUserId(),
-                user.getFirstName() + " " + user.getLastName(),
-                user.getEmail(),
-                user.getRole(),
-                user.getAccountStatus(),
-                user.isOnline(),
-                user.getRestrictedUntil(),
-                user.getRestrictionReason(),
-                user.getOwnedRestaurants().stream()
-                        .filter(Objects::nonNull)
-                        .map(restaurant -> new RestaurantSummary(
-                                restaurant.getRestaurantId(),
-                                restaurant.getRestaurantName(),
-                                restaurant.getCuisineType(),
-                                restaurant.getAvgRating()
-                        ))
-                        .toList()
-        );
-    }
 }

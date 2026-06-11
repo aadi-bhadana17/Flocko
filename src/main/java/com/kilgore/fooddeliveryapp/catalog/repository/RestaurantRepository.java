@@ -6,14 +6,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
 
     Restaurant findRestaurantByRestaurantNameAndAddress_City(String name, String city);
-
-    Optional<Object> findRestaurantByRestaurantName(String name);
 
     @Query("""
             select distinct r
@@ -23,4 +22,6 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
             where r.restaurantId = :restaurantId
             """)
     Optional<Restaurant> findMenuById(@Param("restaurantId") Long restaurantId);
+
+    List<Restaurant> findAllByOwnerUserId(@Param("ownerId") Long ownerId);
 }

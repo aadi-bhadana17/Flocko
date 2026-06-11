@@ -1,6 +1,5 @@
 package com.kilgore.fooddeliveryapp.ordering.dto.request;
 
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,7 +12,7 @@ import lombok.Setter;
 @NoArgsConstructor
 public class SharedCartRequest {
     @NotNull
-    private Restaurant restaurant;
+    private Long restaurantId;
     @NotNull
     private boolean hostPaysAll;
 }

@@ -1,10 +1,7 @@
 package com.kilgore.fooddeliveryapp.catalog.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.kilgore.fooddeliveryapp.identity.model.User;
-import com.kilgore.fooddeliveryapp.ordering.model.KitchenLoadIndicator;
-import com.kilgore.fooddeliveryapp.ordering.model.Order;
-import com.kilgore.fooddeliveryapp.ordering.model.Review;
+import com.kilgore.fooddeliveryapp.common.enums.KitchenLoadIndicator;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -26,8 +23,8 @@ public class Restaurant {
     private Long restaurantId;
     private String restaurantName;
 
-    @ManyToOne(cascade = CascadeType.PERSIST)
-    private User owner;
+    @Column(name = "owner_user_id")
+    private Long ownerUserId;
 
     private String restaurantDescription;
 
@@ -45,11 +42,21 @@ public class Restaurant {
     private BigDecimal avgRating;
     private Long totalReviews;
 
-    @OneToMany(mappedBy = "restaurant")
-    private List<Review> reviews;
+    @ElementCollection
+    @CollectionTable(
+            name = "restaurant_review_ids",
+            joinColumns = @JoinColumn(name = "restaurant_id")
+    )
+    @Column(name = "review_id")
+    private List<Long> reviewIds;
 
-    @OneToMany(mappedBy = "restaurant")
-    private List<Order> orders;
+    @ElementCollection
+    @CollectionTable(
+            name = "restaurant_order_ids",
+            joinColumns = @JoinColumn(name = "restaurant_id")
+    )
+    @Column(name = "order_id")
+    private List<Long> orderIds;
 
     @Column(length = 1000)
     @ElementCollection(fetch = FetchType.EAGER)
@@ -67,7 +74,10 @@ public class Restaurant {
 
     @OneToMany(mappedBy = "restaurant")
     private List<Category> categories;
-    @ManyToMany(mappedBy = "favourites")
-    private Collection<User> users;
+
+    @ElementCollection
+    @CollectionTable(name = "user_favourites", joinColumns = @JoinColumn(name = "restaurant_id"))
+    @Column(name = "user_id")
+    private Collection<Long> favouriteUserIds;
 
 }

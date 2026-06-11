@@ -1,7 +1,6 @@
 package com.kilgore.fooddeliveryapp.catalog.model;
 
-import com.kilgore.fooddeliveryapp.ordering.model.PaymentStatus;
-import com.kilgore.fooddeliveryapp.identity.model.User;
+import com.kilgore.fooddeliveryapp.common.enums.PaymentStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,9 +17,9 @@ public class MessSubscription {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long subscriptionId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @Column(name = "user_id")
+    private Long userId;
+
     @ManyToOne
     private MessPlan messPlan;
     private LocalDate startDate;

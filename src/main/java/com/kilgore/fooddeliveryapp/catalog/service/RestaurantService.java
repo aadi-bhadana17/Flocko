@@ -4,27 +4,21 @@ import com.kilgore.fooddeliveryapp.catalog.dto.request.ContactInformationDto;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.RestaurantAddressDto;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.RestaurantRequest;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.RestaurantStatusRequest;
+import com.kilgore.fooddeliveryapp.identity.dto.response.StaffCreationResponse;
 import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
 import com.kilgore.fooddeliveryapp.catalog.model.RestaurantStatus;
 import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
 import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import com.kilgore.fooddeliveryapp.catalog.model.ContactInformation;
 import com.kilgore.fooddeliveryapp.catalog.model.RestaurantAddress;
-import com.kilgore.fooddeliveryapp.catalog.dto.response.OwnerResponse;
 import com.kilgore.fooddeliveryapp.catalog.dto.response.RestaurantResponse;
-import com.kilgore.fooddeliveryapp.identity.dto.response.StaffCreationResponse;
-import com.kilgore.fooddeliveryapp.identity.dto.summary.UserSummary;
 import com.kilgore.fooddeliveryapp.common.exceptions.RestaurantAlreadyExistsException;
 import com.kilgore.fooddeliveryapp.common.exceptions.RestaurantNotFoundException;
-import com.kilgore.fooddeliveryapp.identity.dto.request.AddStaffRequest;
-import com.kilgore.fooddeliveryapp.identity.model.User;
-import com.kilgore.fooddeliveryapp.identity.model.UserRole;
-import com.kilgore.fooddeliveryapp.identity.repository.UserRepository;
+import com.kilgore.fooddeliveryapp.identity.api.UserFacade;
+import com.kilgore.fooddeliveryapp.catalog.dto.request.AddStaffRequest;
+import com.kilgore.fooddeliveryapp.identity.dto.summary.StaffSummary;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import jakarta.validation.Validator;
@@ -40,17 +34,16 @@ import java.util.Set;
 public class RestaurantService {
 
     private final RestaurantRepository restaurantRepository;
-    private final UserRepository userRepository;
     private final UserAuthorization userAuthorization;
-    private final PasswordEncoder passwordEncoder;
     private final Validator validator;
+    private final UserFacade userFacade;
 
-    public RestaurantService(RestaurantRepository restaurantRepository, UserRepository userRepository, UserAuthorization userAuthorization, PasswordEncoder passwordEncoder, Validator validator) {
+    public RestaurantService(RestaurantRepository restaurantRepository, UserAuthorization userAuthorization,
+                             Validator validator, UserFacade userFacade) {
         this.restaurantRepository = restaurantRepository;
-        this.userRepository = userRepository;
         this.userAuthorization = userAuthorization;
-        this.passwordEncoder = passwordEncoder;
         this.validator = validator;
+        this.userFacade = userFacade;
     }
 
     private void validate(Object obj) {
@@ -74,11 +67,11 @@ public class RestaurantService {
             throw new RestaurantAlreadyExistsException();
         }
 
-       User owner = userAuthorization.authorizeUser();
+       Long ownerId = userAuthorization.authorizeUserId();
 
         restaurant = new Restaurant();
 
-        restaurant.setOwner(owner);
+        restaurant.setOwnerUserId(ownerId);
         restaurant.setRestaurantName(request.getRestaurantName());
         restaurant.setRestaurantDescription(request.getRestaurantDescription());
         restaurant.setCuisineType(request.getCuisineType());
@@ -108,7 +101,7 @@ public class RestaurantService {
                 restaurant.getRestaurantId(),
                 restaurant.getRestaurantName(),
                 restaurant.getRestaurantDescription(),
-                mapToOwnerDto(restaurant.getOwner()),
+                userFacade.getUserById(restaurant.getOwnerUserId()),
                 restaurant.getCuisineType(),
                 mapToAddressDto(restaurant.getAddress()),
                 mapToContactInformationDto(restaurant.getContactInformation()),
@@ -118,14 +111,6 @@ public class RestaurantService {
                 restaurant.isOpen(),
                 restaurant.getRestaurantStatus(),
                 restaurant.getRegistrationDate()
-        );
-    }
-
-    private OwnerResponse mapToOwnerDto(User owner) {
-        return new OwnerResponse(
-                owner.getUserId(),
-                owner.getFirstName() + " " + owner.getLastName(),
-                owner.getEmail()
         );
     }
 
@@ -207,10 +192,9 @@ public class RestaurantService {
         Restaurant restaurant  = restaurantRepository.findById(id)
                 .orElseThrow(() -> new RestaurantNotFoundException(id));
 
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+        Long userId = userAuthorization.authorizeUserId();
 
-        if(!restaurant.getOwner().getEmail().equals(email) && !authentication.getAuthorities().contains(new SimpleGrantedAuthority("ADMIN"))) {
+        if(!restaurant.getOwnerUserId().equals(userId) && !userFacade.isUserAdmin(userId)) {
             throw new AccessDeniedException("You are not authorized to modify this restaurant.");
         }
 
@@ -240,76 +224,38 @@ public class RestaurantService {
     }
 
     public List<RestaurantResponse> getMyRestaurants() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String email = authentication.getName();
+        Long userId = userAuthorization.authorizeUserId();
 
-        return restaurantRepository.findAll()
+        return restaurantRepository.findAllByOwnerUserId(userId)
                 .stream()
-                .filter(r -> r.getOwner().getEmail().equals(email))
                 .map(this::toDto)
                 .toList();
     }
 
 
-    public StaffCreationResponse addStaffToRestaurant(Long id, AddStaffRequest request) {
-        User user = userAuthorization.authorizeUser();
+    public StaffCreationResponse addStaffToRestaurant(Long restaurantId, AddStaffRequest request) {
+        Long userId = userAuthorization.authorizeUserId();
 
-        Restaurant restaurant = restaurantRepository.findById(id)
-                .orElseThrow(() -> new RestaurantNotFoundException(id));
+        Restaurant restaurant = restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        if(!restaurant.getOwner().getEmail().equals(user.getEmail())) {
+        if(!restaurant.getOwnerUserId().equals(userId)) {
             throw new AccessDeniedException("You are not authorized to add staff to this restaurant.");
         }
 
-        String password = request.getFirstName() + "@" + request.getPhone().substring(7) + "***";
-
-        User staff = new User();
-        staff.setFirstName(request.getFirstName());
-        staff.setLastName(request.getLastName());
-        staff.setEmail(request.getEmail());
-        staff.setPhone(request.getPhone());
-        staff.setRole(UserRole.RESTAURANT_STAFF);
-        staff.setEmployedAt(id);
-        staff.setPassword(passwordEncoder.encode(password));
-        staff.setTempPassword(true);
-
-        userRepository.save(staff);
-
-        return toDto(staff, password);
+        return userFacade.createStaff(request, restaurantId);
     }
 
-    private StaffCreationResponse toDto(User user, String password) {
-        return new StaffCreationResponse(
-                user.getFirstName(),
-                user.getLastName(),
-                user.getEmail(),
-                user.getPhone(),
-                user.getRole(),
-                password
-        );
-    }
+    public List<StaffSummary> getAllStaff(Long restaurantId) {
+        Long userId = userAuthorization.authorizeUserId();
 
-    public List<UserSummary> getAllStaff(Long id) {
-        User user = userAuthorization.authorizeUser();
+        Restaurant restaurant =  restaurantRepository.findById(restaurantId)
+                .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        Restaurant restaurant =  restaurantRepository.findById(id)
-                .orElseThrow(() -> new RestaurantNotFoundException(id));
-
-        if(user.getRole() == UserRole.RESTAURANT_OWNER && !restaurant.getOwner().getEmail().equals(user.getEmail())) {
+        if(!restaurant.getOwnerUserId().equals(userId) && !userFacade.isUserAdmin(userId)) {
             throw new AccessDeniedException("You are not authorized to view the staff of this restaurant.");
         }
 
-        return userRepository.findByRestaurantId(id)
-                .stream()
-                .filter(u -> u.getRole() == UserRole.RESTAURANT_STAFF)
-                .map(this::toUserSummary)
-                .toList();
-    }
-
-    private UserSummary toUserSummary(User user) {
-        return new UserSummary(
-                user.getUserId(),
-                user.getFirstName() + " " + user.getLastName()
-        );
+        return userFacade.getRestaurantStaff(restaurantId);
     }
 }

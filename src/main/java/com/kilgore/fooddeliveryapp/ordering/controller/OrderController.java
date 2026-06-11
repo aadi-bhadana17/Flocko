@@ -30,11 +30,6 @@ public class OrderController {
         return orderService.getMyOrders();
     }
 
-    @GetMapping("/restaurant")
-    @PreAuthorize("hasAnyAuthority('RESTAURANT_OWNER', 'RESTAURANT_STAFF')")
-    public List<OrderResponse> getRestaurantOrders() {
-        return orderService.getRestaurantOrders();
-    }
 
     @GetMapping("/{orderId}")
     public OrderResponse getOrder(@PathVariable Long orderId) {
@@ -42,7 +37,7 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}")
-    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'RESTAURANT_STAFF')")
+    @PreAuthorize("hasAnyAuthority('CUSTOMER', 'RESTAURANT_STAFF', 'RESTAURANT_OWNER')")
     public String cancelOrder(@PathVariable Long orderId) {
         return orderService.cancelOrder(orderId);
     }
@@ -55,8 +50,8 @@ public class OrderController {
     }
 
     @GetMapping("/restaurant/{restaurantId}")
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public List<OrderResponse> getAdminRestaurantOrders(@PathVariable Long restaurantId) {
-        return orderService.getAdminRestaurantOrders(restaurantId);
+    @PreAuthorize("hasAnyAuthority('ADMIN','RESTAURANT_OWNER', 'RESTAURANT_STAFF')")
+    public List<OrderResponse> getRestaurantOrders(@PathVariable Long restaurantId) {
+        return orderService.getRestaurantOrders(restaurantId);
     }
 }

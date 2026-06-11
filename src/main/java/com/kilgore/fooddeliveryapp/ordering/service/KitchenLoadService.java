@@ -1,8 +1,6 @@
 package com.kilgore.fooddeliveryapp.ordering.service;
 
-import com.kilgore.fooddeliveryapp.ordering.model.KitchenLoadIndicator;
-import com.kilgore.fooddeliveryapp.ordering.model.OrderStatus;
-import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
+import com.kilgore.fooddeliveryapp.common.enums.KitchenLoadIndicator;
 import com.kilgore.fooddeliveryapp.ordering.repository.OrderRepository;
 import org.springframework.stereotype.Service;
 
@@ -15,8 +13,8 @@ public class KitchenLoadService {
         this.orderRepository = orderRepository;
     }
 
-    public KitchenLoadIndicator getKitchenStatus(Restaurant restaurant) {
-        int currentOrders = getCurrentOrders(restaurant);
+    public KitchenLoadIndicator getKitchenStatus(Long restaurantId) {
+        long currentOrders = getCurrentOrders(restaurantId);
 
         if (currentOrders < 10) {
             return KitchenLoadIndicator.LOW;
@@ -27,12 +25,7 @@ public class KitchenLoadService {
         }
     }
 
-    public int getCurrentOrders(Restaurant restaurant) {
-        long orders = orderRepository.findAll().stream()
-                .filter(order -> order.getRestaurant().equals(restaurant)
-                && (order.getOrderStatus() == OrderStatus.PREPARING || order.getOrderStatus() == OrderStatus.CONFIRMED))
-                .count();
-
-        return (int) orders;
+    public long getCurrentOrders(Long restaurantId) {
+        return orderRepository.countCurrentOrdersByRestaurantId(restaurantId);
     }
 }

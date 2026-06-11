@@ -98,15 +98,4 @@ public class UserController {
         return userService.createRoleChangeRequest(request);
     }
 
-    //------------------------------------------MessPlan Subscription---------------------------------------------------
-
-    @GetMapping("/mess-plans/subscriptions")
-    public List<MessSubscriptionResponse> getMyMessSubscriptions(@RequestParam(required = false) Boolean active) {
-        return userService.getMyMessSubscriptions(active);
-    }
-
-    @PostMapping("/mess-plans/{messPlanId}/subscribe")
-    public String subscribeToMessPlan(@PathVariable Long messPlanId) {
-        return userService.subscribeToMessPlan(messPlanId);
-    }
 }

@@ -66,8 +66,8 @@ public class CartService {
         Long userId = userAuthorization.authorizeUserId();
         Cart cart = getOrCreateCart(userId);
 
-        FoodSummary food = catalogFacade.getFood(request.getFoodId());
-        RestaurantSummary restaurant = catalogFacade.getRestaurant(food.getRestaurantId());
+        FoodSummary food = catalogFacade.getFoodById(request.getFoodId());
+        RestaurantSummary restaurant = catalogFacade.getRestaurantById(food.getRestaurantId());
 
         assignOrVerifyRestaurant(cart, restaurant, food);
         addOrMergeCartItem(cart, request, food);
@@ -128,7 +128,7 @@ public class CartService {
     // ------------------------------------------------------------- CART ACCESS -------------------------------------------------------------------------
 
 
-    protected CartItem  verifyCartItem(Long cartItemId, Cart cart) {
+    public CartItem  verifyCartItem(Long cartItemId, Cart cart) {
         CartItem item = cartItemRepository.findById(cartItemId)
                 .orElseThrow(() -> new EntityNotFoundException("No item found with id " + cartItemId));
 
@@ -177,7 +177,7 @@ public class CartService {
 
     private CartResponse getCartResponse(Cart cart, boolean priceUpdated) {
         UserSummary user = userFacade.getUserById(cart.getUserId());
-        RestaurantSummary restaurant = catalogFacade.getRestaurant(cart.getRestaurantId());
+        RestaurantSummary restaurant = catalogFacade.getRestaurantById(cart.getRestaurantId());
 
         return orderingMapper.toCartResponse(cart, user, restaurant, getMessage(priceUpdated));
     }
@@ -204,9 +204,9 @@ public class CartService {
         return new HashSet<>(list1).equals(new HashSet<>(list2));
     }
 
-    protected void addOrMergeCartItem(Cart cart, AddToCartRequest request, FoodSummary food) {
+    public void addOrMergeCartItem(Cart cart, AddToCartRequest request, FoodSummary food) {
 
-        List<AddonSummary> addonSummaries = catalogFacade.getAddons(request.getAddonIds());
+        List<AddonSummary> addonSummaries = catalogFacade.getAddonsByIds(request.getAddonIds());
         BigDecimal currentPrice = pricingService.calculateCurrentPrice(food, addonSummaries);
 
         Optional<CartItem> existingItem = findMatchingCartItem(cart, food, request, currentPrice);

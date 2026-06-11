@@ -1,6 +1,6 @@
 package com.kilgore.fooddeliveryapp.ordering.dto.request;
 
-import com.kilgore.fooddeliveryapp.ordering.model.KitchenLoadIndicator;
+import com.kilgore.fooddeliveryapp.common.enums.KitchenLoadIndicator;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;

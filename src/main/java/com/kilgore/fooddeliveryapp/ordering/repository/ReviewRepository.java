@@ -10,9 +10,9 @@ import java.util.List;
 @Repository
 public interface ReviewRepository extends JpaRepository<Review,Long> {
 
-    boolean existsByUserUserIdAndRestaurantRestaurantIdAndPostedAtAfter(Long userId, Long restaurantId, LocalDateTime postedAt);
+    boolean existsByUserIdAndRestaurantIdAndPostedAtAfter(Long userId, Long restaurantId, LocalDateTime postedAt);
 
-    List<Review> findByRestaurantRestaurantId(Long restaurantId);
+    List<Review> findByRestaurantId(Long restaurantId);
 
-    List<Review> findByUserUserId(Long userId);
+    List<Review> findByUserId(Long userId);
 }

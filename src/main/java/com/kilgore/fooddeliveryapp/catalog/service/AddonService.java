@@ -13,6 +13,7 @@ import com.kilgore.fooddeliveryapp.catalog.model.Restaurant;
 import com.kilgore.fooddeliveryapp.catalog.repository.AddonRepository;
 import com.kilgore.fooddeliveryapp.catalog.repository.CategoryRepository;
 import com.kilgore.fooddeliveryapp.catalog.repository.RestaurantRepository;
+import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import jakarta.transaction.Transactional;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.security.access.AccessDeniedException;
@@ -27,11 +28,13 @@ public class AddonService {
     private final RestaurantRepository restaurantRepository;
     private final AddonRepository addonRepository;
     private final CategoryRepository categoryRepository;
+    private final UserAuthorization userAuthorization;
 
-    public AddonService(RestaurantRepository restaurantRepository, AddonRepository addonRepository, CategoryRepository categoryRepository) {
+    public AddonService(RestaurantRepository restaurantRepository, AddonRepository addonRepository, CategoryRepository categoryRepository, UserAuthorization userAuthorization) {
         this.restaurantRepository = restaurantRepository;
         this.addonRepository = addonRepository;
         this.categoryRepository = categoryRepository;
+        this.userAuthorization = userAuthorization;
     }
 
     @Transactional
@@ -113,13 +116,12 @@ public class AddonService {
     //------------------------------------------------HELPER METHODS----------------------------------------------------
 
     private Restaurant verifyOwnerAccess(Long restaurantId) {
-        String username =  SecurityContextHolder.getContext()
-                .getAuthentication().getName();
+        Long userId = userAuthorization.authorizeUserId();
 
         Restaurant restaurant = restaurantRepository.findById(restaurantId)
                 .orElseThrow(() -> new RestaurantNotFoundException(restaurantId));
 
-        if(!restaurant.getOwner().getEmail().equals(username)){
+        if(!restaurant.getOwnerUserId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to perform this action of accessing Addons for this restaurant.");
         }
         return restaurant;

@@ -1,4 +1,4 @@
-package com.kilgore.fooddeliveryapp.identity.dto.request;
+package com.kilgore.fooddeliveryapp.catalog.dto.request;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

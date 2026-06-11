@@ -20,16 +20,17 @@ public class UserAuthorization {
 
     public User authorizeUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        System.out.println("Auth before check: " + authentication);
-        if (authentication == null) {
+        if (authentication == null || !authentication.isAuthenticated()) {
             throw new AccessDeniedException("No valid authority");
-        } else if(!authentication.isAuthenticated()) throw new AccessDeniedException("No valid authority");
-
-        System.out.println("Auth: " + authentication);
+        }
 
         User user = userRepository.findByEmail(authentication.getName());
 
         if (user == null) throw new EntityNotFoundException("User not found");
         return user;
+    }
+
+    public Long authorizeUserId() {
+        return authorizeUser().getUserId();
     }
 }
