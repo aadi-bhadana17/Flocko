@@ -33,7 +33,7 @@ public class KitchenService {
 
         RestaurantSummary restaurant = catalogFacade.getRestaurantById(restaurantId);
 
-        if(userFacade.canUserManageRestaurant(userId, restaurantId))
+        if(!userFacade.canUserManageRestaurant(userId, restaurantId))
             throw new AccessDeniedException("You are not allowed to perform this action. Because you don't have authority for that");
 
         catalogFacade.setKitchenLoadIndicator(restaurantId, request.getKitchenLoadIndicator());

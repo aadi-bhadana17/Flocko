@@ -81,6 +81,9 @@ public class OrderingMapper {
                         : BigDecimal.ZERO)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+        System.out.println("Shared Cart ID: " + sharedCart.getSharedCartId());
+        System.out.println("Restaurant ID: " + sharedCart.getRestaurantId());
+
         return new SharedCartResponse(
                 sharedCart.getSharedCartId(),
                 userFacade.getUserById(sharedCart.getHostUserId()),
