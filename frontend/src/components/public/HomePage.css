@@ -1,0 +1,659 @@
+/* ===== FLOCKO HOME PAGE ===== */
+
+/* ----- Hero Section ----- */
+.home-page {
+    background: var(--light);
+    min-height: 100vh;
+}
+
+.home-hero {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 4rem 2rem 3rem;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+}
+
+.home-hero-content h1 {
+    font-family: 'Fraunces', serif;
+    font-size: 3.5rem;
+    font-weight: 900;
+    line-height: 1.1;
+    letter-spacing: -1.5px;
+    color: var(--dark);
+    margin-bottom: 1rem;
+}
+
+.home-hero-content h1 em {
+    font-style: normal;
+    color: var(--primary);
+}
+
+.home-hero-content p {
+    color: var(--gray);
+    font-size: 1.15rem;
+    line-height: 1.7;
+    max-width: 480px;
+    margin: 0 auto 2rem;
+}
+
+/* Hero Tag */
+.hero-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--green-tint);
+    color: var(--primary-dark);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.4rem 0.95rem;
+    border-radius: 100px;
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.3px;
+}
+
+.hero-tag-dot {
+    width: 8px;
+    height: 8px;
+    background: var(--primary);
+    border-radius: 50%;
+    display: inline-block;
+}
+
+/* Hero Stats */
+.hero-stats {
+    display: flex;
+    gap: 2rem;
+    justify-content: center;
+}
+
+.hero-stat {
+    display: flex;
+    flex-direction: column;
+}
+
+.hero-stat-num {
+    font-family: 'Fraunces', serif;
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--primary);
+}
+
+.hero-stat-label {
+    font-size: 0.85rem;
+    color: var(--gray);
+    margin-top: 2px;
+}
+
+/* ----- Sections ----- */
+.home-section {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 2rem;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+}
+
+.section-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--dark);
+}
+
+.section-count {
+    font-size: 0.95rem;
+    color: var(--gray);
+}
+
+/* ----- Filters ----- */
+.home-filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 1.5rem;
+}
+
+.cuisine-pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.cuisine-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.5rem 1.1rem;
+    border: 1.5px solid var(--border);
+    border-radius: 100px;
+    background: var(--surface);
+    color: var(--gray);
+    font-size: 0.92rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.cuisine-pill:hover {
+    border-color: var(--primary);
+    color: var(--primary);
+}
+
+.cuisine-pill.active {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: white;
+}
+
+.pill-emoji {
+    font-size: 1.15rem;
+}
+
+/* Toggle Switch */
+.open-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.open-toggle input {
+    display: none;
+}
+
+.toggle-slider {
+    width: 40px;
+    height: 22px;
+    background: var(--border);
+    border-radius: 100px;
+    position: relative;
+    transition: background 0.2s;
+}
+
+.toggle-slider::after {
+    content: '';
+    width: 18px;
+    height: 18px;
+    background: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.open-toggle input:checked + .toggle-slider {
+    background: var(--primary);
+}
+
+.open-toggle input:checked + .toggle-slider::after {
+    transform: translateX(18px);
+}
+
+.toggle-label {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--gray);
+}
+
+/* ----- Restaurant Grid ----- */
+.home-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+}
+
+.restaurant-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.restaurant-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.restaurant-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px var(--card-shadow);
+}
+
+.r-thumb {
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--green-tint);
+    position: relative;
+    overflow: hidden;
+}
+
+.r-thumb.closed {
+    background: var(--surface-hover);
+}
+
+.r-thumb-emoji {
+    font-size: 3.5rem;
+    position: relative;
+    z-index: 1;
+}
+
+.r-thumb-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.r-thumb.closed .r-thumb-image {
+    filter: grayscale(15%) brightness(0.8);
+}
+
+.closed-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(107, 114, 128, 0.85);
+    color: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.25rem 0.65rem;
+    border-radius: 6px;
+    z-index: 2;
+}
+
+.r-body {
+    padding: 1.1rem;
+}
+
+.r-name {
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: var(--dark);
+}
+
+.r-meta {
+    font-size: 0.9rem;
+    color: var(--gray);
+    margin-top: 6px;
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.r-rating {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+.r-cuisine {
+    color: var(--gray);
+}
+
+.r-city {
+    color: var(--gray);
+}
+
+/* ----- Empty & Error States ----- */
+.home-empty {
+    text-align: center;
+    padding: 4rem 2rem;
+}
+
+.empty-icon {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 1rem;
+}
+
+.home-empty h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.home-empty p {
+    color: var(--gray);
+    font-size: 1rem;
+}
+
+.home-error {
+    background: var(--error-bg);
+    color: var(--error);
+    border: 1px solid var(--error-border);
+    padding: 1rem;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
+
+/* ----- Skeleton Loading ----- */
+.restaurant-card.skeleton {
+    pointer-events: none;
+}
+
+.r-thumb-skeleton {
+    height: 150px;
+    background: linear-gradient(90deg, var(--skeleton-from) 25%, var(--skeleton-mid) 50%, var(--skeleton-from) 75%);
+    background-size: 200% 100%;
+    animation: shimmer-home 1.5s infinite;
+}
+
+.r-body-skeleton {
+    padding: 1.1rem;
+}
+
+.r-line-skeleton {
+    height: 14px;
+    border-radius: 6px;
+    background: linear-gradient(90deg, var(--skeleton-from) 25%, var(--skeleton-mid) 50%, var(--skeleton-from) 75%);
+    background-size: 200% 100%;
+    animation: shimmer-home 1.5s infinite;
+    margin-bottom: 0.5rem;
+}
+
+.r-line-skeleton.wide { width: 70%; }
+.r-line-skeleton.narrow { width: 45%; }
+
+@keyframes shimmer-home {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+}
+
+/* ----- Search Bar ----- */
+.home-search-bar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 420px;
+    margin: 0 auto 2rem;
+    padding: 0.6rem 1rem;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    transition: border-color 0.2s;
+}
+
+.home-search-bar:focus-within {
+    border-color: var(--primary);
+}
+
+.home-search-icon {
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.home-search-input {
+    flex: 1;
+    border: none;
+    outline: none;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: transparent;
+    color: var(--dark);
+}
+
+.home-search-input::placeholder {
+    color: var(--gray);
+    opacity: 0.6;
+}
+
+.home-search-clear {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    border: none;
+    background: var(--surface-hover, #F3F4F6);
+    color: var(--gray);
+    font-size: 0.7rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s;
+}
+
+.home-search-clear:hover {
+    background: var(--error-bg, #FEF2F2);
+    color: var(--error, #EF4444);
+}
+
+/* ----- Favourite Button ----- */
+.fav-btn {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255, 255, 255, 0.85);
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    transition: all 0.2s;
+    z-index: 2;
+}
+
+.fav-btn:hover {
+    transform: scale(1.15);
+    background: rgba(255, 255, 255, 0.95);
+}
+
+.fav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.fav-btn.fav-active {
+    background: rgba(255, 255, 255, 0.95);
+}
+
+/* ----- Group Deal Ads ----- */
+.home-deals-section {
+    padding-top: 0.75rem;
+}
+
+.home-deals-scroll {
+    display: flex;
+    gap: 0.85rem;
+    overflow-x: auto;
+    padding-bottom: 0.35rem;
+}
+
+.deal-ad-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.deal-ad-card {
+    min-width: 290px;
+    max-width: 310px;
+    border-radius: 14px;
+    border: 1px solid var(--border, #E5E7EB);
+    background: var(--surface, #FFFFFF);
+    padding: 0.8rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.deal-ad-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px var(--card-shadow, rgba(0, 0, 0, 0.08));
+}
+
+.deal-ad-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.65rem;
+    align-items: flex-start;
+}
+
+.deal-ad-top h3 {
+    margin: 0;
+    font-size: 0.98rem;
+}
+
+.deal-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.25rem 0.5rem;
+    text-transform: uppercase;
+}
+
+.deal-badge-voting {
+    color: #1D4ED8;
+    background: #DBEAFE;
+}
+
+.deal-badge-confirmation {
+    color: #7C3AED;
+    background: #EDE9FE;
+}
+
+.deal-badge-fulfilled {
+    color: #166534;
+    background: #DCFCE7;
+}
+
+.deal-badge-expired {
+    color: #B91C1C;
+    background: #FEE2E2;
+}
+
+.deal-restaurant-name {
+    margin: 0.35rem 0 0;
+    font-size: 0.85rem;
+    color: var(--gray, #6B7280);
+}
+
+.deal-food-list {
+    margin: 0.35rem 0 0;
+    font-size: 0.82rem;
+    line-height: 1.4;
+    color: var(--dark, #1F2937);
+    min-height: 2.3em;
+}
+
+.deal-prices {
+    margin-top: 0.55rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.deal-original {
+    font-size: 0.82rem;
+    text-decoration: line-through;
+    color: var(--gray, #6B7280);
+}
+
+.deal-progress-head {
+    margin-top: 0.65rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--gray, #6B7280);
+}
+
+.deal-progress-track {
+    height: 8px;
+    border-radius: 999px;
+    background: var(--surface-hover, #F3F4F6);
+    margin-top: 0.3rem;
+    overflow: hidden;
+}
+
+.deal-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #60A5FA, #22C55E);
+    transition: width 0.45s ease;
+}
+
+.deal-time-left {
+    margin-top: 0.55rem;
+    font-size: 0.77rem;
+    color: var(--gray, #6B7280);
+}
+
+.home-empty.compact {
+    padding: 1.3rem 1rem;
+    border: 1px dashed var(--border, #E5E7EB);
+    border-radius: 12px;
+}
+
+.home-empty.compact h3 {
+    font-size: 1.08rem;
+}
+
+.home-empty.compact p {
+    font-size: 0.92rem;
+}
+
+/* ----- Footer ----- */
+.home-footer {
+    text-align: center;
+    padding: 2rem;
+    font-size: 0.9rem;
+    color: var(--gray);
+    border-top: 1px solid var(--border);
+    margin-top: 2rem;
+}
+
+/* ----- Responsive ----- */
+@media (max-width: 900px) {
+    .home-hero {
+        padding: 2rem 1.5rem;
+    }
+
+    .home-hero-content h1 {
+        font-size: 2.5rem;
+    }
+
+    .home-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .deal-ad-card {
+        min-width: 260px;
+    }
+}
+
+@media (max-width: 600px) {
+    .home-hero-content h1 {
+        font-size: 2rem;
+    }
+
+    .home-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .hero-stats {
+        gap: 1.25rem;
+    }
+}

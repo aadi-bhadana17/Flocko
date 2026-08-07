@@ -1,0 +1,828 @@
+/* ===== FLOCKO RESTAURANT PAGE ===== */
+
+.rp-page {
+    background: var(--light);
+    min-height: 100vh;
+}
+
+.rp-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+/* Back Link */
+.rp-back-link {
+    display: inline-block;
+    margin-top: 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--primary);
+    text-decoration: none;
+    transition: color 0.2s;
+}
+
+.rp-back-link:hover {
+    color: var(--primary-dark);
+}
+
+/* Loading */
+.rp-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 1rem;
+}
+
+.rp-loading-icon {
+    font-size: 3.5rem;
+}
+
+.rp-loading p {
+    color: var(--gray);
+    font-size: 1.05rem;
+}
+
+/* Error */
+.rp-error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 0.75rem;
+}
+
+.rp-error-icon {
+    font-size: 3.5rem;
+}
+
+.rp-error-container h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.3rem;
+    color: var(--dark);
+}
+
+/* Header */
+.rp-header {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 2rem 0;
+    margin-top: 0.5rem;
+    transition: background 0.3s ease;
+}
+
+.rp-header-inner {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.rp-header-icon {
+    width: 80px;
+    height: 80px;
+    border-radius: 16px;
+    background: var(--green-tint);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    flex-shrink: 0;
+}
+
+.rp-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.9rem;
+    font-weight: 900;
+    color: var(--dark);
+    letter-spacing: -0.5px;
+    margin-bottom: 0.4rem;
+}
+
+.rp-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.95rem;
+}
+
+.rp-status {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+/* Favourite Button */
+.rp-fav-btn {
+    padding: 0.5rem 1.15rem;
+    border-radius: 100px;
+    border: 1.5px solid var(--border);
+    background: var(--surface);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--gray);
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+    margin-left: auto;
+}
+
+.rp-fav-btn:hover {
+    border-color: var(--error, #EF4444);
+    color: var(--error, #EF4444);
+    background: var(--error-bg, #FEF2F2);
+}
+
+.rp-fav-btn.rp-fav-active {
+    border-color: var(--error, #EF4444);
+    color: var(--error, #EF4444);
+    background: var(--error-bg, #FEF2F2);
+}
+
+.rp-fav-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.rp-status.open {
+    color: var(--primary);
+}
+
+.rp-status.closed {
+    color: var(--gray);
+}
+
+.rp-cuisine {
+    color: var(--gray);
+}
+
+.rp-rating {
+    color: var(--warning);
+    font-weight: 600;
+}
+
+.rp-city {
+    color: var(--gray);
+}
+
+/* Mess Plans */
+.rp-mess-wrap {
+    padding-top: 2rem;
+}
+
+.rp-mess-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 1rem;
+}
+
+.rp-mess-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.45rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.rp-mess-sub {
+    font-size: 0.9rem;
+    color: var(--gray);
+}
+
+.rp-mess-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 0.9rem;
+    margin-bottom: 0.5rem;
+}
+
+.rp-mess-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.rp-mess-card-button {
+    text-align: left;
+    width: 100%;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+    background: var(--surface);
+}
+
+.rp-mess-card-button:hover {
+    border-color: var(--primary);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
+}
+
+.rp-mess-card-button.active {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.12);
+}
+
+.rp-mess-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.rp-mess-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.rp-mess-price {
+    font-family: 'Fraunces', serif;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+}
+
+.rp-mess-desc {
+    font-size: 0.85rem;
+    color: var(--gray);
+    line-height: 1.4;
+}
+
+.rp-mess-meta,
+.rp-mess-note {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.rp-mess-subscribe {
+    margin-top: 0.35rem;
+    border: none;
+    border-radius: 8px;
+    background: var(--primary);
+    color: #fff;
+    padding: 0.55rem 0.85rem;
+    font-weight: 600;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.rp-mess-subscribe:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.rp-mess-subscribe:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.rp-mess-toast,
+.rp-mess-error,
+.rp-mess-empty {
+    border-radius: 10px;
+    font-size: 0.9rem;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.8rem;
+}
+
+.rp-mess-toast {
+    background: var(--green-tint);
+    border: 1px solid var(--green-tint-hover);
+    color: var(--primary-dark);
+}
+
+.rp-mess-error {
+    background: var(--error-bg, #FEF2F2);
+    border: 1px solid var(--error-border, #FECACA);
+    color: var(--error, #EF4444);
+}
+
+.rp-mess-empty {
+    background: var(--surface);
+    border: 1px dashed var(--border);
+    color: var(--gray);
+}
+
+.rp-mess-detail-wrap {
+    margin-top: 1rem;
+}
+
+.rp-mess-detail-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+}
+
+.rp-mess-day-list {
+    margin-top: 0.9rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.rp-mess-day-section {
+    border-top: 1px solid var(--border);
+    padding-top: 0.7rem;
+}
+
+.rp-mess-day-section:first-child {
+    border-top: none;
+    padding-top: 0;
+}
+
+.rp-mess-day-title {
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.rp-mess-meal-block {
+    margin-bottom: 0.55rem;
+}
+
+.rp-mess-meal-title {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--gray);
+    margin-bottom: 0.35rem;
+}
+
+.rp-mess-food-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+
+.rp-mess-food-chip {
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.22rem 0.6rem;
+    font-size: 0.8rem;
+    color: var(--dark);
+}
+
+/* Menu Layout */
+.rp-menu-layout {
+    display: grid;
+    grid-template-columns: 240px 1fr;
+    gap: 2rem;
+    padding-top: 2rem;
+    padding-bottom: 3rem;
+}
+
+/* Sidebar */
+.rp-sidebar {
+    position: sticky;
+    top: 88px;
+    align-self: start;
+}
+
+.rp-sidebar-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.75rem;
+    letter-spacing: -0.3px;
+}
+
+.rp-cat-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--gray);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+    margin-bottom: 0.25rem;
+    text-align: left;
+}
+
+.rp-cat-btn:hover {
+    background: var(--surface-hover);
+    color: var(--dark);
+}
+
+.rp-cat-btn.active {
+    background: var(--green-tint);
+    color: var(--primary-dark);
+    font-weight: 600;
+}
+
+.rp-cat-count {
+    font-size: 0.82rem;
+    background: var(--border);
+    padding: 0.1rem 0.5rem;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.rp-cat-btn.active .rp-cat-count {
+    background: rgba(22, 163, 74, 0.15);
+    color: var(--primary-dark);
+}
+
+.rp-sidebar-empty {
+    font-size: 0.84rem;
+    color: var(--gray);
+    margin: 0.35rem 0;
+}
+
+.rp-sidebar-divider {
+    margin: 0.7rem 0;
+    border-top: 1px solid var(--border);
+}
+
+.rp-review-nav-btn {
+    margin-top: 0.15rem;
+}
+
+/* Category Header */
+.rp-category-header {
+    margin-bottom: 1.5rem;
+}
+
+.rp-category-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    letter-spacing: -0.3px;
+}
+
+.rp-category-desc {
+    color: var(--gray);
+    font-size: 0.95rem;
+    margin-top: 0.3rem;
+}
+
+.rp-review-header-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.65rem 1rem;
+    align-items: center;
+}
+
+.rp-review-post-btn {
+    width: auto;
+    margin-top: 0;
+    padding: 0.5rem 0.9rem;
+    font-size: 0.85rem;
+    grid-row: 1 / span 2;
+    align-self: start;
+}
+
+.rp-review-toast {
+    border-radius: 10px;
+    font-size: 0.9rem;
+    padding: 0.65rem 0.85rem;
+    margin-bottom: 0.8rem;
+    background: var(--green-tint);
+    border: 1px solid var(--green-tint-hover);
+    color: var(--primary-dark);
+}
+
+.rp-review-form {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.rp-review-form-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-bottom: 0.7rem;
+}
+
+.rp-review-form-row label {
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--dark);
+}
+
+.rp-review-form-row select,
+.rp-review-form-row textarea {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 0.55rem 0.72rem;
+    font-size: 0.88rem;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--dark);
+    background: var(--surface);
+}
+
+.rp-review-form-row textarea {
+    resize: vertical;
+}
+
+.rp-review-submit-btn {
+    width: auto;
+    margin-top: 0;
+    min-width: 140px;
+}
+
+.rp-review-list {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.rp-review-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+}
+
+.rp-review-top-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    margin-bottom: 0.35rem;
+    color: var(--dark);
+}
+
+.rp-review-date {
+    font-size: 0.8rem;
+    color: var(--gray);
+}
+
+.rp-review-rating {
+    font-size: 0.95rem;
+    color: #F59E0B;
+    font-weight: 700;
+}
+
+.rp-review-rating span {
+    color: var(--gray);
+    font-size: 0.82rem;
+    font-weight: 500;
+}
+
+.rp-review-comment {
+    margin-top: 0.35rem;
+    font-size: 0.9rem;
+    color: var(--gray);
+    line-height: 1.45;
+}
+
+/* Food Grid */
+.rp-food-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.rp-food-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 1.35rem;
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: box-shadow 0.2s, background 0.3s ease;
+}
+
+.rp-food-body {
+    flex: 1;
+}
+
+.rp-food-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.rp-veg-badge {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--primary);
+}
+
+.rp-unavailable-badge {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--gray);
+    background: var(--surface-hover);
+    padding: 0.15rem 0.5rem;
+    border-radius: 6px;
+}
+
+.rp-food-name {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.3rem;
+}
+
+.rp-food-desc {
+    font-size: 0.92rem;
+    color: var(--gray);
+    line-height: 1.5;
+    margin-bottom: 0.6rem;
+    max-width: 400px;
+}
+
+.rp-food-price {
+    font-family: 'Fraunces', serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--dark);
+}
+
+.rp-food-img {
+    width: 110px;
+    height: 110px;
+    border-radius: 12px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.rp-food-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Empty Category */
+.rp-empty-cat {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem;
+    color: var(--gray);
+    font-size: 1rem;
+    gap: 0.5rem;
+}
+
+/* Addons */
+.rp-addons-section {
+    margin-top: 2rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border);
+}
+
+.rp-addons-title {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dark);
+    margin-bottom: 0.75rem;
+}
+
+.rp-addons-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.rp-addon-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 0.9rem;
+    background: var(--surface-secondary);
+    border: 1px solid var(--border);
+    border-radius: 100px;
+    font-size: 0.9rem;
+}
+
+.rp-addon-name {
+    font-weight: 500;
+    color: var(--dark);
+}
+
+.rp-addon-price {
+    color: var(--primary);
+    font-weight: 600;
+}
+
+/* ===== ADD TO CART ===== */
+
+.rp-cart-toast {
+    max-width: 1100px;
+    margin: 0 auto 1rem;
+    padding: 0.7rem 1rem;
+    background: var(--green-tint);
+    color: var(--primary-dark);
+    border: 1px solid var(--green-tint-hover);
+    border-radius: 10px;
+    text-align: center;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.rp-add-to-cart-btn {
+    margin-top: 0.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    background: var(--primary);
+    color: white;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+    width: 100%;
+}
+
+.rp-add-to-cart-btn:hover:not(:disabled) {
+    background: var(--primary-dark);
+    transform: translateY(-1px);
+}
+
+.rp-add-to-cart-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.rp-food-addon-select {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+}
+
+.rp-food-addon-label {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.85rem;
+    color: var(--gray);
+    cursor: pointer;
+}
+
+.rp-food-addon-label input[type="checkbox"] {
+    accent-color: var(--primary);
+    width: 16px;
+    height: 16px;
+}
+
+.rp-food-addon-label span {
+    line-height: 1.2;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .rp-menu-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .rp-sidebar {
+        position: static;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .rp-sidebar-title {
+        width: 100%;
+    }
+
+    .rp-cat-btn {
+        width: auto;
+        flex: 0 0 auto;
+    }
+
+    .rp-header-inner {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .rp-review-header-row {
+        grid-template-columns: 1fr;
+    }
+
+    .rp-review-post-btn {
+        grid-row: auto;
+        width: fit-content;
+    }
+}

@@ -1,0 +1,382 @@
+/* ===== FLOCKO ORDER DETAIL PAGE ===== */
+
+.od-page {
+    background: var(--light, #F8FAFC);
+    min-height: 100vh;
+}
+
+.od-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 4rem;
+}
+
+/* Loading */
+.od-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 1rem;
+}
+
+.od-loading-icon {
+    font-size: 3rem;
+}
+
+.od-loading p {
+    color: var(--gray, #6B7280);
+    font-size: 0.95rem;
+}
+
+/* Error */
+.od-error-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 50vh;
+    gap: 0.75rem;
+    text-align: center;
+}
+
+.od-error-icon {
+    font-size: 2.5rem;
+}
+
+.od-error-container h3 {
+    color: var(--dark, #1F2937);
+}
+
+/* Back Link */
+.od-back-link {
+    display: inline-block;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--primary, #22C55E);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    transition: color 0.2s;
+}
+
+.od-back-link:hover {
+    color: var(--primary-dark, #16A34A);
+}
+
+/* Header */
+.od-header {
+    margin-bottom: 1.5rem;
+}
+
+.od-header-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.od-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--dark, #1F2937);
+    margin: 0;
+}
+
+.od-date {
+    font-size: 0.85rem;
+    color: var(--gray, #6B7280);
+}
+
+.od-status-badge {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.35rem 0.85rem;
+    border-radius: 100px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+/* Status Tracker */
+.od-tracker {
+    background: #FFFFFF;
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.od-tracker-steps {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+}
+
+.od-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: relative;
+    flex: 1;
+    z-index: 1;
+}
+
+.od-step-dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--border, #E5E7EB);
+    border: 3px solid #FFFFFF;
+    box-shadow: 0 0 0 2px var(--border, #E5E7EB);
+    transition: all 0.3s;
+    margin-bottom: 0.5rem;
+}
+
+.od-step.active .od-step-dot {
+    background: var(--primary, #22C55E);
+    box-shadow: 0 0 0 2px var(--primary, #22C55E);
+}
+
+.od-step.current .od-step-dot {
+    box-shadow: 0 0 0 2px var(--primary, #22C55E), 0 0 0 5px rgba(34, 197, 94, 0.2);
+}
+
+.od-step-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--gray, #6B7280);
+    text-align: center;
+    white-space: nowrap;
+}
+
+.od-step.active .od-step-label {
+    color: var(--dark, #1F2937);
+    font-weight: 600;
+}
+
+.od-step-line {
+    position: absolute;
+    top: 8px;
+    left: 58%;
+    width: 84%;
+    height: 2px;
+    background: var(--border, #E5E7EB);
+    z-index: -1;
+}
+
+.od-step-line.filled {
+    background: var(--primary, #22C55E);
+}
+
+/* Cancel Message */
+.od-cancel-msg {
+    background: #FEF3C7;
+    color: #B45309;
+    border: 1px solid #FDE68A;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+/* Layout */
+.od-layout {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* Card */
+.od-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.25rem;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+}
+
+.od-card-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--dark, #1F2937);
+    margin: 0 0 1rem 0;
+}
+
+/* Items */
+.od-items {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.od-item {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.od-item-info {
+    flex: 1;
+}
+
+.od-item-name {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--dark, #1F2937);
+}
+
+.od-item-qty {
+    font-size: 0.8rem;
+    color: var(--gray, #6B7280);
+    margin-left: 0.35rem;
+}
+
+.od-item-addons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.25rem;
+}
+
+.od-addon-chip {
+    font-size: 0.7rem;
+    font-weight: 500;
+    color: var(--gray, #6B7280);
+    background: #F3F4F6;
+    padding: 0.1rem 0.45rem;
+    border-radius: 100px;
+}
+
+.od-item-price {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--dark, #1F2937);
+    flex-shrink: 0;
+}
+
+.od-divider {
+    border: none;
+    border-top: 1px solid var(--border, #E5E7EB);
+    margin: 1rem 0;
+}
+
+.od-total-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark, #1F2937);
+    margin-bottom: 0.5rem;
+}
+
+.od-total-amount {
+    font-family: 'Fraunces', serif;
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--primary, #22C55E);
+}
+
+.od-payment-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: var(--gray, #6B7280);
+}
+
+.od-payment-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+}
+
+.od-payment-badge.pending {
+    background: #FEF3C7;
+    color: #B45309;
+}
+
+.od-payment-badge.success {
+    background: #DCFCE7;
+    color: #15803D;
+}
+
+.od-payment-badge.failed {
+    background: #FEE2E2;
+    color: #DC2626;
+}
+
+/* Address */
+.od-address {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.od-address-line {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--dark, #1F2937);
+}
+
+.od-address-sub {
+    font-size: 0.82rem;
+    color: var(--gray, #6B7280);
+}
+
+.od-address-landmark {
+    font-size: 0.78rem;
+    color: var(--gray, #6B7280);
+    font-style: italic;
+}
+
+.od-no-address {
+    font-size: 0.85rem;
+    color: var(--gray, #6B7280);
+}
+
+/* Cancel Button */
+.od-cancel-btn {
+    display: block;
+    width: 100%;
+    margin-top: 1.25rem;
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: 1.5px solid #FECACA;
+    background: transparent;
+    color: #DC2626;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.od-cancel-btn:hover:not(:disabled) {
+    background: #FEF2F2;
+}
+
+.od-cancel-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+@media (max-width: 640px) {
+    .od-tracker-steps {
+        gap: 0.25rem;
+    }
+
+    .od-step-label {
+        font-size: 0.6rem;
+    }
+
+    .od-step-line {
+        width: 80%;
+    }
+}
+

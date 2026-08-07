@@ -1,0 +1,677 @@
+/* ===== FLOCKO ADMIN DASHBOARD ===== */
+
+.ad-page {
+    background: var(--light, #F8FAFC);
+    min-height: 100vh;
+}
+
+.ad-container {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+}
+
+/* Loading */
+.ad-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 1rem;
+}
+
+.ad-loading-icon { font-size: 3.5rem; }
+.ad-loading p { color: var(--gray, #6B7280); font-size: 1.05rem; }
+
+/* Page Header */
+.ad-page-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.ad-page-title {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--dark, #1F2937);
+    letter-spacing: -0.5px;
+}
+
+.ad-page-sub {
+    font-size: 1rem;
+    color: var(--gray, #6B7280);
+}
+
+.ad-greeting {
+    font-size: 1.1rem;
+    color: var(--gray, #6B7280);
+    margin-bottom: 1.5rem;
+}
+
+.ad-greeting em {
+    font-style: normal;
+    color: var(--primary, #22C55E);
+    font-weight: 600;
+}
+
+/* Toasts */
+.ad-toast {
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.ad-toast-error {
+    background: var(--error-bg, #FEF2F2);
+    color: var(--error, #EF4444);
+    border: 1px solid var(--error-border, #FECACA);
+}
+
+.ad-toast-success {
+    background: var(--green-tint, #DCFCE7);
+    color: var(--primary-dark, #16A34A);
+    border: 1px solid var(--green-tint-hover, #BBF7D0);
+}
+
+/* ── Tabs ── */
+.ad-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border, #E5E7EB);
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+}
+
+.ad-tab {
+    padding: 0.65rem 1.25rem;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--gray, #6B7280);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+
+.ad-tab:hover { color: var(--dark, #1F2937); }
+
+.ad-tab.active {
+    color: var(--primary, #22C55E);
+    border-bottom-color: var(--primary, #22C55E);
+    font-weight: 600;
+}
+
+.ad-tab-content {
+    min-height: 300px;
+}
+
+/* ── Tab Header ── */
+.ad-tab-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.ad-tab-header h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--dark, #1F2937);
+}
+
+/* ── Summary Cards ── */
+.ad-summary-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.75rem;
+}
+
+.ad-summary-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.25rem;
+    text-align: center;
+    transition: box-shadow 0.2s;
+}
+
+.ad-summary-card:hover {
+    box-shadow: 0 2px 12px var(--card-shadow, rgba(0,0,0,0.06));
+}
+
+.ad-summary-num {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--primary, #22C55E);
+}
+
+.ad-summary-label {
+    font-size: 0.82rem;
+    color: var(--gray, #6B7280);
+    margin-top: 2px;
+}
+
+/* ── Empty States ── */
+.ad-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 30vh;
+    gap: 0.75rem;
+    text-align: center;
+}
+
+.ad-empty-icon { font-size: 4rem; }
+
+.ad-empty h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark, #1F2937);
+}
+
+.ad-empty p {
+    color: var(--gray, #6B7280);
+    font-size: 1rem;
+}
+
+.ad-empty-small {
+    text-align: center;
+    padding: 2.5rem 1rem;
+}
+
+.ad-empty-small p {
+    color: var(--gray, #6B7280);
+    font-size: 1rem;
+}
+
+/* ── Role Request Card ── */
+.ad-request-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.ad-request-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.15rem 1.25rem;
+    transition: box-shadow 0.2s;
+}
+
+.ad-request-card:hover {
+    box-shadow: 0 2px 10px var(--card-shadow, rgba(0,0,0,0.05));
+}
+
+.ad-request-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.ad-request-user {
+    font-weight: 600;
+    font-size: 1rem;
+    color: var(--dark, #1F2937);
+}
+
+.ad-request-email {
+    font-size: 0.85rem;
+    color: var(--gray, #6B7280);
+    display: block;
+    margin-top: 0.1rem;
+}
+
+.ad-request-role {
+    font-size: 0.8rem;
+    font-weight: 600;
+    padding: 0.2rem 0.65rem;
+    border-radius: 100px;
+    background: #EDE9FE;
+    color: #7C3AED;
+    white-space: nowrap;
+}
+
+.ad-request-reason {
+    font-size: 0.9rem;
+    color: var(--gray, #6B7280);
+    margin-bottom: 0.5rem;
+    line-height: 1.5;
+    font-style: italic;
+}
+
+.ad-request-meta {
+    font-size: 0.8rem;
+    color: var(--gray, #6B7280);
+    margin-bottom: 0.65rem;
+}
+
+.ad-request-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border, #E5E7EB);
+    flex-wrap: wrap;
+}
+
+.ad-request-status {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    white-space: nowrap;
+}
+
+.ad-request-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+/* ── Filters ── */
+.ad-filters {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.ad-filter {
+    padding: 0.35rem 0.8rem;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid var(--border, #E5E7EB);
+    background: var(--surface, #FFFFFF);
+    color: var(--gray, #6B7280);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+}
+
+.ad-filter:hover {
+    border-color: var(--primary, #22C55E);
+    color: var(--primary, #22C55E);
+}
+
+.ad-filter.active {
+    background: var(--primary, #22C55E);
+    border-color: var(--primary, #22C55E);
+    color: white;
+}
+
+/* ── Restaurant List (Admin) ── */
+.ad-restaurant-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.ad-restaurant-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.15rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: box-shadow 0.2s;
+    flex-wrap: wrap;
+}
+
+.ad-restaurant-card:hover {
+    box-shadow: 0 2px 10px var(--card-shadow, rgba(0,0,0,0.05));
+}
+
+.ad-restaurant-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.ad-restaurant-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dark, #1F2937);
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.ad-restaurant-sub {
+    font-size: 0.85rem;
+    color: var(--gray, #6B7280);
+    display: block;
+    margin-top: 0.15rem;
+}
+
+.ad-restaurant-owner {
+    font-size: 0.82rem;
+    color: var(--gray, #6B7280);
+    margin-top: 0.1rem;
+}
+
+.ad-restaurant-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.ad-status-toggle {
+    padding: 0.35rem 0.85rem;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.ad-status-toggle.open {
+    background: var(--green-tint, #DCFCE7);
+    color: var(--primary-dark, #16A34A);
+}
+
+.ad-status-toggle.closed {
+    background: var(--surface-hover, #F3F4F6);
+    color: var(--gray, #6B7280);
+}
+
+.ad-status-toggle:hover {
+    transform: scale(1.03);
+}
+
+/* ── Orders (Admin) ── */
+.ad-order-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.15rem 1.25rem;
+    margin-bottom: 0.65rem;
+    transition: box-shadow 0.2s;
+}
+
+.ad-order-card:hover {
+    box-shadow: 0 2px 10px var(--card-shadow, rgba(0,0,0,0.05));
+}
+
+.ad-order-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+}
+
+.ad-order-id {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--dark, #1F2937);
+    margin-right: 0.75rem;
+}
+
+.ad-order-date {
+    font-size: 0.82rem;
+    color: var(--gray, #6B7280);
+}
+
+.ad-order-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.ad-order-customer {
+    font-size: 0.88rem;
+    color: var(--gray, #6B7280);
+    margin-bottom: 0.5rem;
+}
+
+.ad-order-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+}
+
+.ad-order-item-chip {
+    font-size: 0.78rem;
+    color: var(--gray, #6B7280);
+    background: var(--surface-hover, #F3F4F6);
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+}
+
+.ad-order-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border, #E5E7EB);
+}
+
+.ad-order-total {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--dark, #1F2937);
+}
+
+/* ── Buttons ── */
+.ad-btn {
+    padding: 0.6rem 1.3rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.ad-btn-primary {
+    background: var(--primary, #22C55E);
+    color: white;
+}
+
+.ad-btn-primary:hover:not(:disabled) {
+    background: var(--primary-dark, #16A34A);
+    transform: translateY(-1px);
+}
+
+.ad-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.ad-btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--border, #E5E7EB);
+    color: var(--dark, #1F2937);
+}
+
+.ad-btn-outline:hover {
+    border-color: var(--primary, #22C55E);
+    color: var(--primary, #22C55E);
+}
+
+.ad-btn-sm {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+}
+
+.ad-btn-danger {
+    background: transparent;
+    border: 1.5px solid var(--error-border, #FECACA);
+    color: var(--error, #EF4444);
+}
+
+.ad-btn-danger:hover:not(:disabled) {
+    background: var(--error-bg, #FEF2F2);
+}
+
+.ad-btn-approve {
+    background: var(--green-tint, #DCFCE7);
+    color: var(--primary-dark, #16A34A);
+    border: 1.5px solid var(--green-tint-hover, #BBF7D0);
+}
+
+.ad-btn-approve:hover:not(:disabled) {
+    background: var(--primary, #22C55E);
+    color: white;
+    border-color: var(--primary, #22C55E);
+}
+
+.ad-btn-reject {
+    background: var(--error-bg, #FEF2F2);
+    color: var(--error, #EF4444);
+    border: 1.5px solid var(--error-border, #FECACA);
+}
+
+.ad-btn-reject:hover:not(:disabled) {
+    background: var(--error, #EF4444);
+    color: white;
+    border-color: var(--error, #EF4444);
+}
+
+/* ── Restaurant select for orders ── */
+.ad-restaurant-select {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+    color: var(--dark, #1F2937);
+}
+
+.ad-restaurant-select select {
+    padding: 0.5rem 0.85rem;
+    border: 1.5px solid var(--border, #E5E7EB);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: var(--surface, #FFFFFF);
+    color: var(--dark, #1F2937);
+    outline: none;
+    min-width: 200px;
+}
+
+.ad-restaurant-select select:focus {
+    border-color: var(--primary, #22C55E);
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .ad-tabs {
+        gap: 0.25rem;
+    }
+
+    .ad-tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .ad-summary-row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .ad-restaurant-card {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ad-restaurant-actions {
+        align-self: flex-end;
+    }
+
+    .ad-request-bottom {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .ad-restrict-form {
+        padding: 0.75rem !important;
+    }
+}
+
+/* ── User Status Badges ── */
+.ad-user-status-badge {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    white-space: nowrap;
+}
+
+/* ── User Detail Grid (expanded view) ── */
+.ad-user-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 0.6rem;
+}
+
+.ad-user-detail-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.ad-user-detail-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    color: var(--gray, #6B7280);
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.ad-user-detail-value {
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--dark, #1F2937);
+}
+
+/* ── Suspended Restaurant ── */
+.ad-btn-warn {
+    background: #FEF3C7;
+    color: #B45309;
+    border: 1.5px solid #FDE68A;
+}
+
+.ad-btn-warn:hover:not(:disabled) {
+    background: #F59E0B;
+    color: white;
+    border-color: #F59E0B;
+}
+

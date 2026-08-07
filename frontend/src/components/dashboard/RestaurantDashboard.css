@@ -1,0 +1,1010 @@
+/* ===== FLOCKO RESTAURANT DASHBOARD ===== */
+
+.rd-page {
+    background: var(--light, #F8FAFC);
+    min-height: 100vh;
+}
+
+.rd-container {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+}
+
+/* Loading */
+.rd-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 1rem;
+}
+
+.rd-loading-icon { font-size: 3.5rem; }
+.rd-loading p { color: var(--gray, #6B7280); font-size: 1.05rem; }
+
+/* Page Header */
+.rd-page-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.rd-page-title {
+    font-family: 'Fraunces', serif;
+    font-size: 2rem;
+    font-weight: 900;
+    color: var(--dark, #1F2937);
+    letter-spacing: -0.5px;
+}
+
+.rd-page-sub {
+    font-size: 1rem;
+    color: var(--gray, #6B7280);
+}
+
+/* Toasts */
+.rd-toast {
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.rd-toast-error {
+    background: var(--error-bg, #FEF2F2);
+    color: var(--error, #EF4444);
+    border: 1px solid var(--error-border, #FECACA);
+}
+
+.rd-toast-success {
+    background: var(--green-tint, #DCFCE7);
+    color: var(--primary-dark, #16A34A);
+    border: 1px solid var(--green-tint-hover, #BBF7D0);
+}
+
+/* Restaurant Selector */
+.rd-restaurant-selector {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+    font-size: 0.95rem;
+    color: var(--dark, #1F2937);
+}
+
+.rd-restaurant-selector select {
+    padding: 0.5rem 0.85rem;
+    border: 1.5px solid var(--border, #E5E7EB);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: var(--surface, #FFFFFF);
+    color: var(--dark, #1F2937);
+    outline: none;
+}
+
+.rd-restaurant-selector select:focus {
+    border-color: var(--primary, #22C55E);
+}
+
+/* ── Tabs ── */
+.rd-tabs {
+    display: flex;
+    gap: 0.5rem;
+    border-bottom: 2px solid var(--border, #E5E7EB);
+    margin-bottom: 1.75rem;
+    flex-wrap: wrap;
+}
+
+.rd-tab {
+    padding: 0.65rem 1.25rem;
+    border: none;
+    background: transparent;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--gray, #6B7280);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.2s;
+}
+
+.rd-tab:hover {
+    color: var(--dark, #1F2937);
+}
+
+.rd-tab.active {
+    color: var(--primary, #22C55E);
+    border-bottom-color: var(--primary, #22C55E);
+    font-weight: 600;
+}
+
+.rd-tab-content {
+    min-height: 300px;
+}
+
+/* ── Tab Header ── */
+.rd-tab-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+}
+
+.rd-tab-header h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--dark, #1F2937);
+}
+
+/* ── Empty States ── */
+.rd-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 40vh;
+    gap: 0.75rem;
+    text-align: center;
+}
+
+.rd-empty-icon { font-size: 4rem; }
+
+.rd-empty h3 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark, #1F2937);
+}
+
+.rd-empty p, .rd-empty-small p {
+    color: var(--gray, #6B7280);
+    font-size: 1rem;
+}
+
+.rd-empty-small {
+    text-align: center;
+    padding: 2.5rem 1rem;
+}
+
+/* ── Restaurant Info ── */
+.rd-restaurant-info {
+    /* wrapper */
+}
+
+.rd-restaurant-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.rd-restaurant-name {
+    font-family: 'Fraunces', serif;
+    font-size: 1.65rem;
+    font-weight: 900;
+    color: var(--dark, #1F2937);
+}
+
+.rd-restaurant-cuisine {
+    font-size: 0.9rem;
+    color: var(--gray, #6B7280);
+    display: block;
+    margin-top: 0.2rem;
+}
+
+.rd-restaurant-actions {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.rd-status-toggle {
+    padding: 0.4rem 1rem;
+    border-radius: 100px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'DM Sans', sans-serif;
+}
+
+.rd-status-toggle.open {
+    background: var(--green-tint, #DCFCE7);
+    color: var(--primary-dark, #16A34A);
+}
+
+.rd-status-toggle.closed {
+    background: var(--surface-hover, #F3F4F6);
+    color: var(--gray, #6B7280);
+}
+
+.rd-status-toggle:hover {
+    transform: scale(1.03);
+}
+
+/* Detail Grid */
+.rd-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.rd-detail-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.25rem;
+}
+
+.rd-detail-card h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--dark, #1F2937);
+    margin-bottom: 0.5rem;
+}
+
+.rd-detail-card p {
+    font-size: 0.9rem;
+    color: var(--gray, #6B7280);
+    line-height: 1.6;
+}
+
+/* ── List ── */
+.rd-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+}
+
+.rd-card-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.9rem;
+}
+
+.rd-entity-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 220px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+
+.rd-entity-card:hover {
+    box-shadow: 0 2px 10px var(--card-shadow, rgba(0,0,0,0.05));
+    transform: translateY(-1px);
+}
+
+.rd-entity-content {
+    padding: 0.95rem 1rem 0.65rem;
+    flex: 1;
+}
+
+.rd-entity-card .rd-list-actions {
+    border-top: 1px solid var(--border, #E5E7EB);
+    padding: 0.75rem 0.95rem 0.9rem;
+    justify-content: flex-end;
+}
+
+.rd-food-card {
+    min-height: 300px;
+}
+
+.rd-food-image-wrap {
+    width: 100%;
+    height: 140px;
+    background: var(--surface-hover, #F3F4F6);
+    border-bottom: 1px solid var(--border, #E5E7EB);
+}
+
+.rd-food-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.rd-list-item {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 12px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    transition: box-shadow 0.2s;
+}
+
+.rd-list-item:hover {
+    box-shadow: 0 2px 10px var(--card-shadow, rgba(0,0,0,0.05));
+}
+
+.rd-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.rd-list-name {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--dark, #1F2937);
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+}
+
+.rd-list-sub {
+    font-size: 0.85rem;
+    color: var(--gray, #6B7280);
+    display: block;
+    margin-top: 0.15rem;
+}
+
+.rd-list-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+    margin-top: 0.35rem;
+}
+
+.rd-tag {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--primary-dark, #16A34A);
+    background: var(--green-tint, #DCFCE7);
+    padding: 0.15rem 0.55rem;
+    border-radius: 100px;
+}
+
+.rd-food-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.rd-food-price {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.05rem;
+    color: var(--dark, #1F2937);
+    white-space: nowrap;
+}
+
+.rd-veg {
+    font-size: 0.8rem;
+}
+
+/* List Actions */
+.rd-list-actions {
+    display: flex;
+    gap: 0.4rem;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.rd-icon-btn {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--border, #E5E7EB);
+    background: var(--surface, #FFFFFF);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    transition: all 0.15s;
+}
+
+.rd-icon-btn:hover {
+    border-color: var(--primary, #22C55E);
+    background: var(--green-tint, #DCFCE7);
+}
+
+.rd-icon-btn.danger:hover {
+    border-color: var(--error, #EF4444);
+    background: var(--error-bg, #FEF2F2);
+}
+
+.rd-avail-toggle {
+    padding: 0.3rem 0.75rem;
+    border-radius: 100px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+}
+
+.rd-avail-toggle.on {
+    background: var(--green-tint, #DCFCE7);
+    color: var(--primary-dark, #16A34A);
+}
+
+.rd-avail-toggle.off {
+    background: var(--surface-hover, #F3F4F6);
+    color: var(--gray, #6B7280);
+}
+
+/* ── Forms ── */
+.rd-form, .rd-inline-form {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    overflow: hidden;
+}
+
+.rd-form-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark, #1F2937);
+    margin-bottom: 0.25rem;
+}
+
+.rd-form-section {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--gray, #6B7280);
+    margin-top: 0.5rem;
+}
+
+.rd-form input,
+.rd-form textarea,
+.rd-form select,
+.rd-inline-form input,
+.rd-inline-form textarea,
+.rd-inline-form select {
+    width: 100%;
+    padding: 0.65rem 0.9rem;
+    border: 1.5px solid var(--border, #E5E7EB);
+    border-radius: 8px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    background: var(--surface, #FFFFFF);
+    color: var(--dark, #1F2937);
+    outline: none;
+    transition: border-color 0.2s;
+    box-sizing: border-box;
+}
+
+.rd-form input:focus,
+.rd-form textarea:focus,
+.rd-form select:focus,
+.rd-inline-form input:focus,
+.rd-inline-form textarea:focus,
+.rd-inline-form select:focus {
+    border-color: var(--primary, #22C55E);
+}
+
+.rd-form textarea,
+.rd-inline-form textarea {
+    min-height: 70px;
+    resize: vertical;
+}
+
+.rd-form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.65rem;
+}
+
+.rd-form-actions {
+    display: flex;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.rd-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+    color: var(--dark, #1F2937);
+    cursor: pointer;
+}
+
+.rd-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary, #22C55E);
+}
+
+.rd-cat-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    align-items: center;
+}
+
+.rd-cat-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--gray, #6B7280);
+    width: 100%;
+    margin-bottom: 0.1rem;
+}
+
+/* ── Staff ── */
+.rd-staff-created {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--green-tint-hover, #BBF7D0);
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+    margin-bottom: 1rem;
+}
+
+.rd-staff-created-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--primary-dark, #16A34A);
+    margin-bottom: 0.35rem;
+}
+
+.rd-staff-created-row {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.rd-staff-created-row code {
+    font-size: 0.85rem;
+    padding: 0.35rem 0.5rem;
+    border-radius: 8px;
+    background: var(--surface-hover, #F3F4F6);
+    border: 1px solid var(--border, #E5E7EB);
+}
+
+.rd-staff-created p {
+    margin-top: 0.4rem;
+    font-size: 0.78rem;
+    color: var(--gray, #6B7280);
+}
+
+.rd-staff-row {
+    min-height: 62px;
+}
+
+/* ── Mess Plans ── */
+.rd-mp-slots-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+}
+
+.rd-mp-slot {
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 10px;
+    padding: 0.85rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+    background: var(--light, #F8FAFC);
+}
+
+.rd-mp-item {
+    align-items: flex-start;
+}
+
+.rd-mp-detail {
+    margin-top: 0.7rem;
+    padding-top: 0.7rem;
+    border-top: 1px dashed var(--border, #E5E7EB);
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.rd-mp-detail-slot {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+/* ── Kitchen Controller ── */
+.rd-kitchen-wrap {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.rd-kitchen-form,
+.rd-kitchen-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1rem;
+}
+
+.rd-kitchen-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+}
+
+.rd-kitchen-form h3 {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+}
+
+.rd-kitchen-form p {
+    margin: 0;
+    font-size: 0.88rem;
+    color: var(--gray, #6B7280);
+}
+
+.rd-kitchen-form label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gray, #6B7280);
+}
+
+.rd-kitchen-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    color: var(--gray, #6B7280);
+    font-size: 0.87rem;
+}
+
+.rd-kitchen-badge {
+    display: inline-block;
+    margin-top: 0.7rem;
+    background: var(--green-tint, #DCFCE7);
+    color: var(--primary-dark, #16A34A);
+    border-radius: 100px;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
+.rd-kitchen-card p {
+    margin-top: 0.6rem;
+    font-size: 0.86rem;
+    color: var(--gray, #6B7280);
+    line-height: 1.5;
+}
+
+/* ── Buttons ── */
+.rd-btn {
+    padding: 0.6rem 1.3rem;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+}
+
+.rd-btn-primary {
+    background: var(--primary, #22C55E);
+    color: white;
+}
+
+.rd-btn-primary:hover:not(:disabled) {
+    background: var(--primary-dark, #16A34A);
+    transform: translateY(-1px);
+}
+
+.rd-btn-primary:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.rd-btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--border, #E5E7EB);
+    color: var(--dark, #1F2937);
+}
+
+.rd-btn-outline:hover {
+    border-color: var(--primary, #22C55E);
+    color: var(--primary, #22C55E);
+}
+
+.rd-btn-sm {
+    padding: 0.35rem 0.85rem;
+    font-size: 0.8rem;
+}
+
+.rd-btn-danger {
+    background: transparent;
+    border: 1.5px solid var(--error-border, #FECACA);
+    color: var(--error, #EF4444);
+}
+
+.rd-btn-danger:hover:not(:disabled) {
+    background: var(--error-bg, #FEF2F2);
+}
+
+/* ── Orders Tab ── */
+.rd-order-filters {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.25rem;
+}
+
+.rd-order-filter {
+    padding: 0.35rem 0.8rem;
+    border-radius: 100px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid var(--border, #E5E7EB);
+    background: var(--surface, #FFFFFF);
+    color: var(--gray, #6B7280);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+}
+
+.rd-order-filter:hover {
+    border-color: var(--primary, #22C55E);
+    color: var(--primary, #22C55E);
+}
+
+.rd-order-filter.active {
+    background: var(--primary, #22C55E);
+    border-color: var(--primary, #22C55E);
+    color: white;
+}
+
+.rd-order-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.15rem 1.25rem;
+    margin-bottom: 0.65rem;
+    transition: box-shadow 0.2s;
+}
+
+.rd-order-card:hover {
+    box-shadow: 0 2px 10px var(--card-shadow, rgba(0,0,0,0.05));
+}
+
+.rd-order-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.6rem;
+}
+
+.rd-order-id {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--dark, #1F2937);
+    margin-right: 0.75rem;
+}
+
+.rd-order-date {
+    font-size: 0.82rem;
+    color: var(--gray, #6B7280);
+}
+
+.rd-order-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.rd-order-customer {
+    font-size: 0.88rem;
+    color: var(--gray, #6B7280);
+    margin-bottom: 0.5rem;
+}
+
+.rd-order-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin-bottom: 0.75rem;
+}
+
+.rd-order-item-chip {
+    font-size: 0.78rem;
+    color: var(--gray, #6B7280);
+    background: var(--surface-hover, #F3F4F6);
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+}
+
+.rd-order-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding-top: 0.65rem;
+    border-top: 1px solid var(--border, #E5E7EB);
+    flex-wrap: wrap;
+}
+
+.rd-order-total {
+    font-family: 'Fraunces', serif;
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: var(--dark, #1F2937);
+}
+
+.rd-order-status-actions {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+}
+
+/* ── Group Deals ── */
+.rd-groupdeal-header-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.rd-groupdeal-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.rd-groupdeal-food-select {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.rd-form-help {
+    font-size: 0.82rem;
+    color: var(--gray, #6B7280);
+}
+
+.rd-groupdeal-food-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.45rem;
+}
+
+.rd-check-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 10px;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.84rem;
+    color: var(--dark, #1F2937);
+}
+
+.rd-groupdeal-tier-wrap {
+    background: var(--surface-hover, #F3F4F6);
+    border-radius: 10px;
+    padding: 0.65rem;
+}
+
+.rd-groupdeal-tier-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.55rem;
+    font-size: 0.86rem;
+    font-weight: 600;
+}
+
+.rd-groupdeal-table-wrap {
+    overflow-x: auto;
+}
+
+.rd-groupdeal-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 12px;
+}
+
+.rd-groupdeal-table th,
+.rd-groupdeal-table td {
+    text-align: left;
+    padding: 0.7rem;
+    border-bottom: 1px solid var(--border, #E5E7EB);
+    font-size: 0.86rem;
+}
+
+.rd-groupdeal-table th {
+    color: var(--gray, #6B7280);
+    font-weight: 600;
+}
+
+.rd-groupdeal-name {
+    font-weight: 600;
+    color: var(--dark, #1F2937);
+}
+
+.rd-groupdeal-sub {
+    margin-top: 0.2rem;
+    font-size: 0.77rem;
+    color: var(--gray, #6B7280);
+}
+
+.rd-groupdeal-row-actions {
+    display: flex;
+    gap: 0.45rem;
+    flex-wrap: wrap;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .rd-tabs {
+        gap: 0.25rem;
+    }
+
+    .rd-tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+    }
+
+    .rd-form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .rd-list-item {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .rd-card-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .rd-list-actions {
+        align-self: flex-end;
+    }
+
+    .rd-groupdeal-food-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 980px) {
+    .rd-card-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .rd-kitchen-wrap {
+        grid-template-columns: 1fr;
+    }
+}
+

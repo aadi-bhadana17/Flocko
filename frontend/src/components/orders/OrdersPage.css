@@ -1,0 +1,252 @@
+/* ===== FLOCKO ORDERS PAGE ===== */
+
+.orders-page {
+    background: var(--light, #F8FAFC);
+    min-height: 100vh;
+}
+
+.orders-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 2rem 4rem;
+}
+
+/* Loading */
+.orders-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 1rem;
+}
+
+.orders-loading-icon {
+    font-size: 3rem;
+}
+
+.orders-loading p {
+    color: var(--gray, #6B7280);
+    font-size: 0.95rem;
+}
+
+/* Header */
+.orders-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+}
+
+.orders-title {
+    font-family: 'Fraunces', serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--dark, #1F2937);
+}
+
+.orders-count {
+    font-size: 0.85rem;
+    color: var(--gray, #6B7280);
+    font-weight: 500;
+}
+
+/* Error */
+.orders-error {
+    background: #FEF2F2;
+    color: #DC2626;
+    border: 1px solid #FECACA;
+    border-radius: 10px;
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    margin-bottom: 1rem;
+}
+
+/* Filters */
+.orders-filters {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-bottom: 1.5rem;
+}
+
+.orders-filter-btn {
+    padding: 0.4rem 0.85rem;
+    border-radius: 100px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid var(--border, #E5E7EB);
+    background: #FFFFFF;
+    color: var(--gray, #6B7280);
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.2s;
+}
+
+.orders-filter-btn:hover {
+    border-color: var(--primary, #22C55E);
+    color: var(--primary, #22C55E);
+}
+
+.orders-filter-btn.active {
+    background: var(--primary, #22C55E);
+    border-color: var(--primary, #22C55E);
+    color: white;
+}
+
+/* Empty */
+.orders-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 40vh;
+    gap: 0.75rem;
+    text-align: center;
+}
+
+.orders-empty-icon {
+    font-size: 3.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.orders-empty h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark, #1F2937);
+}
+
+.orders-empty p {
+    color: var(--gray, #6B7280);
+    font-size: 0.95rem;
+}
+
+/* Button */
+.orders-btn {
+    padding: 0.6rem 1.25rem;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    border: none;
+    font-family: 'DM Sans', sans-serif;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.orders-btn-primary {
+    background: var(--primary, #22C55E);
+    color: white;
+}
+
+.orders-btn-primary:hover {
+    background: var(--primary-dark, #16A34A);
+    transform: translateY(-1px);
+}
+
+/* Orders List */
+.orders-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+/* Order Card */
+.order-card-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.order-card {
+    background: #FFFFFF;
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1.25rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+}
+
+.order-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.06);
+}
+
+.order-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.order-card-info {
+    flex: 1;
+}
+
+.order-card-restaurant {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--dark, #1F2937);
+    margin: 0 0 0.2rem 0;
+}
+
+.order-card-id {
+    font-size: 0.78rem;
+    color: var(--gray, #6B7280);
+}
+
+.order-status-badge {
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.7rem;
+    border-radius: 100px;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.order-card-items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 0.75rem;
+}
+
+.order-card-item {
+    font-size: 0.8rem;
+    color: var(--gray, #6B7280);
+    background: #F3F4F6;
+    padding: 0.2rem 0.6rem;
+    border-radius: 100px;
+}
+
+.order-card-more {
+    font-size: 0.78rem;
+    color: var(--primary, #22C55E);
+    font-weight: 500;
+    padding: 0.2rem 0.4rem;
+}
+
+.order-card-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border, #E5E7EB);
+}
+
+.order-card-date {
+    font-size: 0.8rem;
+    color: var(--gray, #6B7280);
+}
+
+.order-card-total {
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--dark, #1F2937);
+}
+

@@ -1,0 +1,259 @@
+.gdd-page {
+    min-height: 100vh;
+    background: var(--light, #F8FAFC);
+}
+
+.gdd-container {
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 1.5rem 1.5rem 3rem;
+}
+
+.gdd-back {
+    display: inline-flex;
+    margin-bottom: 1rem;
+    text-decoration: none;
+    color: var(--primary, #22C55E);
+    font-weight: 600;
+}
+
+.gdd-hero,
+.gdd-card {
+    background: var(--surface, #FFFFFF);
+    border: 1px solid var(--border, #E5E7EB);
+    border-radius: 14px;
+    padding: 1rem;
+}
+
+.gdd-hero {
+    margin-bottom: 0.9rem;
+}
+
+.gdd-hero-top {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.8rem;
+    align-items: flex-start;
+}
+
+.gdd-hero-top h1 {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-size: 1.55rem;
+}
+
+.gdd-hero-top p {
+    margin: 0.3rem 0 0;
+    color: var(--gray, #6B7280);
+}
+
+.gdd-status {
+    font-size: 0.78rem;
+    font-weight: 700;
+    padding: 0.35rem 0.65rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+}
+
+.gdd-status-created {
+    color: #92400E;
+    background: #FEF3C7;
+}
+
+.gdd-status-voting {
+    color: #1D4ED8;
+    background: #DBEAFE;
+}
+
+.gdd-status-confirmation {
+    color: #7C3AED;
+    background: #EDE9FE;
+}
+
+.gdd-status-fulfilled {
+    color: #15803D;
+    background: #DCFCE7;
+}
+
+.gdd-status-expired {
+    color: #B91C1C;
+    background: #FEE2E2;
+}
+
+.gdd-price-row {
+    margin-top: 0.9rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+}
+
+.gdd-label {
+    display: block;
+    font-size: 0.77rem;
+    color: var(--gray, #6B7280);
+    margin-bottom: 0.2rem;
+}
+
+.gdd-progress-wrap {
+    margin-top: 0.95rem;
+}
+
+.gdd-progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.83rem;
+    color: var(--gray, #6B7280);
+}
+
+.gdd-progress-track {
+    margin-top: 0.35rem;
+    height: 10px;
+    border-radius: 999px;
+    background: #E5E7EB;
+    overflow: hidden;
+}
+
+.gdd-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #60A5FA, #22C55E);
+    transition: width 0.45s ease;
+}
+
+.gdd-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.9rem;
+    margin-bottom: 0.9rem;
+}
+
+.gdd-card h2 {
+    margin: 0 0 0.65rem;
+    font-size: 1rem;
+}
+
+.gdd-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.gdd-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 0.6rem;
+    border-radius: 8px;
+    background: #F9FAFB;
+}
+
+.gdd-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.88rem;
+}
+
+.gdd-table th,
+.gdd-table td {
+    border-bottom: 1px solid var(--border, #E5E7EB);
+    text-align: left;
+    padding: 0.5rem;
+}
+
+.gdd-table th {
+    color: var(--gray, #6B7280);
+    font-weight: 600;
+}
+
+.gdd-actions-card {
+    margin-top: 0.9rem;
+}
+
+.gdd-form {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.7rem;
+    align-items: end;
+}
+
+.gdd-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    font-size: 0.84rem;
+    color: var(--gray, #6B7280);
+}
+
+.gdd-form input,
+.gdd-form select {
+    border: 1.5px solid var(--border, #E5E7EB);
+    border-radius: 10px;
+    padding: 0.55rem 0.65rem;
+    font: inherit;
+}
+
+.gdd-primary,
+.gdd-danger {
+    border: none;
+    border-radius: 9px;
+    padding: 0.6rem 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.gdd-primary {
+    background: var(--primary, #22C55E);
+    color: #FFFFFF;
+}
+
+.gdd-danger {
+    background: #DC2626;
+    color: #FFFFFF;
+}
+
+.gdd-primary:disabled,
+.gdd-danger:disabled {
+    opacity: 0.65;
+    cursor: not-allowed;
+}
+
+.gdd-muted {
+    color: var(--gray, #6B7280);
+    margin: 0;
+}
+
+.gdd-success {
+    color: #166534;
+    margin: 0;
+}
+
+.gdd-toast,
+.gdd-error {
+    margin: 0 0 0.9rem;
+    padding: 0.65rem 0.75rem;
+    border-radius: 10px;
+    font-size: 0.86rem;
+}
+
+.gdd-toast {
+    background: #ECFDF5;
+    border: 1px solid #A7F3D0;
+    color: #065F46;
+}
+
+.gdd-error {
+    background: #FEF2F2;
+    border: 1px solid #FECACA;
+    color: #DC2626;
+}
+
+@media (max-width: 760px) {
+    .gdd-price-row,
+    .gdd-grid,
+    .gdd-form {
+        grid-template-columns: 1fr;
+    }
+}
+
