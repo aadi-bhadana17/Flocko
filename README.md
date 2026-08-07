@@ -1,8 +1,4 @@
 
-<p align="center">
-  <img src="assets/logo.png" alt="Flocko Logo" width="180">
-</p>
-
 # 🍽️ Flocko — Smart Food Delivery Platform
 
 ## What Is Flocko?
