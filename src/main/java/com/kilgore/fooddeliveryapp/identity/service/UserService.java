@@ -4,6 +4,7 @@ import com.kilgore.fooddeliveryapp.catalog.api.CatalogFacade;
 import com.kilgore.fooddeliveryapp.common.util.UserAuthorization;
 import com.kilgore.fooddeliveryapp.identity.model.Address;
 import com.kilgore.fooddeliveryapp.common.enums.PaymentStatus;
+import com.kilgore.fooddeliveryapp.identity.model.UserRole;
 import com.kilgore.fooddeliveryapp.identity.repository.AddressRepository;
 import com.kilgore.fooddeliveryapp.identity.dto.request.AddressRequest;
 import com.kilgore.fooddeliveryapp.identity.dto.request.ChangePasswordRequest;
@@ -233,6 +234,15 @@ public class UserService {
         );
     }
 
+    public Long getStaffRestaurantId() {
+        User user =  userAuthorization.authorizeUser();
+
+        if(user.getRole() != UserRole.RESTAURANT_STAFF)
+            throw new AccessDeniedException("User is not a restaurant staff");
+
+        return user.getEmployedAt();
+    }
+
 
     // ------------------------------------------------------Helper Methods---------------------------------------------------------
 
@@ -269,4 +279,6 @@ public class UserService {
 
         return address;
     }
+
+
 }

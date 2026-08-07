@@ -1,6 +1,9 @@
 package com.kilgore.fooddeliveryapp.identity.api.impl;
 
+import com.kilgore.fooddeliveryapp.catalog.api.CatalogFacade;
 import com.kilgore.fooddeliveryapp.catalog.dto.request.AddStaffRequest;
+import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantExtendedSummary;
+import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantSummary;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityNotFoundException;
 import com.kilgore.fooddeliveryapp.identity.api.UserFacade;
 import com.kilgore.fooddeliveryapp.identity.dto.response.StaffCreationResponse;
@@ -32,13 +35,15 @@ public class UserFacadeImpl implements UserFacade {
     private final AddressRepository addressRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final CatalogFacade catalogFacade;
 
     public UserFacadeImpl(UserRepository userRepository, AddressRepository addressRepository,
-                          UserMapper userMapper, PasswordEncoder passwordEncoder) {
+                          UserMapper userMapper, PasswordEncoder passwordEncoder, CatalogFacade catalogFacade) {
         this.userRepository = userRepository;
         this.addressRepository = addressRepository;
         this.userMapper = userMapper;
         this.passwordEncoder = passwordEncoder;
+        this.catalogFacade = catalogFacade;
     }
 
     @Override
@@ -155,12 +160,10 @@ public class UserFacadeImpl implements UserFacade {
 
     @Override
     public boolean isOwnerOfRestaurant(Long userId, Long restaurantId) {
-        User user = fetchUser(userId);
-        if (user.getOwnedRestaurantIds() == null || restaurantId == null) {
-            return false;
-        }
-        return user.getOwnedRestaurantIds().stream()
-                .anyMatch(ownedId -> ownedId.equals(restaurantId));
+        RestaurantExtendedSummary restaurant = catalogFacade.getRestaurantExtendedById(restaurantId);
+
+        System.out.println(restaurant);
+        return restaurant.getOwnerUserId().equals(userId);
     }
 
     @Override
@@ -213,6 +216,7 @@ public class UserFacadeImpl implements UserFacade {
         if (user.getEmployedAt() != null && user.getEmployedAt().equals(restaurantId))
             return true;
 
+        System.out.println("Checking if user " + userId + " is owner of restaurant " + restaurantId);
 
         return isOwnerOfRestaurant(userId, restaurantId);
     }

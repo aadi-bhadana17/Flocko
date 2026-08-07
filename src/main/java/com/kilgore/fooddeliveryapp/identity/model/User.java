@@ -60,7 +60,4 @@ public class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Address> addresses =  new ArrayList<>();
-
-    @ElementCollection
-    private Set<Long> ownedRestaurantIds = new HashSet<>();
 }

@@ -11,6 +11,7 @@ import com.kilgore.fooddeliveryapp.identity.dto.response.UserProfileResponse;
 import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantSummary;
 import com.kilgore.fooddeliveryapp.identity.service.UserService;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -96,6 +97,12 @@ public class UserController {
     @PostMapping("/role-change-request")
     public RoleChangeRequestResponse roleChangeRequest(@RequestBody RoleChangeRequestDto request) {
         return userService.createRoleChangeRequest(request);
+    }
+
+    @GetMapping("/staff-restaurant")
+    @PreAuthorize("hasAnyAuthority('RESTAURANT_STAFF')")
+    public Long getStaffRestaurantId() {
+        return userService.getStaffRestaurantId();
     }
 
 }
