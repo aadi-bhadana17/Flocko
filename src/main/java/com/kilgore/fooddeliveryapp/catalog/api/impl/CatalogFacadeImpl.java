@@ -151,6 +151,15 @@ public class CatalogFacadeImpl implements CatalogFacade {
         return "Restaurant " + restaurant.getRestaurantName() + " has been activated.";
     }
 
+    @Override
+    public List<Long> getOwnedRestaurantIds(Long userId) {
+
+        return restaurantRepository.findByOwnerUserId(userId)
+                .stream()
+                .map(Restaurant::getRestaurantId)
+                .toList();
+    }
+
     private Restaurant fetchRestaurant(Long restaurantId) {
         return restaurantRepository.findById(restaurantId).orElseThrow(() ->
                 new RestaurantNotFoundException(restaurantId));

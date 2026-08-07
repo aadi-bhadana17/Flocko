@@ -24,4 +24,6 @@ public interface CatalogFacade {
 
     String suspendRestaurant(Long restaurantId);
     String reactivateRestaurant(Long restaurantId);
+
+    List<Long> getOwnedRestaurantIds(Long userId);
 }
