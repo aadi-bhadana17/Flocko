@@ -11,6 +11,7 @@ import com.kilgore.fooddeliveryapp.identity.model.UserRole;
 import com.kilgore.fooddeliveryapp.identity.model.User;
 import com.kilgore.fooddeliveryapp.identity.repository.UserRepository;
 import com.kilgore.fooddeliveryapp.common.security.JwtService;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -91,10 +92,14 @@ public class AuthService {
         );
     }
 
+    @Transactional
     public String logoutUser() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email);
         user.setOnline(false);
+
+        System.out.println("Logging out user: " + email);
+
         userRepository.save(user);
         return "You have been logged out successfully.";
     }
