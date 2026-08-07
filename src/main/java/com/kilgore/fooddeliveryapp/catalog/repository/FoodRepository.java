@@ -16,6 +16,6 @@ public interface FoodRepository extends JpaRepository<Food, Long> {
 
     List<Food> findByRestaurantId(Long restaurantId);
 
-    @EntityGraph(attributePaths = {"foodCategory", "images"})
+    @EntityGraph(attributePaths = {"images"})
     List<Food> findAllByRestaurantId(@Param("restaurantId") Long restaurantId);
 }
