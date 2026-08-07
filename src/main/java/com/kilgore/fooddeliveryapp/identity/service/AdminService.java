@@ -5,7 +5,6 @@ import com.kilgore.fooddeliveryapp.identity.model.RequestStatus;
 import com.kilgore.fooddeliveryapp.identity.dto.request.RoleChangeRequestDecisionDto;
 import com.kilgore.fooddeliveryapp.identity.dto.request.UserRestrictionDto;
 import com.kilgore.fooddeliveryapp.identity.dto.response.RoleChangeRequestResponse;
-import com.kilgore.fooddeliveryapp.catalog.dto.summary.RestaurantSummary;
 import com.kilgore.fooddeliveryapp.identity.dto.summary.UserExtendedSummary;
 import com.kilgore.fooddeliveryapp.common.exceptions.EntityNotFoundException;
 import com.kilgore.fooddeliveryapp.common.exceptions.InvalidResponseForRoleChangeRequest;
@@ -24,7 +23,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class AdminService {
@@ -72,7 +70,7 @@ public class AdminService {
         boolean isRestaurantClosed = false;
 
         if(user.getRole() == UserRole.RESTAURANT_OWNER) {
-            user.getOwnedRestaurantIds()
+            catalogFacade.getOwnedRestaurantIds(userId)
                     .forEach(catalogFacade::suspendRestaurant);
             isRestaurantClosed = true;
         }
@@ -107,7 +105,7 @@ public class AdminService {
         boolean isRestaurantSuspended = false;
 
         if(user.getRole() == UserRole.RESTAURANT_OWNER) {
-            user.getOwnedRestaurantIds()
+            catalogFacade.getOwnedRestaurantIds(userId)
                     .forEach(catalogFacade::suspendRestaurant);
             isRestaurantSuspended = true;
         }
@@ -129,7 +127,7 @@ public class AdminService {
         boolean isRestaurantReopened = false;
 
         if(user.getRole() == UserRole.RESTAURANT_OWNER) {
-            user.getOwnedRestaurantIds()
+            catalogFacade.getOwnedRestaurantIds(userId)
                     .forEach(catalogFacade::reactivateRestaurant);
             isRestaurantReopened = true;
         }
