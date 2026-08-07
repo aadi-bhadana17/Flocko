@@ -329,6 +329,9 @@ public class SharedCartService {
     private SharedCart createNewSharedCart(Long userId, SharedCartRequest request) {
         SharedCart sharedCart = new SharedCart();
         sharedCart.setHostUserId(userId);
+
+        System.out.println("Request Restaurant ID = " + request.getRestaurantId());
+
         sharedCart.setRestaurantId(request.getRestaurantId());
         sharedCart.setHostPaysAll(request.isHostPaysAll());
         sharedCart.setJoinCode(generateUniqueJoinCode());
