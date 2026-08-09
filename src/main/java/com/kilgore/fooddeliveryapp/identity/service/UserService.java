@@ -253,7 +253,8 @@ public class UserService {
                 user.getEmail(),
                 user.getPhone(),
                 user.getRole(),
-                user.getWalletBalance()
+                user.getWalletBalance(),
+                user.isTestCreditClaimed()
         );
     }
 

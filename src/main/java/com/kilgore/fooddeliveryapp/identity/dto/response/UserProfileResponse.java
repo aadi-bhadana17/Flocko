@@ -17,5 +17,6 @@ public class UserProfileResponse{
     private String phone;
     private UserRole role;
     private BigDecimal walletBalance;
+    private boolean testCreditClaimed;
 
 }

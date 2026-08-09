@@ -312,6 +312,8 @@ const HomePage = () => {
                 </motion.div>
             </section>
 
+
+
             {/* Filters */}
             <section className="home-section">
                 <div className="home-filters">

@@ -47,6 +47,8 @@ public class User {
     private BigDecimal walletBalance = BigDecimal.ZERO;
     private BigDecimal pendingDepositAmount;
     private String pendingPaypalOrderId;
+    @Column(nullable = false, columnDefinition = "BOOLEAN DEFAULT FALSE")
+    private boolean testCreditClaimed = false;
     @Version
     private Long version = 0L;
 

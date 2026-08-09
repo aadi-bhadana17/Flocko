@@ -93,4 +93,20 @@ public class WalletService {
         }
         throw new RuntimeException("Payment capture failed");
     }
+
+    /** One-time ₹2000 test credit – can only be claimed once per account. */
+    public DepositResult claimTestCredit() {
+        User user = userAuthorization.authorizeUser();
+
+        if (user.isTestCreditClaimed()) {
+            throw new IllegalStateException("Test credit has already been claimed for this account.");
+        }
+
+        BigDecimal credit = BigDecimal.valueOf(2000);
+        user.setWalletBalance(user.getWalletBalance().add(credit));
+        user.setTestCreditClaimed(true);
+        userRepository.save(user);
+
+        return new DepositResult(credit, user.getWalletBalance(), "₹2000 test credit added to your wallet!");
+    }
 }

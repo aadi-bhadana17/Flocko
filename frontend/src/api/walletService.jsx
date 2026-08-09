@@ -11,3 +11,7 @@ export const initiateDeposit = async (amount) => {
     return (response.data || '').toString().trim();
 };
 
+export const claimTestCredit = async () => {
+    const response = await api.post(`${WALLET_BASE}/test-credit`);
+    return response.data;
+};
